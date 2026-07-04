@@ -59,12 +59,22 @@ const REGION_COORDS: Record<string, [number, number]> = {
 };
 
 export default function Map() {
-  const { reports, filters, addReport } = useStore();
+  const { reports, filters, addReport, setReports } = useStore();
   const [mounted, setMounted] = useState(false);
   const [alerts, setAlerts] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setMounted(true);
+    
+    // Fetch initial active reports
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    fetch(`${apiUrl}/api/reports`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setReports(data);
+      })
+      .catch(console.error);
+
     socket.connect();
 
     socket.on('report:new', (report) => {
