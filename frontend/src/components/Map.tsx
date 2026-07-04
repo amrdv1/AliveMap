@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, ZoomControl, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useStore } from '../store/useStore';
@@ -32,9 +32,36 @@ const icons = {
   ALERT: createCustomIcon('#a855f7'),
 };
 
+const REGION_COORDS: Record<string, [number, number]> = {
+  "Київська область": [50.4501, 30.5234],
+  "м. Київ": [50.4501, 30.5234],
+  "Одеська область": [46.4825, 30.7233],
+  "Дніпропетровська область": [48.4647, 35.0462],
+  "Харківська область": [50.0000, 36.2304],
+  "Львівська область": [49.8397, 24.0297],
+  "Миколаївська область": [46.9750, 31.9946],
+  "Запорізька область": [47.8388, 35.1396],
+  "Херсонська область": [46.6354, 32.6169],
+  "Чернігівська область": [51.4982, 31.2893],
+  "Сумська область": [50.9077, 34.7981],
+  "Полтавська область": [49.5883, 34.5514],
+  "Черкаська область": [49.4444, 32.0598],
+  "Вінницька область": [49.2331, 28.4682],
+  "Житомирська область": [50.2547, 28.6587],
+  "Кіровоградська область": [48.5079, 32.2623],
+  "Хмельницька область": [49.4230, 26.9871],
+  "Чернівецька область": [48.2915, 25.9352],
+  "Івано-Франківська область": [48.9226, 24.7111],
+  "Тернопільська область": [49.5535, 25.5948],
+  "Волинська область": [50.7472, 25.3254],
+  "Рівненська область": [50.6199, 26.2516],
+  "Закарпатська область": [48.6208, 22.2879],
+};
+
 export default function Map() {
   const { reports, filters, addReport } = useStore();
   const [mounted, setMounted] = useState(false);
+  const [alerts, setAlerts] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setMounted(true);
@@ -44,9 +71,14 @@ export default function Map() {
       addReport(report);
     });
 
+    socket.on('alerts:sync', (data) => {
+      setAlerts(data);
+    });
+
     return () => {
       socket.disconnect();
       socket.off('report:new');
+      socket.off('alerts:sync');
     };
   }, [addReport]);
 
@@ -86,6 +118,20 @@ export default function Map() {
           </Popup>
         </Marker>
       ))}
+
+      {Object.keys(alerts).map(region => {
+        if (REGION_COORDS[region]) {
+          return (
+            <Circle 
+              key={region} 
+              center={REGION_COORDS[region]} 
+              radius={70000} 
+              pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.15, weight: 1 }}
+            />
+          );
+        }
+        return null;
+      })}
     </MapContainer>
   );
 }
