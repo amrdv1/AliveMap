@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MODERATOR
+  VIEWER
+}
+
+enum ReportType {
+  DRONE
+  MISSILE
+  AIRCRAFT
+  ALERT
+}
+
+enum ReportStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum SourceType {
+  API
+  RSS
+  WEBHOOK
+  MANUAL
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  role      Role      @default(VIEWER)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  reports   Report[]
+  sessions  Session[]
+  settings  Settings?
+  logs      Log[]
+}
+
+model Report {
+  id         String       @id @default(uuid())
+  type       ReportType
+  lat        Float
+  lng        Float
+  direction  Float?
+  speed      Float?
+  time       DateTime     @default(now())
+  status     ReportStatus @default(ACTIVE)
+  confidence Float        @default(1.0)
+  sourceId   String?
+  source     Source?      @relation(fields: [sourceId], references: [id])
+  userId     String?
+  user       User?        @relation(fields: [userId], references: [id])
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model Source {
+  id        String     @id @default(uuid())
+  name      String
+  type      SourceType
+  url       String?
+  status    String     @default("ACTIVE")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  reports   Report[]
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+model Settings {
+  id                  String  @id @default(uuid())
+  userId              String  @unique
+  user                User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme               String  @default("dark")
+  language            String  @default("en")
+  notificationsEnabled Boolean @default(true)
+}
+
+model Log {
+  id        String   @id @default(uuid())
+  action    String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  timestamp DateTime @default(now())
+  details   String?
+}
