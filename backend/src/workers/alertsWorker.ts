@@ -5,12 +5,12 @@ import { Server } from 'socket.io';
 const prisma = new PrismaClient();
 
 export async function startAlertsWorker(io: Server) {
-    let source = await prisma.source.findUnique({ where: { name: 'Official Alerts' } });
+    let source = await prisma.source.findFirst({ where: { name: 'Official Alerts' } });
     if (!source) {
       source = await prisma.source.create({
         data: {
           name: 'Official Alerts',
-          type: 'SYSTEM',
+          type: 'API',
           reliability: 100,
           isActive: true
         }

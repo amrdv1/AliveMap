@@ -1,5 +1,6 @@
 import { TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
+// @ts-ignore
 import input from 'input';
 import dotenv from 'dotenv';
 import path from 'path';

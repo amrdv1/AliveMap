@@ -34,7 +34,7 @@ export async function startTelegramWorker(io: Server) {
     await client.connect();
     console.log("Telegram Userbot connected successfully. Listening to monitoring channels...");
 
-    let source = await prisma.source.findUnique({ where: { name: 'Telegram Worker' } });
+    let source = await prisma.source.findFirst({ where: { name: 'Telegram Worker' } });
     if (!source) {
       source = await prisma.source.create({
         data: {

@@ -1,5 +1,5 @@
 export interface ParsedThreat {
-  type: 'DRONE' | 'MISSILE' | 'AIRCRAFT' | 'INFO';
+  type: 'DRONE' | 'MISSILE' | 'AIRCRAFT' | 'ALERT';
   lat: number | null;
   lng: number | null;
   confidence: number;
@@ -35,7 +35,7 @@ const CITY_COORDS: Record<string, {lat: number, lng: number}> = {
 export function parseTelegramText(text: string): ParsedThreat {
   const lowerText = text.toLowerCase();
   
-  let type: ParsedThreat['type'] = 'INFO';
+  let type: ParsedThreat['type'] = 'ALERT';
   if (lowerText.match(/(шахед|бпла|мопед|безпілотник)/)) {
     type = 'DRONE';
   } else if (lowerText.match(/(ракет|балістик|кинджал|іскандер|х-101|кх-)/)) {
