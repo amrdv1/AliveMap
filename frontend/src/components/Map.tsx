@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl, GeoJSON, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, ZoomControl, GeoJSON, Polyline, LayersControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useStore, ThreatObject } from '../store/useStore';
