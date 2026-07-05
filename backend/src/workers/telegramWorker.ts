@@ -89,6 +89,37 @@ export async function startTelegramWorker(io: Server) {
       }
     }, new NewMessage({}));
 
+    // Fetch initial history
+    try {
+        console.log("Fetching recent Telegram history...");
+        await prisma.threatObject.deleteMany({ where: { sourceId } });
+        const dialogs = await client.getDialogs();
+        
+        for (const dialog of dialogs) {
+            if (!dialog.entity) continue;
+            const username = 'username' in dialog.entity && dialog.entity.username ? dialog.entity.username.toLowerCase() : null;
+            
+            if (username && CHANNELS.some(c => c.toLowerCase() === username)) {
+                const messages = await client.getMessages(dialog.entity, { limit: 10 });
+                for (const message of messages.reverse()) {
+                    if (!message || !message.message) continue;
+                    const parsedThreat = parseTelegramText(message.message);
+                    if (parsedThreat.lat !== null && parsedThreat.lng !== null) {
+                        const savedThreat = await processExternalThreat(
+                            null, parsedThreat.type as any, parsedThreat.lat, parsedThreat.lng,
+                            new Date((message.date || Math.floor(Date.now()/1000)) * 1000),
+                            sourceId, null, parsedThreat.direction, parsedThreat.confidence / 100
+                        );
+                        if (savedThreat) io.emit('threat:update', savedThreat);
+                    }
+                }
+            }
+        }
+        console.log("History fetch complete.");
+    } catch (e) {
+        console.error("History fetch error:", e);
+    }
+
   } catch (err) {
     console.error("Failed to start Telegram Worker:", err);
   }
