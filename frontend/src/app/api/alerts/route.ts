@@ -5,7 +5,8 @@ export const revalidate = 0;
 
 export async function GET() {
   try {
-    const res = await fetch('https://ubilling.net.ua/aerialalerts/', {
+    // Use allorigins to bypass IP blocks when deployed on cloud platforms like Railway
+    const res = await fetch('https://api.allorigins.win/raw?url=https://ubilling.net.ua/aerialalerts/', {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; ALIVEMAP/1.0)',
         'Accept': 'application/json'

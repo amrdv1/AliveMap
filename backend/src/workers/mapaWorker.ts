@@ -70,7 +70,7 @@ export async function startMapaWorker(io: Server) {
         };
 
         const savedThreat = await processExternalThreat(
-          obj.id, // externalId
+          obj.id ? obj.id.toString() : null, // externalId
           threatType,
           latestLoc.lat,
           latestLoc.lng,
