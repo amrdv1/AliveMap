@@ -70,6 +70,7 @@ const AIRBASE_COORDS: Record<string, {lat: number, lng: number}> = {
   "бельбек": { lat: 44.6853, lng: 33.5614 },
   "ахтубінськ": { lat: 48.3075, lng: 46.2081 },
   "морозовськ": { lat: 48.3142, lng: 41.7925 },
+  "шаталов": { lat: 54.3400, lng: 32.4700 }, // Shatalovo
   // Shahed / Tactical Launch Sites
   "приморськ": { lat: 46.0465, lng: 38.1749 }, // Primorsko-Akhtarsk
   "чауд": { lat: 45.0000, lng: 35.8333 }, // Cape Chauda
@@ -77,6 +78,7 @@ const AIRBASE_COORDS: Record<string, {lat: number, lng: number}> = {
   "курськ": { lat: 51.7373, lng: 36.1950 },
   "воронеж": { lat: 51.6608, lng: 39.2003 },
   "білгородс": { lat: 50.6, lng: 36.6 },
+  "брянськ": { lat: 53.2435, lng: 34.3634 },
 };
 
 // Generic safe zones to place threats with no exact coordinates
@@ -85,6 +87,7 @@ const GENERIC_SPAWN = {
   DRONE_SOUTH: { lat: 45.5, lng: 36.5 }, // Sea of Azov
   DRONE_NORTH: { lat: 52.0, lng: 33.0 }, // Bryansk region
   MISSILE: { lat: 46.0, lng: 37.0 }, // Sea of Azov / Krasnodar
+  BLACK_SEA: { lat: 44.0, lng: 31.0 }, // Black Sea
 };
 
 function parseDirection(text: string): number | null {
@@ -101,87 +104,79 @@ function parseDirection(text: string): number | null {
   return null;
 }
 
-export function parseTelegramText(text: string): ParsedThreat | null {
+export function parseTelegramText(text: string): ParsedThreat[] {
   const lowerText = text.toLowerCase();
   
   let type: ParsedThreat['type'] | null = null;
   
   // Strict matching to ignore informational messages
-  if (lowerText.match(/(шахед|бпла|мопед|безпілотник|геран)/)) {
+  if (lowerText.match(/(шахед|бпла|мопед|безпілотник|геран|гербер)/)) {
     type = 'DRONE';
   } else if (lowerText.match(/(балістик|кинджал|іскандер|с-300|с-400)/)) {
     type = 'BALLISTIC_MISSILE';
-  } else if (lowerText.match(/(х-101|х-55|х-59|х-69|калібр|кх-)/)) {
+  } else if (lowerText.match(/(х-101|х-55|х-59|х-69|калібр|кх-|ракетонос)/)) {
     type = 'CRUISE_MISSILE';
   } else if (lowerText.match(/(ракет|р-68|р-27)/)) {
     type = 'MISSILE';
-  } else if (lowerText.match(/(ту-95|міг-31|авіаці|су-34|су-35|су-27|ту-22)/)) {
+  } else if (lowerText.match(/(ту-95|ту-160|ту-22|міг-31|авіаці|су-34|су-35|су-27|бортів)/)) {
     type = 'AIRCRAFT';
   } else if (lowerText.match(/(каб|фаб|уаб|авіабомб)/)) {
     type = 'KAB';
   }
 
   // If no specific threat type is found, or it's a generic "tryvoha" message, ignore.
-  if (!type) return null;
+  if (!type) return [];
   
   // Filter out generic alerts that do not mention movement, takeoffs, or specific presence
   if (lowerText.match(/(увага|повітряна тривога|відбій)/) && !lowerText.match(/(летить|рух|зліт|пуск|напрямок|загроза|фіксує|повітрі|пускові|курс)/)) {
-      return null;
+      return [];
   }
   
-  let lat = null;
-  let lng = null;
-  let confidence = 0;
+  const matchedLocations: {lat: number, lng: number, conf: number}[] = [];
   
-  const jitter = () => (Math.random() - 0.5) * 0.4; 
-  let direction = parseDirection(lowerText) ?? Math.floor(Math.random() * 360);
-  
-  // 1. Check if Airbase / Launch site is mentioned (highest priority for aircraft and new launches)
+  // 1. Check if Airbase / Launch site is mentioned (collect ALL)
   for (const [base, coords] of Object.entries(AIRBASE_COORDS)) {
     if (lowerText.includes(base)) {
-      lat = coords.lat + jitter();
-      lng = coords.lng + jitter();
-      confidence = 90;
-      break;
+      matchedLocations.push({ lat: coords.lat, lng: coords.lng, conf: 90 });
     }
   }
 
-  // 2. Check if Ukrainian City/Region is mentioned
-  if (lat === null) {
+  // 2. Check if Ukrainian City/Region is mentioned (collect ALL)
+  if (matchedLocations.length === 0) {
       for (const [cityKey, coords] of Object.entries(CITY_COORDS)) {
         if (lowerText.includes(cityKey)) {
-          lat = coords.lat + jitter();
-          lng = coords.lng + jitter();
-          confidence = 80;
-          break;
+          matchedLocations.push({ lat: coords.lat, lng: coords.lng, conf: 80 });
         }
       }
   }
   
   // 3. Fallback: Assign default generic coordinates based on context
-  if (lat === null) {
+  if (matchedLocations.length === 0) {
       if (type === 'AIRCRAFT' && lowerText.match(/(зліт|в повітрі|активність|на пускових|рубіж)/)) {
-          lat = GENERIC_SPAWN.AIRCRAFT.lat + jitter();
-          lng = GENERIC_SPAWN.AIRCRAFT.lng + jitter();
-          confidence = 50;
+          matchedLocations.push({ lat: GENERIC_SPAWN.AIRCRAFT.lat, lng: GENERIC_SPAWN.AIRCRAFT.lng, conf: 50 });
+      } else if (type === 'CRUISE_MISSILE' && lowerText.match(/(морі|море|ракетонос)/)) {
+          matchedLocations.push({ lat: GENERIC_SPAWN.BLACK_SEA.lat, lng: GENERIC_SPAWN.BLACK_SEA.lng, conf: 80 });
       } else if (type === 'DRONE') {
           if (lowerText.match(/(північ|курськ|брянськ|суми)/)) {
-            lat = GENERIC_SPAWN.DRONE_NORTH.lat + jitter();
-            lng = GENERIC_SPAWN.DRONE_NORTH.lng + jitter();
+            matchedLocations.push({ lat: GENERIC_SPAWN.DRONE_NORTH.lat, lng: GENERIC_SPAWN.DRONE_NORTH.lng, conf: 50 });
           } else {
-            lat = GENERIC_SPAWN.DRONE_SOUTH.lat + jitter();
-            lng = GENERIC_SPAWN.DRONE_SOUTH.lng + jitter();
+            matchedLocations.push({ lat: GENERIC_SPAWN.DRONE_SOUTH.lat, lng: GENERIC_SPAWN.DRONE_SOUTH.lng, conf: 50 });
           }
-          confidence = 50;
       } else if (type === 'MISSILE' || type === 'BALLISTIC_MISSILE' || type === 'CRUISE_MISSILE') {
-          lat = GENERIC_SPAWN.MISSILE.lat + jitter();
-          lng = GENERIC_SPAWN.MISSILE.lng + jitter();
-          confidence = 50;
+          matchedLocations.push({ lat: GENERIC_SPAWN.MISSILE.lat, lng: GENERIC_SPAWN.MISSILE.lng, conf: 50 });
       } else {
-          // If we can't map it and it's not a generic takeoff, return null
-          return null; 
+          return []; 
       }
   }
   
-  return { type, lat, lng, confidence, direction };
+  const jitter = () => (Math.random() - 0.5) * 0.4; 
+  let direction = parseDirection(lowerText) ?? Math.floor(Math.random() * 360);
+
+  return matchedLocations.map(loc => ({
+      type: type!,
+      lat: loc.lat + jitter(),
+      lng: loc.lng + jitter(),
+      confidence: loc.conf,
+      direction
+  }));
 }
