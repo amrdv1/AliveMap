@@ -44,6 +44,12 @@ const getIcon = (type: string, direction: number | null | undefined, confidence:
   }
   
   const colors: Record<string, string> = {
+    DRONE: '#f97316',
+    MISSILE: '#ef4444',
+    CRUISE_MISSILE: '#dc2626',
+    BALLISTIC_MISSILE: '#991b1b',
+    ZIRCON: '#ff0000',
+    KAB: '#f59e0b',
     AIRCRAFT: '#eab308',
     ALERT: '#a855f7',
   };
@@ -86,9 +92,10 @@ const REGION_NAME_MAP: Record<string, string> = {
   "Автономна Республіка Крим": "Crimea",
   "м. Севастополь": "Sevastopol"
 };
-const AnimatedMarker = ({ threat, getIcon }: any) => {
+
+function AnimatedMarker({ threat, getIcon }: { threat: any, getIcon: any }) {
+  const markerRef = useRef<any>(null);
   const currentLoc = threat.locations[0];
-  const [pos, setPos] = useState<[number, number]>([currentLoc.lat, currentLoc.lng]);
 
   useEffect(() => {
     let animationFrameId: number;
@@ -100,19 +107,18 @@ const AnimatedMarker = ({ threat, getIcon }: any) => {
       lastTime = now;
 
       const timeSinceUpdate = (now - new Date(currentLoc.time).getTime()) / 1000;
-      if (threat.speed && threat.course && timeSinceUpdate < 300) {
-        setPos((prevPos) => {
-          const R = 6371; // Earth radius in km
-          const d = (threat.speed / 3600) * dt; // Distance traveled in km during dt
-          const brng = threat.course * Math.PI / 180;
-          const lat1 = prevPos[0] * Math.PI / 180;
-          const lon1 = prevPos[1] * Math.PI / 180;
+      if (threat.speed && threat.course && timeSinceUpdate < 300 && markerRef.current) {
+        const currentPos = markerRef.current.getLatLng();
+        const R = 6371; // Earth radius in km
+        const d = (threat.speed / 3600) * dt; // Distance traveled in km during dt
+        const brng = threat.course * Math.PI / 180;
+        const lat1 = currentPos.lat * Math.PI / 180;
+        const lon1 = currentPos.lng * Math.PI / 180;
 
-          const lat2 = Math.asin(Math.sin(lat1)*Math.cos(d/R) + Math.cos(lat1)*Math.sin(d/R)*Math.cos(brng));
-          const lon2 = lon1 + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(lat1), Math.cos(d/R)-Math.sin(lat1)*Math.sin(lat2));
+        const lat2 = Math.asin(Math.sin(lat1)*Math.cos(d/R) + Math.cos(lat1)*Math.sin(d/R)*Math.cos(brng));
+        const lon2 = lon1 + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(lat1), Math.cos(d/R)-Math.sin(lat1)*Math.sin(lat2));
 
-          return [lat2 * 180 / Math.PI, lon2 * 180 / Math.PI];
-        });
+        markerRef.current.setLatLng([lat2 * 180 / Math.PI, lon2 * 180 / Math.PI]);
       }
       animationFrameId = requestAnimationFrame(animate);
     };
@@ -123,7 +129,9 @@ const AnimatedMarker = ({ threat, getIcon }: any) => {
 
   // Sync position with server when a new location arrives
   useEffect(() => {
-    setPos([currentLoc.lat, currentLoc.lng]);
+    if (markerRef.current) {
+      markerRef.current.setLatLng([currentLoc.lat, currentLoc.lng]);
+    }
   }, [currentLoc.lat, currentLoc.lng, currentLoc.time]);
 
   const pathPositions: [number, number][] = threat.locations.map((l: any) => [l.lat, l.lng]);
@@ -150,7 +158,7 @@ const AnimatedMarker = ({ threat, getIcon }: any) => {
         <Polyline positions={pathPositions} pathOptions={{ color: '#ef4444', weight: 1, opacity: 0.3, dashArray: '4' }} />
       )}
 
-      <Marker position={pos} icon={getIcon(threat.type, threat.course, threat.confidence)}>
+      <Marker ref={markerRef} position={[currentLoc.lat, currentLoc.lng]} icon={getIcon(threat.type, threat.course, threat.confidence)}>
         <Popup className="custom-popup">
           <div className="font-sans">
             <div className="font-bold text-lg mb-1">{threat.type}</div>
@@ -187,7 +195,7 @@ export default function Map() {
       .then(data => setGeoData(data))
       .catch(console.error);
 
-    fetch('/ukraine-districts.geojson')
+    fetch('/ukraine-districts.geojson?v=2')
       .then(res => res.json())
       .then(data => setGeoDataDistricts(data))
       .catch(console.error);

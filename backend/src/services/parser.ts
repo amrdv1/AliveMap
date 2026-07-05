@@ -110,7 +110,9 @@ export function parseTelegramText(text: string): ParsedThreat[] {
   let type: ParsedThreat['type'] | null = null;
   
   // Strict matching to ignore informational messages
-  if (lowerText.match(/(шахед|бпла|мопед|безпілотник|геран|гербер)/)) {
+  if (lowerText.match(/(циркон)/)) {
+    type = 'ZIRCON';
+  } else if (lowerText.match(/(шахед|бпла|мопед|безпілотник|геран|гербер)/)) {
     type = 'DRONE';
   } else if (lowerText.match(/(балістик|кинджал|іскандер|с-300|с-400)/)) {
     type = 'BALLISTIC_MISSILE';
@@ -122,13 +124,15 @@ export function parseTelegramText(text: string): ParsedThreat[] {
     type = 'AIRCRAFT';
   } else if (lowerText.match(/(каб|фаб|уаб|авіабомб)/)) {
     type = 'KAB';
+  } else if (lowerText.match(/(збито|знищено|мінус|чисто|впав|припинив|відбив)/)) {
+    type = 'PPO';
   }
 
   if (!type) return [];
 
   // Capture summaries and informational noise as a special ALERT type with null coordinates
   // so it gets saved to the message history but doesn't spawn a map marker
-  if (lowerText.match(/(збито|знищено|за добу|наслідки|втрати|підсумки|статистика|постраждал|загинул|відбій|ліквідаці|інформаці|зведення|уламк|загалом)/)) {
+  if (lowerText.match(/(за добу|наслідки|втрати|підсумки|статистика|постраждал|загинул|відбій|ліквідаці|інформаці|зведення|уламк|загалом)/)) {
       return [{ type: 'SUMMARY', lat: null, lng: null, confidence: 100, direction: null }];
   }
   
@@ -143,7 +147,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
   }
 
   // Strong action words indicating real threat movement or presence
-  const hasActionWord = lowerText.match(/(летить|рух|зліт|пуск|напрямок|загроза|фіксує|повітрі|пускові|курс|вибух|атака|йде|увага|небезпека|відмічено)/);
+  const hasActionWord = lowerText.match(/(летить|рух|зліт|пуск|напрямок|загроза|фіксує|повітрі|пускові|курс|вибух|атака|йде|увага|небезпека|відмічено|збито|знищено|мінус|чисто|впав|припинив|відбив)/);
   
   const matchedLocations: {lat: number, lng: number, conf: number}[] = [];
   

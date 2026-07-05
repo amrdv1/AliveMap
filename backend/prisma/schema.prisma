@@ -22,6 +22,8 @@ enum ReportType {
   KAB
   ALERT
   RECON
+  ZIRCON
+  PPO
 }
 
 enum ReportStatus {
