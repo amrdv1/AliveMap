@@ -40,11 +40,6 @@ export default function Sidebar() {
                  threat.type === 'KAB' ? 'КАБ' :
                  threat.type === 'AIRCRAFT' ? 'Літак МіГ-31К' : threat.type}
               </div>
-              {threat.locations[0]?.source?.name && (
-                <div className="text-[10px] text-gray-500 mt-0.5">
-                  {threat.locations[0].source.name}
-                </div>
-              )}
             </div>
             
             <div className="text-[10px] text-gray-400 font-mono">

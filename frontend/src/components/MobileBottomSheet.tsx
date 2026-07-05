@@ -37,7 +37,7 @@ export default function MobileBottomSheet() {
              selectedThreat.type === 'AIRCRAFT' ? 'Літак МіГ-31К' : selectedThreat.type}
           </h2>
           <p className="text-sm text-gray-400">
-            {selectedThreat.locations[0]?.source?.name || 'Україна'}
+            Україна
           </p>
         </div>
         
