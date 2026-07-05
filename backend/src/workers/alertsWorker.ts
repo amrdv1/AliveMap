@@ -22,11 +22,10 @@ export async function startAlertsWorker(io: Server) {
             const ALERTS_API_URL = 'https://ubilling.net.ua/aerialalerts/';
             const { data } = await axios.get(ALERTS_API_URL, { timeout: 10000 });
             if (data && data.states) {
-                // Transform data.states into format expected by frontend: { "Region": { alertnow: true } }
                 const formattedStates: Record<string, { alertnow: boolean }> = {};
-                for (const [region, timestamp] of Object.entries(data.states)) {
-                    // ubilling returns a timestamp string if active, null if not
-                    if (timestamp) {
+                for (const [region, alertData] of Object.entries(data.states)) {
+                    // ubilling returns an object { alertnow: true/false, changed: ... }
+                    if ((alertData as any)?.alertnow === true) {
                         formattedStates[region] = { alertnow: true };
                     }
                 }
