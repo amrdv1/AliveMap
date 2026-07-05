@@ -118,14 +118,25 @@ export default function Map() {
       updateThreat(threat);
     });
 
-    socket.on('alerts:sync', (data) => {
-      setAlerts(data);
-    });
+    const fetchAlerts = async () => {
+      try {
+        const res = await fetch('https://ubilling.net.ua/aerialalerts/');
+        const data = await res.json();
+        if (data && data.states) {
+          setAlerts(data.states);
+        }
+      } catch (e) {
+        console.error('Failed to fetch alerts', e);
+      }
+    };
+    
+    fetchAlerts();
+    const alertInterval = setInterval(fetchAlerts, 10000); // Polling every 10s
 
     return () => {
       socket.disconnect();
       socket.off('threat:update');
-      socket.off('alerts:sync');
+      clearInterval(alertInterval);
     };
   }, [setThreats, updateThreat]);
 

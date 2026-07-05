@@ -31,16 +31,12 @@ export default function Home() {
         <Navbar />
         <MonitoringFeed />
         
-        {/* Top Right: Active Targets */}
-        <div className="absolute top-24 right-6 z-20">
-          <div className="bg-[#070b14]/80 backdrop-blur-md rounded-2xl border border-gray-800/50 shadow-xl overflow-hidden max-h-[50vh] w-80">
+        {/* Right Side Panels (Flex Column to avoid overlap) */}
+        <div className="absolute top-24 right-6 bottom-24 z-20 flex flex-col gap-4 w-80">
+          <div className="bg-[#070b14]/80 backdrop-blur-md rounded-2xl border border-gray-800/50 shadow-xl overflow-hidden flex-1 min-h-[150px]">
             <Sidebar />
           </div>
-        </div>
-
-        {/* Bottom Right: Legend */}
-        <div className="absolute bottom-24 right-6 z-20">
-          <div className="bg-[#070b14]/80 backdrop-blur-md rounded-2xl border border-gray-800/50 shadow-xl overflow-hidden h-72 w-80">
+          <div className="bg-[#070b14]/80 backdrop-blur-md rounded-2xl border border-gray-800/50 shadow-xl overflow-hidden shrink-0 h-72">
             <LegendSidebar />
           </div>
         </div>
