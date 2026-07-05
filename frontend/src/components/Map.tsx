@@ -149,10 +149,10 @@ export default function Map() {
             );
             
             return {
-              color: isActive ? '#ef4444' : '#4b5563',
-              weight: isActive ? 2 : 1,
-              fillColor: isActive ? '#ef4444' : '#1f2937',
-              fillOpacity: isActive ? 0.35 : 0.05,
+              color: isActive ? '#ef4444' : '#6b7280',
+              weight: isActive ? 2 : 1.5,
+              fillColor: isActive ? '#ef4444' : '#374151',
+              fillOpacity: isActive ? 0.35 : 0.15,
             };
           }}
         />
