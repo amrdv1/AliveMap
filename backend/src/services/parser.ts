@@ -3,6 +3,7 @@ export interface ParsedThreat {
   lat: number | null;
   lng: number | null;
   confidence: number;
+  direction?: number;
 }
 
 // Simple Geocoding Dictionary (Roots)
@@ -51,6 +52,9 @@ export function parseTelegramText(text: string): ParsedThreat {
   // Random offset for coordinates so they don't stack exactly on top of each other
   const jitter = () => (Math.random() - 0.5) * 0.3; 
   
+  // Random direction for visualization
+  const direction = Math.floor(Math.random() * 360);
+  
   for (const [cityKey, coords] of Object.entries(CITY_COORDS)) {
     if (lowerText.includes(cityKey)) {
       lat = coords.lat + jitter();
@@ -60,5 +64,5 @@ export function parseTelegramText(text: string): ParsedThreat {
     }
   }
   
-  return { type, lat, lng, confidence };
+  return { type, lat, lng, confidence, direction };
 }

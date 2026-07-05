@@ -77,6 +77,7 @@ export async function startTelegramWorker(io: Server) {
               lat: parsed.lat,
               lng: parsed.lng,
               confidence: parsed.confidence,
+              direction: parsed.direction,
               sourceId: sourceId
             },
             include: { source: true }
@@ -134,6 +135,7 @@ async function fetchHistory(client: TelegramClient, sourceId: string, io: Server
                 lat: parsed.lat,
                 lng: parsed.lng,
                 confidence: parsed.confidence,
+                direction: parsed.direction,
                 sourceId: sourceId
               },
               include: { source: true }

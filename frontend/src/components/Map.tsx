@@ -15,21 +15,39 @@ L.Icon.Default.mergeOptions({
   shadowUrl: '/marker-shadow.png',
 });
 
-// Custom animated icons
-const createCustomIcon = (color: string) => {
+const getIcon = (type: string, direction?: number | null) => {
+  const isDrone = type === 'DRONE';
+  const isMissile = type === 'MISSILE';
+  
+  if (isDrone || isMissile) {
+    const rot = direction || 0;
+    const imgUrl = isDrone ? '/icons/drone.png' : '/icons/missile.png';
+    const shadowColor = isDrone ? 'rgba(255, 255, 0, 0.8)' : 'rgba(255, 0, 0, 0.8)';
+    const arrowColor = isDrone ? '#ffff00' : '#ff0000';
+    
+    return L.divIcon({
+      className: 'custom-div-icon',
+      html: `<div style="transform: rotate(${rot}deg); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; position: relative;">
+          <img src="${imgUrl}" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 8px ${shadowColor}); mix-blend-mode: screen;" />
+          <div style="position: absolute; top: -12px; width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 12px solid ${arrowColor}; filter: drop-shadow(0 0 5px ${arrowColor})"></div>
+        </div>`,
+      iconSize: [48, 48],
+      iconAnchor: [24, 24],
+    });
+  }
+  
+  const colors: Record<string, string> = {
+    AIRCRAFT: '#eab308',
+    ALERT: '#a855f7',
+  };
+  const color = colors[type] || '#ffffff';
+  
   return L.divIcon({
     className: 'custom-div-icon',
     html: `<div style="background-color: ${color};" class="w-4 h-4 rounded-full shadow-[0_0_15px_${color}] animate-pulse border-2 border-white"></div>`,
     iconSize: [20, 20],
     iconAnchor: [10, 10],
   });
-};
-
-const icons = {
-  DRONE: createCustomIcon('#3b82f6'),
-  MISSILE: createCustomIcon('#ef4444'),
-  AIRCRAFT: createCustomIcon('#eab308'),
-  ALERT: createCustomIcon('#a855f7'),
 };
 
 const REGION_NAME_MAP: Record<string, string> = {
@@ -127,7 +145,7 @@ export default function Map() {
         <Marker 
           key={report.id} 
           position={[report.lat, report.lng]}
-          icon={icons[report.type as keyof typeof icons]}
+          icon={getIcon(report.type, report.direction)}
         >
           <Popup className="dark-popup">
             <div className="p-2 bg-[#0a0f18] text-white rounded shadow-lg border border-gray-800">
