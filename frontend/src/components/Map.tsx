@@ -284,7 +284,7 @@ export default function Map() {
         style={{ height: '100%', width: '100%', zIndex: 0 }}
         zoomControl={false}
       >
-        <LayersControl position="topright">
+        <LayersControl position="bottomright">
           <LayersControl.BaseLayer checked name="ALIVEMAP Dark">
             <TileLayer
               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
