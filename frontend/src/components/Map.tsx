@@ -85,6 +85,87 @@ const REGION_NAME_MAP: Record<string, string> = {
   "АР Крим": "Crimea",
   "м. Севастополь": "Sevastopol"
 };
+const AnimatedMarker = ({ threat, getIcon }: any) => {
+  const currentLoc = threat.locations[0];
+  const [pos, setPos] = useState<[number, number]>([currentLoc.lat, currentLoc.lng]);
+
+  useEffect(() => {
+    let animationFrameId: number;
+    let lastTime = Date.now();
+
+    const animate = () => {
+      const now = Date.now();
+      const dt = (now - lastTime) / 1000; // seconds elapsed
+      lastTime = now;
+
+      if (threat.speed && threat.course) {
+        setPos((prevPos) => {
+          const R = 6371; // Earth radius in km
+          const d = (threat.speed / 3600) * dt; // Distance traveled in km during dt
+          const brng = threat.course * Math.PI / 180;
+          const lat1 = prevPos[0] * Math.PI / 180;
+          const lon1 = prevPos[1] * Math.PI / 180;
+
+          const lat2 = Math.asin(Math.sin(lat1)*Math.cos(d/R) + Math.cos(lat1)*Math.sin(d/R)*Math.cos(brng));
+          const lon2 = lon1 + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(lat1), Math.cos(d/R)-Math.sin(lat1)*Math.sin(lat2));
+
+          return [lat2 * 180 / Math.PI, lon2 * 180 / Math.PI];
+        });
+      }
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animationFrameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [threat.speed, threat.course]);
+
+  // Sync position with server when a new location arrives
+  useEffect(() => {
+    setPos([currentLoc.lat, currentLoc.lng]);
+  }, [currentLoc.lat, currentLoc.lng, currentLoc.time]);
+
+  const pathPositions: [number, number][] = threat.locations.map((l: any) => [l.lat, l.lng]);
+  let predictedPath: [number, number][] = [];
+  
+  if (threat.speed && threat.course) {
+    const lat1 = currentLoc.lat;
+    const lon1 = currentLoc.lng;
+    const d = (threat.speed / 60) * 10; 
+    const R = 6371; 
+    const brng = threat.course * Math.PI / 180;
+    const lat1Rad = lat1 * Math.PI / 180;
+    const lon1Rad = lon1 * Math.PI / 180;
+    
+    const lat2Rad = Math.asin(Math.sin(lat1Rad)*Math.cos(d/R) + Math.cos(lat1Rad)*Math.sin(d/R)*Math.cos(brng));
+    const lon2Rad = lon1Rad + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(lat1Rad), Math.cos(d/R)-Math.sin(lat1Rad)*Math.sin(lat2Rad));
+    
+    predictedPath = [[lat1, lon1], [lat2Rad * 180 / Math.PI, lon2Rad * 180 / Math.PI]];
+  }
+
+  return (
+    <>
+      {pathPositions.length > 1 && (
+        <Polyline positions={pathPositions} pathOptions={{ color: '#e63946', weight: 2, opacity: 0.8, dashArray: '5, 10' }} />
+      )}
+      {predictedPath.length > 0 && (
+        <Polyline positions={predictedPath} pathOptions={{ color: '#ffb703', weight: 2, dashArray: '4, 8', opacity: 0.6 }} />
+      )}
+      <Marker position={pos} icon={getIcon(threat.type, threat.course)}>
+        <Popup className="custom-popup">
+          <div className="font-sans">
+            <div className="font-bold text-lg mb-1">{threat.type}</div>
+            <div className="text-sm opacity-80 mb-2">Confidence: {(threat.confidence * 100).toFixed(0)}%</div>
+            {threat.speed && <div className="text-sm">Speed: {threat.speed.toFixed(0)} km/h</div>}
+            {threat.course && <div className="text-sm">Course: {threat.course.toFixed(0)}°</div>}
+            <div className="text-xs opacity-50 mt-2">
+              Updated: {new Date(currentLoc.time).toLocaleTimeString()}
+            </div>
+          </div>
+        </Popup>
+      </Marker>
+    </>
+  );
+};
 
 export default function Map() {
   const { threats, filters, updateThreat, setThreats } = useStore();
@@ -197,90 +278,7 @@ export default function Map() {
         />
         <div className="map-overlay" />
         <ZoomControl position="bottomright" />
-        
-const AnimatedMarker = ({ threat, getIcon }: any) => {
-  const currentLoc = threat.locations[0];
-  const [pos, setPos] = useState<[number, number]>([currentLoc.lat, currentLoc.lng]);
 
-  useEffect(() => {
-    let animationFrameId: number;
-    let lastTime = Date.now();
-
-    const animate = () => {
-      const now = Date.now();
-      const dt = (now - lastTime) / 1000; // seconds elapsed
-      lastTime = now;
-
-      if (threat.speed && threat.course) {
-        setPos((prevPos) => {
-          const R = 6371; // Earth radius in km
-          const d = (threat.speed / 3600) * dt; // Distance traveled in km during dt
-          const brng = threat.course * Math.PI / 180;
-          const lat1 = prevPos[0] * Math.PI / 180;
-          const lon1 = prevPos[1] * Math.PI / 180;
-
-          const lat2 = Math.asin(Math.sin(lat1)*Math.cos(d/R) + Math.cos(lat1)*Math.sin(d/R)*Math.cos(brng));
-          const lon2 = lon1 + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(lat1), Math.cos(d/R)-Math.sin(lat1)*Math.sin(lat2));
-
-          return [lat2 * 180 / Math.PI, lon2 * 180 / Math.PI];
-        });
-      }
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    animationFrameId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [threat.speed, threat.course]);
-
-  // Sync position with server when a new location arrives
-  useEffect(() => {
-    setPos([currentLoc.lat, currentLoc.lng]);
-  }, [currentLoc.lat, currentLoc.lng, currentLoc.time]);
-
-  const pathPositions: [number, number][] = threat.locations.map((l: any) => [l.lat, l.lng]);
-  let predictedPath: [number, number][] = [];
-  
-  if (threat.speed && threat.course) {
-    const lat1 = currentLoc.lat;
-    const lon1 = currentLoc.lng;
-    const d = (threat.speed / 60) * 10; 
-    const R = 6371; 
-    const brng = threat.course * Math.PI / 180;
-    const lat1Rad = lat1 * Math.PI / 180;
-    const lon1Rad = lon1 * Math.PI / 180;
-    
-    const lat2Rad = Math.asin(Math.sin(lat1Rad)*Math.cos(d/R) + Math.cos(lat1Rad)*Math.sin(d/R)*Math.cos(brng));
-    const lon2Rad = lon1Rad + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(lat1Rad), Math.cos(d/R)-Math.sin(lat1Rad)*Math.sin(lat2Rad));
-    
-    predictedPath = [[lat1, lon1], [lat2Rad * 180 / Math.PI, lon2Rad * 180 / Math.PI]];
-  }
-
-  return (
-    <>
-      {pathPositions.length > 1 && (
-        <Polyline positions={pathPositions} pathOptions={{ color: '#e63946', weight: 2, opacity: 0.8, dashArray: '5, 10' }} />
-      )}
-      {predictedPath.length > 0 && (
-        <Polyline positions={predictedPath} pathOptions={{ color: '#ffb703', weight: 2, dashArray: '4, 8', opacity: 0.6 }} />
-      )}
-      <Marker position={pos} icon={getIcon(threat.type, threat.course)}>
-        <Popup className="custom-popup">
-          <div className="font-sans">
-            <div className="font-bold text-lg mb-1">{threat.type}</div>
-            <div className="text-sm opacity-80 mb-2">Confidence: {(threat.confidence * 100).toFixed(0)}%</div>
-            {threat.speed && <div className="text-sm">Speed: {threat.speed.toFixed(0)} km/h</div>}
-            {threat.course && <div className="text-sm">Course: {threat.course.toFixed(0)}°</div>}
-            <div className="text-xs opacity-50 mt-2">
-              Updated: {new Date(currentLoc.time).toLocaleTimeString()}
-            </div>
-          </div>
-        </Popup>
-      </Marker>
-    </>
-  );
-};
-
-// Replace filteredThreats.map inside MapContainer with this:
         {filteredThreats.map((threat) => (
           <AnimatedMarker key={threat.id} threat={threat} getIcon={getIcon} />
         ))}
