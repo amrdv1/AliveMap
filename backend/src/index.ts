@@ -71,8 +71,8 @@ server.listen(PORT, async () => {
       });
       if (updated.count > 0) {
         console.log(`[Archiver] Archived ${updated.count} stale targets.`);
-        // Note: Frontend fetches the whole list, so it will update on next polling,
-        // or we could emit a socket event if needed. But for now, DB update is fine.
+        // Ask all clients to refetch to clear their states
+        io.emit('threats:refresh');
       }
     } catch (e) {
       console.error('[Archiver] Error:', e);

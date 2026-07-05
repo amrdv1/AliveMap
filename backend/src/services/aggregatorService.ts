@@ -148,6 +148,7 @@ async function updateThreat(
       speed: speed ?? existingThreat.speed,
       course: course ?? existingThreat.course,
       confidence: finalConfidence,
+      updatedAt: new Date(),
       locations: pointsToSave.length > 0 ? { createMany: { data: pointsToSave } } : undefined
     },
     include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }

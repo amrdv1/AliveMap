@@ -197,6 +197,10 @@ export default function Map() {
       updateThreat(threat);
     });
 
+    socket.on('threats:refresh', () => {
+      fetchThreats();
+    });
+
     socket.on('monitoring:new_message', (message: any) => {
       useStore.getState().addMessage(message);
     });

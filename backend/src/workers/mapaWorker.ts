@@ -61,6 +61,11 @@ export async function startMapaWorker(io: Server) {
         // Get the latest location to use for distance matching
         const latestLoc = trailLocations[trailLocations.length - 1];
 
+        // Skip stale data from MAPA (older than 15 mins)
+        if (new Date().getTime() - latestLoc.time.getTime() > 15 * 60 * 1000) {
+          continue;
+        }
+
         const threatData = {
           type: threatType,
           confidence: 0.3, // Lower confidence for mapa.ua (background layer)
@@ -95,10 +100,12 @@ export async function startMapaWorker(io: Server) {
         if (!updatedIds.includes(t.id)) {
           // If a threat hasn't been updated in 15 mins, archive it
           if (new Date().getTime() - new Date(t.updatedAt).getTime() > 15 * 60 * 1000) {
-            await prisma.threatObject.update({
+            const archived = await prisma.threatObject.update({
               where: { id: t.id },
               data: { status: ReportStatus.ARCHIVED }
             });
+            // Emit to frontend so it removes it from active view
+            io.emit('threat:update', archived);
           }
         }
       }
