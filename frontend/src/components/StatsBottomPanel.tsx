@@ -3,11 +3,13 @@ import { useStore } from '../store/useStore';
 import { Radar } from 'lucide-react';
 
 export default function StatsBottomPanel() {
-  const { threats } = useStore();
+  const { threats, alerts } = useStore();
   
   const activeThreats = threats.filter(t => t.status === 'ACTIVE');
   
-  const alertsCount = threats.filter(t => t.type === 'ALERT').length;
+  // Count active regions from siren.pp.ua
+  const alertsCount = Object.values(alerts).filter(a => a?.alertnow === true).length;
+  
   const dronesCount = activeThreats.filter(t => t.type === 'DRONE').length;
   const missilesCount = activeThreats.filter(t => t.type === 'CRUISE_MISSILE' || t.type === 'BALLISTIC_MISSILE' || t.type === 'MISSILE').length;
   const aircraftCount = activeThreats.filter(t => t.type === 'AIRCRAFT').length;

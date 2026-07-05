@@ -167,9 +167,8 @@ const AnimatedMarker = ({ threat, getIcon }: any) => {
 };
 
 export default function Map() {
-  const { threats, filters, updateThreat, setThreats } = useStore();
+  const { threats, filters, updateThreat, setThreats, alerts, setAlerts } = useStore();
   const [mounted, setMounted] = useState(false);
-  const [alerts, setAlerts] = useState<Record<string, any>>({});
   const [geoData, setGeoData] = useState<any>(null);
   const [geoDataDistricts, setGeoDataDistricts] = useState<any>(null);
 
@@ -363,8 +362,8 @@ export default function Map() {
         <GeoJSON 
           data={geoData}
           style={() => ({
-            color: '#374151',
-            weight: 1,
+            color: 'rgba(255, 255, 255, 0.25)',
+            weight: 1.5,
             fillColor: 'transparent',
             fillOpacity: 0,
             interactive: false
