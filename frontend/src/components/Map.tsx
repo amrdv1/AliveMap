@@ -83,7 +83,7 @@ const REGION_NAME_MAP: Record<string, string> = {
   "Закарпатська область": "Transcarpathia",
   "Донецька область": "Donets'k",
   "Луганська область": "Luhans'k",
-  "АР Крим": "Crimea",
+  "Автономна Республіка Крим": "Crimea",
   "м. Севастополь": "Sevastopol"
 };
 const AnimatedMarker = ({ threat, getIcon }: any) => {
