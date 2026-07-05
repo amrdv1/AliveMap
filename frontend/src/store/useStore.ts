@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ReportType = 'DRONE' | 'MISSILE' | 'CRUISE_MISSILE' | 'BALLISTIC_MISSILE' | 'KAB' | 'AIRCRAFT' | 'ALERT';
+export type ReportType = 'DRONE' | 'MISSILE' | 'CRUISE_MISSILE' | 'BALLISTIC_MISSILE' | 'KAB' | 'AIRCRAFT' | 'ALERT' | 'RECON';
 export type ReportStatus = 'ACTIVE' | 'ARCHIVED';
 
 export interface ThreatLocation {

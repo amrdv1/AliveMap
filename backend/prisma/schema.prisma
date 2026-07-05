@@ -21,6 +21,7 @@ enum ReportType {
   AIRCRAFT
   KAB
   ALERT
+  RECON
 }
 
 enum ReportStatus {
