@@ -1,0 +1,98 @@
+import { TelegramClient } from 'telegram';
+import { StringSession } from 'telegram/sessions';
+import { NewMessage, NewMessageEvent } from 'telegram/events';
+import { parseTelegramText } from '../services/parser';
+import prisma from '../db';
+import { Server } from 'socket.io';
+import { processExternalThreat } from '../services/aggregatorService';
+
+const CHANNELS = [
+  'vanek_nikolaev', 
+  'monitor', 
+  'kievreal1', 
+  'operativnoZSU',
+  'insiderUKR',
+  'smolii_ukraine',
+  'kyiv_golovne',
+  'war_monitor',
+  'monitor_ukraine',
+  'radar_ua_top'
+];
+
+export async function startTelegramWorker(io: Server) {
+  const apiId = Number(process.env.TELEGRAM_API_ID);
+  const apiHash = process.env.TELEGRAM_API_HASH;
+  const sessionString = process.env.TELEGRAM_SESSION;
+
+  if (!apiId || !apiHash || !sessionString) {
+    console.log("Telegram credentials missing in .env. Telegram worker is disabled.");
+    return;
+  }
+
+  const stringSession = new StringSession(sessionString);
+  const client = new TelegramClient(stringSession, apiId, apiHash, {
+    connectionRetries: 5,
+  });
+
+  try {
+    // Suppress verbose gramjs logging
+    client.setLogLevel("none");
+    
+    await client.connect();
+    console.log("Telegram Userbot connected successfully. Listening to monitoring channels...");
+
+    let source = await prisma.source.findFirst({ where: { name: 'Telegram Worker' } });
+    if (!source) {
+      source = await prisma.source.create({
+        data: {
+          name: 'Telegram Worker',
+          type: 'API'
+        }
+      });
+    }
+    const sourceId = source.id;
+
+    client.addEventHandler(async (event: NewMessageEvent) => {
+      const message = event.message;
+      if (!message || !message.message) return;
+
+      const chat = await message.getChat();
+      if (!chat) return;
+      
+      const username = 'username' in chat && chat.username ? chat.username.toLowerCase() : null;
+      
+      if (username && CHANNELS.some(c => c.toLowerCase() === username)) {
+        const text = message.message;
+        const parsedThreat = parseTelegramText(text);
+
+        // Forward raw message to frontend chat panel
+        io.emit('monitoring:new_message', { 
+            text, channelName: username, timestamp: new Date(), tags: [parsedThreat.type] 
+        });
+
+        // Add target to map
+        if (parsedThreat.lat !== null && parsedThreat.lng !== null) {
+            const savedThreat = await processExternalThreat(
+                null,
+                parsedThreat.type as any,
+                parsedThreat.lat,
+                parsedThreat.lng,
+                new Date(),
+                sourceId,
+                null,
+                parsedThreat.direction,
+                parsedThreat.confidence / 100
+            );
+
+            if (savedThreat) {
+                io.emit('threat:update', savedThreat);
+                console.log(`Telegram Threat Detected: ${parsedThreat.type} at [${parsedThreat.lat}, ${parsedThreat.lng}] from ${username}`);
+            }
+        }
+      }
+    }, new NewMessage({}));
+
+  } catch (err) {
+    console.error("Failed to start Telegram Worker:", err);
+  }
+}

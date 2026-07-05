@@ -13,6 +13,7 @@ import webhookRoutes from './routes/webhooks';
 
 import { startAlertsWorker } from './workers/alertsWorker';
 import { startMapaWorker } from './workers/mapaWorker';
+import { startTelegramWorker } from './workers/telegramWorker';
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ server.listen(PORT, async () => {
   // Start remaining background workers
   startAlertsWorker(io);
   startMapaWorker(io); // Re-enabled mapa.ua as background layer
+  startTelegramWorker(io); // Integrated telegram parser
   
   // Auto-archive stale targets (no updates in 15 mins)
   setInterval(async () => {
