@@ -8,6 +8,7 @@ import authRoutes from './routes/auth';
 import reportRoutes from './routes/reports';
 import { startTelegramWorker } from './workers/telegramWorker';
 import { startAlertsWorker } from './workers/alertsWorker';
+import { startMapaWorker } from './workers/mapaWorker';
 
 dotenv.config();
 
@@ -40,4 +41,5 @@ server.listen(PORT, () => {
   // Start background workers
   startTelegramWorker(io);
   startAlertsWorker(io);
+  startMapaWorker(io);
 });

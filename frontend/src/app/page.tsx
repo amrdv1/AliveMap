@@ -10,7 +10,6 @@ import MobileBottomSheet from '@/components/MobileBottomSheet';
 
 import MonitoringFeed from '@/components/MonitoringFeed';
 import StatsBottomPanel from '@/components/StatsBottomPanel';
-import AboutModal from '@/components/AboutModal';
 
 const Map = dynamic(() => import('@/components/Map'), { 
   ssr: false,
@@ -20,7 +19,6 @@ const Map = dynamic(() => import('@/components/Map'), {
 export default function Home() {
   return (
     <main className="relative h-[100dvh] w-screen overflow-hidden font-sans text-white bg-black">
-      <AboutModal />
       {/* Background Map Layer */}
       <div className="absolute inset-0 z-0">
         <Map />

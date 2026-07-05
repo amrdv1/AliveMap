@@ -33,7 +33,6 @@ export default function Navbar() {
         <div className="text-gray-400 hover:text-white cursor-pointer pb-1 transition-colors">ЗВЕДЕННЯ</div>
         <div className="text-gray-400 hover:text-white cursor-pointer pb-1 transition-colors">СТАТИСТИКА</div>
         <div className="text-gray-400 hover:text-white cursor-pointer pb-1 transition-colors">НОВИНИ</div>
-        <div onClick={() => setAboutOpen(true)} className="text-gray-400 hover:text-white cursor-pointer pb-1 transition-colors">ПРО НАС</div>
       </div>
 
       {/* Time & Live Indicator */}

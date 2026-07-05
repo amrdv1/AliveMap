@@ -96,6 +96,7 @@ export async function startTelegramWorker(io: Server) {
           console.error('Failed to save monitoring message', e);
         }
 
+        /*
         const parsed = parseTelegramText(text);
 
         if (parsed.lat !== null && parsed.lng !== null) {
@@ -109,6 +110,7 @@ export async function startTelegramWorker(io: Server) {
 
           console.log(`Telegram Threat Tracked: ${parsed.type} at [${parsed.lat}, ${parsed.lng}] from ${channelName}`);
         }
+        */
       }
     }, new NewMessage({}));
 
