@@ -264,7 +264,7 @@ export default function Map() {
       if (isDistrict) {
         return alerts[alertRegion]?.alertnow === true && alerts[alertRegion]?.regionType === 'District' && alertRegion === regionName;
       } else {
-        return alerts[alertRegion]?.alertnow === true && (!alerts[alertRegion]?.regionType || alerts[alertRegion]?.regionType === 'State') && REGION_NAME_MAP[alertRegion] === regionName;
+        return alerts[alertRegion]?.alertnow === true && REGION_NAME_MAP[alertRegion] === regionName;
       }
     });
 
@@ -402,7 +402,6 @@ export default function Map() {
             const isActive = Object.keys(alerts).some(
               (alertRegion) => 
                 alerts[alertRegion]?.alertnow === true && 
-                (!alerts[alertRegion]?.regionType || alerts[alertRegion]?.regionType === 'State') &&
                 REGION_NAME_MAP[alertRegion] === regionName
             );
             

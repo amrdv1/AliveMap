@@ -7,7 +7,7 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const messages = await prisma.monitoringMessage.findMany({
       orderBy: { timestamp: 'desc' },
-      take: 50
+      take: 200
     });
     res.json(messages);
   } catch (error) {
