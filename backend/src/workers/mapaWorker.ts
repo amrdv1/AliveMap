@@ -4,7 +4,7 @@ import prisma from '../db';
 import { ReportType, ReportStatus, SourceType } from '@prisma/client';
 import { processExternalThreat } from '../services/aggregatorService';
 
-const MAPA_API_URL = 'https://api.allorigins.win/raw?url=https://mapa.ua/api/v1/current';
+const MAPA_API_URL = 'https://mapa.ua/api/v1/current';
 
 // Maps MAPA kind -> our ReportType
 const KIND_MAPPING: Record<string, ReportType> = {
