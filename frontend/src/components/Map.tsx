@@ -145,10 +145,18 @@ const AnimatedMarker = ({ threat, getIcon }: any) => {
   return (
     <>
       {pathPositions.length > 1 && (
-        <Polyline positions={pathPositions} pathOptions={{ color: '#e63946', weight: 2, opacity: 0.8, dashArray: '5, 10' }} />
+        <Polyline positions={pathPositions} pathOptions={{ color: '#e63946', weight: 2, opacity: 0.5 }} />
       )}
       {predictedPath.length > 0 && (
-        <Polyline positions={predictedPath} pathOptions={{ color: '#ffb703', weight: 2, dashArray: '4, 8', opacity: 0.6 }} />
+        <>
+          <Polyline positions={predictedPath} pathOptions={{ color: '#ffb703', weight: 2, opacity: 0.8 }} />
+          <Marker position={predictedPath[1]} icon={L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="transform: rotate(${threat.course || 0}deg); color: #ffb703; display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1"><polygon points="12 2 22 22 12 17 2 22 12 2"/></svg></div>`,
+            iconSize: [12, 12],
+            iconAnchor: [6, 6],
+          })} />
+        </>
       )}
       <Marker position={pos} icon={getIcon(threat.type, threat.course)}>
         <Popup className="custom-popup">
@@ -201,8 +209,7 @@ export default function Map() {
 
     const fetchAlerts = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const res = await fetch(`${apiUrl}/api/alerts`);
+        const res = await fetch('/api/alerts');
         const data = await res.json();
         if (data && data.states) {
           setAlerts(data.states);
