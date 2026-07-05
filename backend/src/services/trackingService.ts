@@ -59,7 +59,7 @@ export async function processNewThreatLocation(
     }
   });
 
-  let matchedThreat: ThreatObject | null = null;
+  let matchedThreat: any = null;
   let minDistance = Infinity;
 
   for (const threat of activeThreats) {
@@ -76,7 +76,7 @@ export async function processNewThreatLocation(
     }
   }
 
-  let finalThreat: ThreatObject;
+  let finalThreat: any;
 
   if (matchedThreat) {
     // Attach to existing threat
