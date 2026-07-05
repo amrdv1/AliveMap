@@ -99,7 +99,8 @@ const AnimatedMarker = ({ threat, getIcon }: any) => {
       const dt = (now - lastTime) / 1000; // seconds elapsed
       lastTime = now;
 
-      if (threat.speed && threat.course) {
+      const timeSinceUpdate = (now - new Date(currentLoc.time).getTime()) / 1000;
+      if (threat.speed && threat.course && timeSinceUpdate < 300) {
         setPos((prevPos) => {
           const R = 6371; // Earth radius in km
           const d = (threat.speed / 3600) * dt; // Distance traveled in km during dt
@@ -262,7 +263,7 @@ export default function Map() {
     // Find matching alert
     const matchedAlertKey = Object.keys(alerts).find(alertRegion => {
       if (isDistrict) {
-        return alerts[alertRegion]?.alertnow === true && alerts[alertRegion]?.regionType === 'District' && alertRegion === regionName;
+        return alerts[alertRegion]?.alertnow === true && (alerts[alertRegion]?.regionType === 'District' || alertRegion === 'м. Київ') && alertRegion === regionName;
       } else {
         return alerts[alertRegion]?.alertnow === true && REGION_NAME_MAP[alertRegion] === regionName;
       }
@@ -426,7 +427,7 @@ export default function Map() {
             const isActive = Object.keys(alerts).some(
               (alertRegion) => 
                 alerts[alertRegion]?.alertnow === true && 
-                alerts[alertRegion]?.regionType === 'District' &&
+                (alerts[alertRegion]?.regionType === 'District' || alertRegion === 'м. Київ') &&
                 alertRegion === rayonName
             );
             
