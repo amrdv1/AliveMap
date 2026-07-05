@@ -244,13 +244,6 @@ export default function Map() {
     <>
       <style dangerouslySetInnerHTML={{__html: `
         .leaflet-container { background: #000 !important; }
-        .map-overlay {
-          position: absolute;
-          inset: 0;
-          background: rgba(5, 10, 20, 0.6);
-          pointer-events: none;
-          z-index: 400; /* Leaflet layers are 1-399 */
-        }
         .radar-pulse {
           position: absolute;
           width: 100%;
@@ -294,7 +287,7 @@ export default function Map() {
             />
           </LayersControl.BaseLayer>
         </LayersControl>
-        <div className="map-overlay" />
+        
         <ZoomControl position="bottomright" />
 
         {filteredThreats.map((threat) => (
@@ -314,10 +307,11 @@ export default function Map() {
             );
             
             return {
-              color: isActive ? '#ef4444' : '#6b7280',
+              color: isActive ? '#ef4444' : '#4b5563',
               weight: isActive ? 2 : 1,
               fillColor: isActive ? '#ef4444' : '#000000',
-              fillOpacity: isActive ? 0.35 : 0.0, // hide fill completely if not active
+              fillOpacity: isActive ? 0.45 : 0.05,
+
             };
           }}
         />

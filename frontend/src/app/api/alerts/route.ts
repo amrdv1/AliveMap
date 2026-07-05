@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const res = await fetch('https://ubilling.net.ua/aerialalerts/', {
@@ -7,7 +10,7 @@ export async function GET() {
         'User-Agent': 'Mozilla/5.0 (compatible; ALIVEMAP/1.0)',
         'Accept': 'application/json'
       },
-      next: { revalidate: 10 } // Cache for 10 seconds
+      cache: 'no-store'
     });
     
     if (!res.ok) {
