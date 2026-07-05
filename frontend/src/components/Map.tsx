@@ -28,7 +28,7 @@ const getIcon = (type: string, direction?: number | null) => {
     return L.divIcon({
       className: 'custom-div-icon',
       html: `<div style="transform: rotate(${rot}deg); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; position: relative;">
-          <img src="${imgUrl}" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 8px ${shadowColor}); mix-blend-mode: screen;" />
+          <img src="${imgUrl}" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 8px ${shadowColor});" />
           <div style="position: absolute; top: -12px; width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 12px solid ${arrowColor}; filter: drop-shadow(0 0 5px ${arrowColor})"></div>
         </div>`,
       iconSize: [48, 48],
