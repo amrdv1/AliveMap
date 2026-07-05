@@ -69,7 +69,7 @@ server.listen(PORT, async () => {
   
   // Start remaining background workers
   startAlertsWorker(io);
-  startMapaWorker(io); // Re-enabled mapa.ua as background layer
+  // startMapaWorker(io); // Temporarily disabled
   startTelegramWorker(io); // Integrated telegram parser
   
   // Auto-archive stale targets (no updates in 15 mins)

@@ -305,11 +305,6 @@ export default function Map() {
 
   return (
     <>
-      <div style={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', zIndex: 9999, background: 'rgba(0,0,0,0.8)', color: 'white', padding: 10, borderRadius: 5, fontSize: 12, fontFamily: 'monospace' }}>
-        Luhansk: {JSON.stringify(alerts['Луганська область']) || 'undefined'} <br/>
-        Crimea: {JSON.stringify(alerts['Автономна Республіка Крим']) || 'undefined'} <br/>
-        Has Luhans'k match? {Object.keys(alerts).some(alertRegion => alerts[alertRegion]?.alertnow === true && (!alerts[alertRegion]?.regionType || alerts[alertRegion]?.regionType === 'State') && REGION_NAME_MAP[alertRegion] === "Luhans'k") ? 'YES' : 'NO'}
-      </div>
       <style dangerouslySetInnerHTML={{__html: `
         .leaflet-container { background: #000 !important; }
         .radar-pulse {
@@ -363,17 +358,26 @@ export default function Map() {
           <AnimatedMarker key={threat.id} threat={threat} getIcon={getIcon} />
         ))}
 
+      {/* Base Map State Outlines (always visible, beautiful borders) */}
+      {geoData && (
+        <GeoJSON 
+          data={geoData}
+          style={() => ({
+            color: '#374151',
+            weight: 1,
+            fillColor: 'transparent',
+            fillOpacity: 0,
+            interactive: false
+          })}
+        />
+      )}
+
       {/* State level alarms */}
       {geoData && (
         <GeoJSON 
-          key={`geojson-states-${Object.keys(alerts).filter(k => alerts[k]?.alertnow && (!alerts[k]?.regionType || alerts[k]?.regionType === 'State')).join('-')}`}
+          key={`geojson-states-${JSON.stringify(alerts)}`}
           data={geoData}
-          onEachFeature={(f, l) => {
-             if (f.properties.name === "Luhans'k" || f.properties.name === "Crimea") {
-                console.log("Binding popup for", f.properties.name, "Alerts:", alerts["Луганська область"], alerts["Автономна Республіка Крим"]);
-             }
-             bindPopupToFeature(f, l, 'name', false);
-          }}
+          onEachFeature={(f, l) => bindPopupToFeature(f, l, 'name', false)}
           style={(feature) => {
             const regionName = feature?.properties?.name;
             const isActive = Object.keys(alerts).some(
@@ -384,10 +388,10 @@ export default function Map() {
             );
             
             return {
-              color: isActive ? '#ef4444' : '#4b5563',
-              weight: isActive ? 2 : 1,
-              fillColor: isActive ? '#ef4444' : '#000000',
-              fillOpacity: isActive ? 0.45 : 0.05,
+              color: isActive ? '#ff4d4f' : 'transparent',
+              weight: isActive ? 1.5 : 0,
+              fillColor: isActive ? '#ef4444' : 'transparent',
+              fillOpacity: isActive ? 0.2 : 0, // Lower opacity for comfortable viewing
             };
           }}
         />
@@ -396,7 +400,7 @@ export default function Map() {
       {/* District level alarms */}
       {geoDataDistricts && (
         <GeoJSON 
-          key={`geojson-districts-${Object.keys(alerts).filter(k => alerts[k]?.alertnow && alerts[k]?.regionType === 'District').join('-')}`}
+          key={`geojson-districts-${JSON.stringify(alerts)}`}
           data={geoDataDistricts}
           onEachFeature={(f, l) => bindPopupToFeature(f, l, 'rayon', true)}
           style={(feature) => {
@@ -409,10 +413,10 @@ export default function Map() {
             );
             
             return {
-              color: isActive ? '#ef4444' : 'transparent',
-              weight: isActive ? 2 : 0,
+              color: isActive ? '#ff4d4f' : 'transparent',
+              weight: isActive ? 1 : 0,
               fillColor: isActive ? '#ef4444' : 'transparent',
-              fillOpacity: isActive ? 0.6 : 0,
+              fillOpacity: isActive ? 0.25 : 0, // Slightly higher than state to be visible inside state
             };
           }}
         />
