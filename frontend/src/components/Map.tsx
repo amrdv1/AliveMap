@@ -210,10 +210,15 @@ export default function Map() {
 
     const fetchAlerts = async () => {
       try {
-        const res = await fetch('/api/alerts');
+        // Fetch directly from client using corsproxy to avoid Railway IP block
+        const res = await fetch('https://corsproxy.io/?https://ubilling.net.ua/aerialalerts/');
         const data = await res.json();
+        const statesMap: Record<string, any> = {};
         if (data && data.states) {
-          setAlerts(data.states);
+          for (const [regionName, alertData] of Object.entries(data.states)) {
+            statesMap[regionName] = { alertnow: (alertData as any)?.alertnow === true };
+          }
+          setAlerts(statesMap);
         }
       } catch (e) {
         console.error('Failed to fetch alerts', e);
