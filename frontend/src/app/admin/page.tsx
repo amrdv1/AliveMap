@@ -127,7 +127,7 @@ export default function AdminPage() {
                           <td className="px-6 py-4">{t.course ? `${t.course.toFixed(0)}°` : '-'}</td>
                           <td className="px-6 py-4 flex justify-end gap-3">
                             <button className="text-gray-400 hover:text-white transition-colors"><Edit size={18} /></button>
-                            <button onClick={() => handleDelete(t.id)} className="text-gray-400 hover:text-red-500 transition-colors"><Trash Admin={18} /></button>
+                            <button onClick={() => handleDelete(t.id)} className="text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
                           </td>
                         </tr>
                       ))}
