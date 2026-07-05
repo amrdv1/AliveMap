@@ -17,8 +17,9 @@ L.Icon.Default.mergeOptions({
 
 import { THREAT_SVGS, THREAT_COLORS } from './ThreatIcon';
 
-const getIcon = (type: string, direction: number | null | undefined) => {
+const getIcon = (type: string, direction: number | null | undefined, confidence: number = 1.0) => {
   const isThreat = Object.keys(THREAT_SVGS).includes(type);
+  const opacity = confidence < 0.5 ? 0.3 : 1.0;
   
   if (isThreat) {
     const rot = direction || 0;
@@ -31,9 +32,9 @@ const getIcon = (type: string, direction: number | null | undefined) => {
     
     return L.divIcon({
       className: 'custom-div-icon',
-      html: `<div style="position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+      html: `<div style="position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; opacity: ${opacity};">
                <div class="radar-pulse" style="--ring-color: ${ringColor}"></div>
-               <div style="transform: rotate(${rot}deg); z-index: 10; width: 20px; height: 20px; color: ${THREAT_COLORS[type as keyof typeof THREAT_COLORS]};">
+               <div style="transform: rotate(${rot}deg); z-index: 10; width: 20px; height: 20px; color: ${THREAT_COLORS[type as keyof typeof THREAT_COLORS]}; filter: drop-shadow(0 0 8px ${ringColor});">
                  ${svgIcon}
                </div>
              </div>`,
@@ -148,7 +149,7 @@ const AnimatedMarker = ({ threat, getIcon }: any) => {
         <Polyline positions={pathPositions} pathOptions={{ color: '#ef4444', weight: 1, opacity: 0.3, dashArray: '4' }} />
       )}
 
-      <Marker position={pos} icon={getIcon(threat.type, threat.course)}>
+      <Marker position={pos} icon={getIcon(threat.type, threat.course, threat.confidence)}>
         <Popup className="custom-popup">
           <div className="font-sans">
             <div className="font-bold text-lg mb-1">{threat.type}</div>
