@@ -46,6 +46,7 @@ model User {
   sessions  Session[]
   settings  Settings?
   logs      Log[]
+  changeLogs ChangeLog[]
 }
 
 model Report {
@@ -68,6 +69,7 @@ model Report {
 
 model ThreatObject {
   id        String   @id @default(uuid())
+  externalId String? @unique
   type      ReportType
   status    ReportStatus @default(ACTIVE)
   speed     Float?
@@ -99,6 +101,7 @@ model Source {
   updatedAt DateTime   @updatedAt
   reports   Report[]
   threatLocations ThreatLocation[]
+  apiLogs   ApiLog[]
 }
 
 model Session {
@@ -135,4 +138,26 @@ model MonitoringMessage {
   timestamp   DateTime
   tags        String[]
   createdAt   DateTime @default(now())
+}
+
+model ApiLog {
+  id        String   @id @default(uuid())
+  sourceId  String
+  source    Source   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  endpoint  String
+  payload   String   @db.Text
+  status    Int
+  createdAt DateTime @default(now())
+}
+
+model ChangeLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entity    String
+  entityId  String
+  action    String
+  oldData   String?  @db.Text
+  newData   String?  @db.Text
+  createdAt DateTime @default(now())
 }

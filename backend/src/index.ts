@@ -6,6 +6,9 @@ import dotenv from 'dotenv';
 import { initSocket } from './socket';
 import authRoutes from './routes/auth';
 import reportRoutes from './routes/reports';
+import threatRoutes from './routes/threats';
+import messageRoutes from './routes/messages';
+import adminRoutes from './routes/admin';
 import { startTelegramWorker } from './workers/telegramWorker';
 import { startAlertsWorker } from './workers/alertsWorker';
 import { startMapaWorker } from './workers/mapaWorker';
@@ -28,11 +31,9 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/reports', reportRoutes);
 
-import threatRoutes from './routes/threats';
-import messageRoutes from './routes/messages';
-
 app.use('/api/threats', threatRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/admin', adminRoutes);
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {

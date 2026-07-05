@@ -17,7 +17,20 @@ const CHANNELS = [
   'ukraine_pyxx',
   'kpszsu',
   'war_monitor',
-  'kyivske_nebo'
+  'kyivske_nebo',
+  'radar_v',
+  'air_alert_ua',
+  'truxaukraine',
+  'svoyi_ua',
+  'real_kiev',
+  'ukraine_now',
+  'kharkivlife',
+  'odesa_typical',
+  'dnepr_operativ',
+  'sumy_now',
+  'trukha_dnipro',
+  'trukha_kharkiv',
+  'trukha_odesa'
 ];
 
 const PRIVATE_CHANNEL_TITLES = [

@@ -1,70 +1,211 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+import { Target, Activity, Database, Plus, Edit, Trash2 } from 'lucide-react';
 
-export default function AdminDashboard() {
-  const router = useRouter();
-  const [mounted, setMounted] = useState(false);
+export default function AdminPage() {
+  const [activeTab, setActiveTab] = useState<'objects' | 'api' | 'changes'>('objects');
+  const [threats, setThreats] = useState<any[]>([]);
+  const [apiLogs, setApiLogs] = useState<any[]>([]);
+  const [changeLogs, setChangeLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
   useEffect(() => {
-    setMounted(true);
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/login');
-    }
-  }, [router]);
+    fetchData();
+  }, [activeTab]);
 
-  if (!mounted) return null;
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      if (activeTab === 'objects') {
+        const res = await fetch(`${apiUrl}/api/admin/threats`);
+        const data = await res.json();
+        setThreats(data);
+      } else if (activeTab === 'api') {
+        const res = await fetch(`${apiUrl}/api/admin/api-logs`);
+        const data = await res.json();
+        setApiLogs(data);
+      } else if (activeTab === 'changes') {
+        const res = await fetch(`${apiUrl}/api/admin/change-logs`);
+        const data = await res.json();
+        setChangeLogs(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    setLoading(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this threat?')) {
+      await fetch(`${apiUrl}/api/admin/threats/${id}`, { method: 'DELETE' });
+      fetchData();
+    }
+  };
+
+  const handleAddDemo = async () => {
+    await fetch(`${apiUrl}/api/admin/threats`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'DRONE',
+        lat: 48.3794,
+        lng: 31.1656,
+        speed: 180,
+        course: 90,
+        confidence: 1.0,
+        status: 'ACTIVE'
+      })
+    });
+    fetchData();
+  };
 
   return (
-    <div className="flex h-screen w-full bg-[#05070A] text-white">
-      <div className="w-64 bg-[#0a0f18] border-r border-gray-800 p-4 flex flex-col">
-        <h2 className="font-bold text-xl mb-8">Admin Panel</h2>
-        <nav className="flex flex-col gap-2">
-          <a href="#" className="p-2 bg-blue-600/20 text-blue-400 rounded">Dashboard</a>
-          <a href="#" className="p-2 hover:bg-gray-800 rounded">Reports</a>
-          <a href="#" className="p-2 hover:bg-gray-800 rounded">Sources</a>
-          <a href="#" className="p-2 hover:bg-gray-800 rounded">Users</a>
-        </nav>
-        
-        <button 
-          onClick={() => { localStorage.removeItem('token'); router.push('/login'); }}
-          className="mt-auto p-2 bg-red-600/20 text-red-400 rounded hover:bg-red-600/30 text-left transition-colors"
-        >
-          Logout
-        </button>
-      </div>
+    <div className="min-h-screen bg-[#05070A] text-white p-8 font-sans">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8 flex items-center gap-3">
+          <Database className="text-red-500" />
+          Панель Адміністратора
+        </h1>
 
-      <div className="flex-1 p-8 overflow-y-auto">
-        <h1 className="text-3xl font-bold mb-6">Dashboard Overview</h1>
-        
-        <div className="grid grid-cols-3 gap-6 mb-8">
-          <div className="bg-[#0a0f18] border border-gray-800 p-6 rounded-lg shadow-lg">
-            <h3 className="text-gray-400 text-sm">Total Reports</h3>
-            <p className="text-3xl font-bold mt-2 text-blue-400">1,248</p>
-          </div>
-          <div className="bg-[#0a0f18] border border-gray-800 p-6 rounded-lg shadow-lg">
-            <h3 className="text-gray-400 text-sm">Active Sources</h3>
-            <p className="text-3xl font-bold mt-2 text-green-400">12</p>
-          </div>
-          <div className="bg-[#0a0f18] border border-gray-800 p-6 rounded-lg shadow-lg">
-            <h3 className="text-gray-400 text-sm">Active Users</h3>
-            <p className="text-3xl font-bold mt-2 text-purple-400">45</p>
-          </div>
+        <div className="flex gap-4 border-b border-gray-800 mb-8">
+          <button
+            onClick={() => setActiveTab('objects')}
+            className={`pb-4 px-4 flex items-center gap-2 font-medium transition-colors ${activeTab === 'objects' ? 'border-b-2 border-red-500 text-red-500' : 'text-gray-400 hover:text-gray-200'}`}
+          >
+            <Target size={18} /> Список Об'єктів
+          </button>
+          <button
+            onClick={() => setActiveTab('api')}
+            className={`pb-4 px-4 flex items-center gap-2 font-medium transition-colors ${activeTab === 'api' ? 'border-b-2 border-red-500 text-red-500' : 'text-gray-400 hover:text-gray-200'}`}
+          >
+            <Activity size={18} /> Журнал API
+          </button>
+          <button
+            onClick={() => setActiveTab('changes')}
+            className={`pb-4 px-4 flex items-center gap-2 font-medium transition-colors ${activeTab === 'changes' ? 'border-b-2 border-red-500 text-red-500' : 'text-gray-400 hover:text-gray-200'}`}
+          >
+            <Database size={18} /> Журнал Змін
+          </button>
         </div>
 
-        <div className="bg-[#0a0f18] border border-gray-800 p-6 rounded-lg shadow-lg">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold">Recent Reports</h3>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors">
-              Create Report
-            </button>
+        {loading ? (
+          <div className="animate-pulse text-gray-500">Завантаження...</div>
+        ) : (
+          <div>
+            {activeTab === 'objects' && (
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-bold">Активні загрози ({threats.length})</h2>
+                  <button onClick={handleAddDemo} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-[0_0_15px_rgba(239,68,68,0.5)]">
+                    <Plus size={18} /> Додати тестову ціль
+                  </button>
+                </div>
+                <div className="bg-[#0a0f18] border border-gray-800 rounded-xl overflow-hidden">
+                  <table className="w-full text-left text-sm text-gray-300">
+                    <thead className="bg-[#111827] text-gray-400 uppercase text-xs">
+                      <tr>
+                        <th className="px-6 py-4">Тип</th>
+                        <th className="px-6 py-4">Статус</th>
+                        <th className="px-6 py-4">Швидкість</th>
+                        <th className="px-6 py-4">Курс</th>
+                        <th className="px-6 py-4 text-right">Дії</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-800">
+                      {threats.map((t) => (
+                        <tr key={t.id} className="hover:bg-gray-800/50 transition-colors">
+                          <td className="px-6 py-4 font-medium">{t.type}</td>
+                          <td className="px-6 py-4">
+                            <span className={`px-2 py-1 rounded-full text-xs ${t.status === 'ACTIVE' ? 'bg-red-500/20 text-red-400 border border-red-500/20' : 'bg-gray-700 text-gray-300'}`}>
+                              {t.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">{t.speed ? `${t.speed.toFixed(0)} км/год` : '-'}</td>
+                          <td className="px-6 py-4">{t.course ? `${t.course.toFixed(0)}°` : '-'}</td>
+                          <td className="px-6 py-4 flex justify-end gap-3">
+                            <button className="text-gray-400 hover:text-white transition-colors"><Edit size={18} /></button>
+                            <button onClick={() => handleDelete(t.id)} className="text-gray-400 hover:text-red-500 transition-colors"><Trash Admin={18} /></button>
+                          </td>
+                        </tr>
+                      ))}
+                      {threats.length === 0 && (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-8 text-center text-gray-500">Немає об'єктів</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'api' && (
+              <div>
+                <h2 className="text-xl font-bold mb-6">Журнал запитів API</h2>
+                <div className="space-y-4">
+                  {apiLogs.map(log => (
+                    <div key={log.id} className="bg-[#0a0f18] border border-gray-800 rounded-xl p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <span className="text-red-400 font-bold">{log.source?.name || 'Unknown API'}</span>
+                          <span className="text-gray-500 text-sm ml-4">{new Date(log.createdAt).toLocaleString()}</span>
+                        </div>
+                        <span className={`px-2 py-1 rounded text-xs font-mono ${log.status >= 400 ? 'bg-red-900/50 text-red-400' : 'bg-green-900/50 text-green-400'}`}>
+                          {log.status}
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-400 mb-2 font-mono">{log.endpoint}</div>
+                      <pre className="text-xs bg-[#05070a] p-3 rounded text-gray-300 overflow-x-auto border border-gray-800">
+                        {log.payload}
+                      </pre>
+                    </div>
+                  ))}
+                  {apiLogs.length === 0 && <div className="text-center text-gray-500 py-8">Немає записів</div>}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'changes' && (
+              <div>
+                <h2 className="text-xl font-bold mb-6">Журнал змін (Аудит)</h2>
+                <div className="bg-[#0a0f18] border border-gray-800 rounded-xl overflow-hidden">
+                  <table className="w-full text-left text-sm text-gray-300">
+                    <thead className="bg-[#111827] text-gray-400 uppercase text-xs">
+                      <tr>
+                        <th className="px-6 py-4">Дата</th>
+                        <th className="px-6 py-4">Користувач</th>
+                        <th className="px-6 py-4">Дія</th>
+                        <th className="px-6 py-4">Сутність</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-800">
+                      {changeLogs.map((log) => (
+                        <tr key={log.id} className="hover:bg-gray-800/50">
+                          <td className="px-6 py-4">{new Date(log.createdAt).toLocaleString()}</td>
+                          <td className="px-6 py-4 text-gray-400">{log.user?.email || log.userId}</td>
+                          <td className="px-6 py-4">
+                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${log.action === 'CREATE' ? 'text-green-400 bg-green-400/10' : log.action === 'DELETE' ? 'text-red-400 bg-red-400/10' : 'text-blue-400 bg-blue-400/10'}`}>
+                              {log.action}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 font-mono text-xs">{log.entity} ({log.entityId.substring(0, 8)}...)</td>
+                        </tr>
+                      ))}
+                      {changeLogs.length === 0 && (
+                        <tr>
+                          <td colSpan={4} className="px-6 py-8 text-center text-gray-500">Немає записів</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="text-center py-8 text-gray-500">
-            <p>API connection established. No recent manual reports.</p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

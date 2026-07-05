@@ -2,6 +2,7 @@ import axios from 'axios';
 import { Server } from 'socket.io';
 import prisma from '../db';
 import { ReportType, ReportStatus, SourceType } from '@prisma/client';
+import { processExternalThreat } from '../services/aggregatorService';
 
 const MAPA_API_URL = 'https://mapa.ua/api/v1/current';
 
@@ -38,71 +39,48 @@ export async function startMapaWorker(io: Server) {
 
         const threatType = KIND_MAPPING[obj.kind] || KIND_MAPPING['default'];
         
-        // Use the last coordinate in the trail as the current, most accurate location
         const trail = obj.trail || [];
-        const currentLoc = trail.length > 0 ? trail[trail.length - 1] : [obj.lon, obj.lat, Math.floor(Date.now()/1000), obj.heading];
-        const [lon, lat, ts, heading] = currentLoc;
-        const timestamp = new Date(ts * 1000);
+        // Map trail to our location format
+        const trailLocations = trail.map((t: any) => ({
+          lat: t[1],
+          lng: t[0],
+          time: new Date(t[2] * 1000),
+          sourceId: source!.id
+        }));
+
+        // If trail is empty, fallback to current coordinates
+        if (trailLocations.length === 0) {
+          trailLocations.push({
+            lat: obj.lat,
+            lng: obj.lon,
+            time: new Date(),
+            sourceId: source!.id
+          });
+        }
+        
+        // Get the latest location to use for distance matching
+        const latestLoc = trailLocations[trailLocations.length - 1];
 
         const threatData = {
           type: threatType,
-          confidence: 1.0, // MAPA data is considered high confidence
+          confidence: 1.0, 
           status: ReportStatus.ACTIVE,
           speed: obj.speed_kmh || null,
-          course: heading || obj.heading || null,
+          course: latestLoc.heading || obj.heading || null,
         };
 
-        const recentThreats = await prisma.threatObject.findMany({
-          where: { status: ReportStatus.ACTIVE, type: threatType },
-          include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
-        });
-
-        let matchedThreat = null;
-        for (const t of recentThreats) {
-          if (t.locations.length > 0) {
-            const loc = t.locations[0];
-            const dist = getDistanceFromLatLonInKm(lat, lon, loc.lat, loc.lng);
-            if (dist < 40) { // If within 40km, assume it's the same object
-              matchedThreat = t;
-              break;
-            }
-          }
-        }
-
-        let savedThreat;
-        if (matchedThreat) {
-          savedThreat = await prisma.threatObject.update({
-            where: { id: matchedThreat.id },
-            data: {
-              speed: threatData.speed,
-              course: threatData.course,
-              locations: {
-                create: {
-                  lat,
-                  lng: lon,
-                  time: timestamp,
-                  sourceId: source!.id
-                }
-              }
-            },
-            include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
-          });
-        } else {
-          savedThreat = await prisma.threatObject.create({
-            data: {
-              ...threatData,
-              locations: {
-                create: {
-                  lat,
-                  lng: lon,
-                  time: timestamp,
-                  sourceId: source!.id
-                }
-              }
-            },
-            include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
-          });
-        }
+        const savedThreat = await processExternalThreat(
+          obj.id, // externalId
+          threatType,
+          latestLoc.lat,
+          latestLoc.lng,
+          latestLoc.time,
+          source!.id,
+          threatData.speed,
+          threatData.course,
+          1.0,
+          trailLocations
+        );
 
         updatedThreats.push(savedThreat);
       }
@@ -140,22 +118,4 @@ export async function startMapaWorker(io: Server) {
 
   fetchMapaData();
   setInterval(fetchMapaData, 15000); // Poll every 15 seconds
-}
-
-function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const R = 6371; // Radius of the earth in km
-  const dLat = deg2rad(lat2-lat1);
-  const dLon = deg2rad(lon2-lon1); 
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2)
-    ; 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  const d = R * c; // Distance in km
-  return d;
-}
-
-function deg2rad(deg: number) {
-  return deg * (Math.PI/180);
 }
