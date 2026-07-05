@@ -6,7 +6,7 @@ export default function LegendSidebar() {
     <div className="hidden lg:flex w-64 h-full bg-[#070b14]/90 backdrop-blur-md border-r border-gray-800/50 flex-col z-20 text-white overflow-y-auto custom-scrollbar">
       <div className="p-6 flex-1">
         
-        <h3 className="text-gray-500 text-xs font-bold tracking-widest mb-6 uppercase">Легенда</h3>
+        <h3 className="text-gray-500 text-xs font-bold tracking-widest mb-6 uppercase">Типи цілей</h3>
         
         <div className="flex flex-col gap-5 mb-10">
           <LegendItem type="DRONE" label="БПЛА" />
@@ -18,7 +18,7 @@ export default function LegendSidebar() {
           <LegendItem type="RECON" label="РОЗВІДКА" />
         </div>
 
-        <h3 className="text-gray-500 text-xs font-bold tracking-widest mb-6 uppercase">Рівень загрози</h3>
+        <h3 className="text-gray-500 text-xs font-bold tracking-widest mb-6 uppercase">Рівень небезпеки</h3>
         
         <div className="flex flex-col gap-4">
           <ThreatLevel color="bg-green-500" label="НИЗЬКИЙ" />
