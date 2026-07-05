@@ -20,39 +20,45 @@ const PRIVATE_CHANNEL_TITLES = [
   'Труха⚡️Радар'
 ];
 
-const API_ID = Number(process.env.TELEGRAM_API_ID);
-const API_HASH = process.env.TELEGRAM_API_HASH;
-const SESSION_STRING = process.env.TELEGRAM_SESSION;
-const WEBHOOK_URL = process.env.WEBHOOK_URL || 'http://localhost:3001/api/webhooks/telegram';
-const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'your-super-secret-key';
+const apiId = parseInt(process.env.TELEGRAM_API_ID || '0');
+const apiHash = process.env.TELEGRAM_API_HASH || '';
+const sessionStr = process.env.TELEGRAM_SESSION || '';
 
-const readline = require('readline').createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-const question = (query: string) => new Promise((resolve) => readline.question(query, resolve));
-
-if (!API_ID || !API_HASH) {
-  console.error("Missing TELEGRAM_API_ID or TELEGRAM_API_HASH in .env. Exiting.");
+if (!apiId || !apiHash || !sessionStr) {
+  console.error("==================================================");
+  console.error("FATAL: Telegram credentials (TELEGRAM_API_ID, TELEGRAM_API_HASH, TELEGRAM_SESSION) are missing!");
+  console.error("The parser cannot start. Please add them to your Railway Variables.");
+  console.error("==================================================");
   process.exit(1);
 }
 
-const stringSession = new StringSession(SESSION_STRING || '');
-const client = new TelegramClient(stringSession, API_ID, API_HASH, {
+const stringSession = new StringSession(sessionStr);
+const WEBHOOK_URL = process.env.WEBHOOK_URL || 'http://localhost:3001/api/webhooks/telegram';
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'your-super-secret-key';
+
+const client = new TelegramClient(stringSession, apiId, apiHash, {
   connectionRetries: 5,
 });
 
 async function start() {
   console.log("Starting Telegram Parser Microservice...");
-  try {
-    await client.start({
-      phoneNumber: async () => (await question('Please enter your number (with +): ')) as string,
-      password: async () => (await question('Please enter your password (if 2FA enabled): ')) as string,
-      phoneCode: async () => (await question('Please enter the code you received: ')) as string,
-      onError: (err) => console.log(err),
-    });
-    console.log("Connected to Telegram successfully.");
-    if (!SESSION_STRING) {
+  
+  await client.start({
+    phoneNumber: async () => {
+      console.error("FATAL: Session invalid or expired. Cannot prompt for phone number on Railway!");
+      process.exit(1);
+      return '';
+    },
+    password: async () => '',
+    phoneCode: async () => '',
+    onError: (err) => {
+      console.log(err);
+      process.exit(1);
+    },
+  });
+  console.log("Connected to Telegram successfully.");
+
+    if (!sessionStr) {
       console.log('SAVE THIS SESSION STRING TO YOUR .env AS TELEGRAM_SESSION:');
       console.log(client.session.save());
       console.log('------------------------------------------------------------');
