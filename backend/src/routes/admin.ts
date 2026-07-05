@@ -111,19 +111,6 @@ router.delete('/threats/:id', async (req, res) => {
   }
 });
 
-// Clear all threats and reports (Temporary wipe endpoint)
-router.delete('/threats/clear/all', async (req, res) => {
-  try {
-    // Delete all threat objects (cascades to ThreatLocation)
-    await prisma.threatObject.deleteMany({});
-    // Delete all legacy reports
-    await prisma.report.deleteMany({});
-    res.json({ success: true, message: 'All targets wiped from DB' });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
 // Get API Logs
 router.get('/api-logs', async (req, res) => {
   try {
