@@ -126,9 +126,10 @@ export function parseTelegramText(text: string): ParsedThreat[] {
 
   if (!type) return [];
 
-  // Ignore summaries, historical data, and post-action reports
+  // Capture summaries and informational noise as a special ALERT type with null coordinates
+  // so it gets saved to the message history but doesn't spawn a map marker
   if (lowerText.match(/(збито|знищено|за добу|наслідки|втрати|підсумки|статистика|постраждал|загинул|відбій|ліквідаці|інформаці|зведення|уламк|загалом)/)) {
-      return [];
+      return [{ type: 'ALERT', lat: null, lng: null, confidence: 100, direction: null }];
   }
   
   // Filter out generic alerts that do not mention movement, takeoffs, or specific presence

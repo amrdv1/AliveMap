@@ -75,6 +75,28 @@ export default function SummaryView() {
           </div>
         </div>
 
+        {/* Textual Summaries */}
+        <div className="bg-[#070b14]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-xl">
+          <h2 className="text-xl font-bold text-white uppercase tracking-wider mb-6 flex items-center gap-2">
+            <Info className="text-purple-500 w-6 h-6" />
+            Останні зведення та статистика
+          </h2>
+          <div className="flex flex-col gap-4">
+            {messages.filter(m => m.tags.includes('SUMMARY') || m.text.toLowerCase().match(/(збито|знищено|за добу|наслідки|підсумки|статистика|ліквідаці|зведення|загалом)/)).slice(0, 5).map(msg => (
+              <div key={msg.id || Math.random().toString()} className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-purple-400 font-bold text-xs uppercase">{msg.channelName}</span>
+                  <span className="text-white/40 text-[10px] font-mono">{new Date(msg.timestamp).toLocaleString('uk-UA')}</span>
+                </div>
+                <p className="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+              </div>
+            ))}
+            {messages.filter(m => m.tags.includes('SUMMARY') || m.text.toLowerCase().match(/(збито|знищено|за добу|наслідки|підсумки|статистика|ліквідаці|зведення|загалом)/)).length === 0 && (
+              <div className="text-gray-500 text-sm italic py-4 text-center">За останній час зведень не надходило</div>
+            )}
+          </div>
+        </div>
+
       </div>
     </div>
   );

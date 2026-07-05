@@ -81,11 +81,23 @@ export async function startTelegramWorker(io: Server) {
         if (!parsedThreats || parsedThreats.length === 0) return; // Ignore generic alerts
         
         const channelDisplay = username || title || 'Monitoring';
+        const isSummary = parsedThreats.some(t => t.lat === null && t.lng === null);
+        const tags = isSummary ? ['SUMMARY'] : [parsedThreats[0].type];
 
-        // Forward raw message to frontend chat panel
-        io.emit('monitoring:new_message', { 
-            text, channelName: channelDisplay, timestamp: new Date(), tags: [parsedThreats[0].type] 
-        });
+        try {
+            const savedMsg = await prisma.monitoringMessage.create({
+                data: {
+                    text,
+                    channelName: channelDisplay,
+                    timestamp: new Date(message.date * 1000),
+                    tags
+                }
+            });
+            // Forward saved message to frontend chat panel
+            io.emit('monitoring:new_message', savedMsg);
+        } catch (e) {
+            console.error("Failed to save monitoring message", e);
+        }
 
         // Add all matched targets to map
         for (const parsed of parsedThreats) {
@@ -121,6 +133,7 @@ export async function startTelegramWorker(io: Server) {
                 }
             }
         });
+        await prisma.monitoringMessage.deleteMany({});
         const dialogs = await client.getDialogs();
         
         for (const dialog of dialogs) {
@@ -138,6 +151,22 @@ export async function startTelegramWorker(io: Server) {
                     const parsedThreats = parseTelegramText(message.message);
                     if (!parsedThreats || parsedThreats.length === 0) continue;
                     
+                    const channelDisplay = username || title || 'Monitoring';
+                    const isSummary = parsedThreats.some(t => t.lat === null && t.lng === null);
+                    const tags = isSummary ? ['SUMMARY'] : [parsedThreats[0].type];
+
+                    try {
+                        const savedMsg = await prisma.monitoringMessage.create({
+                            data: {
+                                text: message.message,
+                                channelName: channelDisplay,
+                                timestamp: new Date(message.date * 1000),
+                                tags
+                            }
+                        });
+                        io.emit('monitoring:new_message', savedMsg);
+                    } catch (e) {}
+
                     for (const parsed of parsedThreats) {
                         if (parsed.lat !== null && parsed.lng !== null) {
                             const savedThreat = await processExternalThreat(

@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react';
 import dynamic from 'next/dynamic';
 import { useStore } from '@/store/useStore';
 import Sidebar from '@/components/Sidebar';
@@ -19,7 +20,16 @@ const Map = dynamic(() => import('@/components/Map'), {
 });
 
 export default function Home() {
-  const { activeTab } = useStore();
+  const { activeTab, setMessages } = useStore();
+
+  React.useEffect(() => {
+    fetch('/api/messages')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setMessages(data);
+      })
+      .catch(console.error);
+  }, [setMessages]);
 
   return (
     <main className="relative h-[100dvh] w-screen overflow-hidden font-sans text-white bg-black">

@@ -3,16 +3,7 @@ import { useStore } from '../store/useStore';
 import { Search, X, Activity } from 'lucide-react';
 
 export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
-  const { messages, setMessages } = useStore();
-
-  useEffect(() => {
-    fetch('/api/messages')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setMessages(data);
-      })
-      .catch(console.error);
-  }, [setMessages]);
+  const { messages } = useStore();
 
   return (
     <div className={`flex flex-col bg-[#010a1b] border border-white/5 font-sans overflow-hidden shadow-2xl ${
