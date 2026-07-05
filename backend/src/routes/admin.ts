@@ -90,6 +90,28 @@ router.put('/threats/:id', async (req, res) => {
   }
 });
 
+// Delete ALL threats (Clear DB)
+router.delete('/threats/clear-all', async (req, res) => {
+  try {
+    await prisma.threatLocation.deleteMany({});
+    await prisma.threatObject.deleteMany({});
+    
+    await prisma.changeLog.create({
+      data: {
+        userId: 'admin',
+        entity: 'ThreatObject',
+        entityId: 'ALL',
+        action: 'DELETE',
+        oldData: 'Deleted all threats'
+      }
+    });
+
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Manual delete
 router.delete('/threats/:id', async (req, res) => {
   const { id } = req.params;

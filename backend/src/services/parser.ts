@@ -137,10 +137,13 @@ export function parseTelegramText(text: string): ParsedThreat[] {
       return [];
   }
 
-  // Must contain an active action word, or a direct pointing word like "на" (e.g., "КАБ на Харків")
-  if (!lowerText.match(/(летить|рух|зліт|пуск|напрямок|загроза|фіксує|повітрі|пускові|курс|вибух|атака|йде|на |до |увага|небезпека|відмічено)/)) {
+  // Filter out "negative" status updates (e.g., "no threats", "clear")
+  if (lowerText.match(/(немає|відсутні|відбій|спокійно|чисто|не активн|не зафіксовано|змінили курс)/)) {
       return [{ type: 'INFO', lat: null, lng: null, confidence: 100, direction: null }];
   }
+
+  // Strong action words indicating real threat movement or presence
+  const hasActionWord = lowerText.match(/(летить|рух|зліт|пуск|напрямок|загроза|фіксує|повітрі|пускові|курс|вибух|атака|йде|увага|небезпека|відмічено)/);
   
   const matchedLocations: {lat: number, lng: number, conf: number}[] = [];
   
@@ -163,6 +166,10 @@ export function parseTelegramText(text: string): ParsedThreat[] {
   
   // 3. Fallback: Assign default generic coordinates based on context
   if (matchedLocations.length === 0) {
+      if (!hasActionWord) {
+          return []; // Drop generic chatter
+      }
+
       if (type === 'AIRCRAFT') {
           matchedLocations.push({ lat: GENERIC_SPAWN.AIRCRAFT.lat, lng: GENERIC_SPAWN.AIRCRAFT.lng, conf: 50 });
       } else if (type === 'CRUISE_MISSILE' && lowerText.match(/(морі|море|ракетонос)/)) {
@@ -176,7 +183,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
       } else if (type === 'MISSILE' || type === 'BALLISTIC_MISSILE' || type === 'CRUISE_MISSILE') {
           matchedLocations.push({ lat: GENERIC_SPAWN.MISSILE.lat, lng: GENERIC_SPAWN.MISSILE.lng, conf: 50 });
       } else {
-          return []; 
+          return [{ type: 'INFO', lat: null, lng: null, confidence: 100, direction: null }]; 
       }
   }
   

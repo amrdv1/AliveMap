@@ -28,7 +28,11 @@ const CHANNELS = [
   'nablydatel_dozor',
   'krolevetsnews',
   'place_kharkiv',
-  'ukraineradar_24_7'
+  'ukraineradar_24_7',
+  'air_alert_ua',
+  'kievmap',
+  'truexanewsua',
+  'ukraine_alarm_bot'
 ];
 
 const PRIVATE_TITLES = [
