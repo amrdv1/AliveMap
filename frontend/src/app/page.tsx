@@ -34,9 +34,6 @@ export default function Home() {
           <div className="bg-[#070b14]/80 backdrop-blur-md rounded-2xl border border-gray-800/50 shadow-xl overflow-hidden flex-1 min-h-[150px]">
             <Sidebar />
           </div>
-          <div className="bg-[#070b14]/80 backdrop-blur-md rounded-2xl border border-gray-800/50 shadow-xl overflow-hidden shrink-0 h-72">
-            <LegendSidebar />
-          </div>
         </div>
 
         <StatsBottomPanel />

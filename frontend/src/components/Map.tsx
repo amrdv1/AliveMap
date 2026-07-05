@@ -201,7 +201,8 @@ export default function Map() {
 
     const fetchAlerts = async () => {
       try {
-        const res = await fetch('https://ubilling.net.ua/aerialalerts/');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const res = await fetch(`${apiUrl}/api/alerts`);
         const data = await res.json();
         if (data && data.states) {
           setAlerts(data.states);
@@ -272,10 +273,20 @@ export default function Map() {
         style={{ height: '100%', width: '100%', zIndex: 0 }}
         zoomControl={false}
       >
-        <TileLayer
-          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-          attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
-        />
+        <LayersControl position="topright">
+          <LayersControl.BaseLayer checked name="ALIVEMAP Dark">
+            <TileLayer
+              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            />
+          </LayersControl.BaseLayer>
+          <LayersControl.BaseLayer name="Satellite">
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
+            />
+          </LayersControl.BaseLayer>
+        </LayersControl>
         <div className="map-overlay" />
         <ZoomControl position="bottomright" />
 

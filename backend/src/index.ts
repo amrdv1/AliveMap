@@ -37,6 +37,17 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/webhooks', webhookRoutes);
 
+app.get('/api/alerts', async (req, res) => {
+  try {
+    const response = await fetch('https://ubilling.net.ua/aerialalerts/');
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Failed to proxy alerts:', error);
+    res.status(500).json({ error: 'Failed to fetch alerts' });
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
