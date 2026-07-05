@@ -1,5 +1,5 @@
 export interface ParsedThreat {
-  type: 'DRONE' | 'MISSILE' | 'AIRCRAFT' | 'ALERT' | 'BALLISTIC_MISSILE' | 'CRUISE_MISSILE' | 'KAB' | 'SUMMARY' | 'INFO';
+  type: 'DRONE' | 'MISSILE' | 'AIRCRAFT' | 'ALERT' | 'BALLISTIC_MISSILE' | 'CRUISE_MISSILE' | 'KAB' | 'SUMMARY' | 'INFO' | 'ZIRCON' | 'PPO';
   lat: number | null;
   lng: number | null;
   confidence: number;
