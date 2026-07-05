@@ -77,11 +77,11 @@ export async function startTelegramWorker(io: Server) {
                 parsed.type as any,
                 parsed.lat,
                 parsed.lng,
-                parsed.course || null,
-                parsed.speed || null,
-                confidence,
+                new Date(),
                 sourceId,
-                text
+                null,
+                parsed.direction,
+                confidence
             );
             if (savedThreat) {
                 io.emit('threat:update', savedThreat);
@@ -111,12 +111,12 @@ export async function startTelegramWorker(io: Server) {
                 const messages = await client.getMessages(dialog.entity, { limit: 10 });
                 for (const message of messages.reverse()) {
                     if (!message || !message.message) continue;
-                    const parsedThreat = parseTelegramText(message.message);
-                    if (parsedThreat.lat !== null && parsedThreat.lng !== null) {
+                    const parsed = parseTelegramText(message.message);
+                    if (parsed && parsed.lat !== null && parsed.lng !== null) {
                         const savedThreat = await processExternalThreat(
-                            null, parsedThreat.type as any, parsedThreat.lat, parsedThreat.lng,
+                            null, parsed.type as any, parsed.lat, parsed.lng,
                             new Date((message.date || Math.floor(Date.now()/1000)) * 1000),
-                            sourceId, null, parsedThreat.direction, parsedThreat.confidence / 100
+                            sourceId, null, parsed.direction, parsed.confidence / 100
                         );
                         if (savedThreat) io.emit('threat:update', savedThreat);
                     }
