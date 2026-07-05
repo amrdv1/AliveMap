@@ -23,13 +23,18 @@ const CHANNELS = [
   'deraketaua'
 ];
 
+const PRIVATE_TITLES = [
+  'НЕПТУН',
+  'Труха ⚡️ Радар'
+];
+
 export async function startTelegramWorker(io: Server) {
   const apiId = Number(process.env.TELEGRAM_API_ID);
   const apiHash = process.env.TELEGRAM_API_HASH;
   const sessionString = process.env.TELEGRAM_SESSION;
 
   if (!apiId || !apiHash || !sessionString) {
-    console.log("Telegram credentials missing in .env. Telegram worker is disabled.");
+    console.error("Telegram credentials missing. Telegram worker disabled.");
     return;
   }
 
@@ -40,7 +45,10 @@ export async function startTelegramWorker(io: Server) {
 
   try {
     await client.connect();
-    console.log("Telegram Userbot connected successfully. Listening to monitoring channels...");
+    console.log("Connected to Telegram using string session.");
+
+    const me = await client.getMe();
+    console.log(`Logged in as: ${me.username || me.id}`);
 
     let source = await prisma.source.findFirst({ where: { name: 'Telegram Worker' } });
     if (!source) {
@@ -51,6 +59,7 @@ export async function startTelegramWorker(io: Server) {
         }
       });
     }
+
     const sourceId = source.id;
 
     client.addEventHandler(async (event: NewMessageEvent) => {
@@ -61,15 +70,21 @@ export async function startTelegramWorker(io: Server) {
       if (!chat) return;
       
       const username = 'username' in chat && chat.username ? chat.username.toLowerCase() : null;
+      const title = 'title' in chat && chat.title ? chat.title : null;
       
-      if (username && CHANNELS.some(c => c.toLowerCase() === username)) {
+      const isPublicMatch = username && CHANNELS.some(c => c.toLowerCase() === username);
+      const isPrivateMatch = title && PRIVATE_TITLES.some(t => title.includes(t));
+      
+      if (isPublicMatch || isPrivateMatch) {
         const text = message.message;
         const parsedThreats = parseTelegramText(text);
         if (!parsedThreats || parsedThreats.length === 0) return; // Ignore generic alerts
         
+        const channelDisplay = username || title || 'Monitoring';
+
         // Forward raw message to frontend chat panel
         io.emit('monitoring:new_message', { 
-            text, channelName: username, timestamp: new Date(), tags: [parsedThreats[0].type] 
+            text, channelName: channelDisplay, timestamp: new Date(), tags: [parsedThreats[0].type] 
         });
 
         // Add all matched targets to map
@@ -89,7 +104,7 @@ export async function startTelegramWorker(io: Server) {
               );
             if (savedThreat) {
                 io.emit('threat:update', savedThreat);
-                console.log(`Telegram Threat Detected: ${parsed.type} at [${parsed.lat}, ${parsed.lng}] from ${username}`);
+                console.log(`Telegram Threat Detected: ${parsed.type} at [${parsed.lat}, ${parsed.lng}] from ${channelDisplay}`);
             }
           }
         }
@@ -111,8 +126,12 @@ export async function startTelegramWorker(io: Server) {
         for (const dialog of dialogs) {
             if (!dialog.entity) continue;
             const username = 'username' in dialog.entity && dialog.entity.username ? dialog.entity.username.toLowerCase() : null;
+            const title = 'title' in dialog.entity && dialog.entity.title ? dialog.entity.title : null;
             
-            if (username && CHANNELS.some(c => c.toLowerCase() === username)) {
+            const isPublicMatch = username && CHANNELS.some(c => c.toLowerCase() === username);
+            const isPrivateMatch = title && PRIVATE_TITLES.some(t => title.includes(t));
+            
+            if (isPublicMatch || isPrivateMatch) {
                 const messages = await client.getMessages(dialog.entity, { limit: 10 });
                 for (const message of messages.reverse()) {
                     if (!message || !message.message) continue;
@@ -137,7 +156,7 @@ export async function startTelegramWorker(io: Server) {
         console.error("History fetch error:", e);
     }
 
-  } catch (err) {
-    console.error("Failed to start Telegram Worker:", err);
+  } catch (error) {
+    console.error("Error starting Telegram worker:", error);
   }
 }
