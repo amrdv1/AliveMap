@@ -17,8 +17,7 @@ export async function startAlertsWorker(io: Server) {
 
     console.log("Official Alerts Worker started...");
 
-    // Poll ubilling.net.ua open API for active alerts map
-    setInterval(async () => {
+    const fetchAlerts = async () => {
         try {
             const { data } = await axios.get('https://ubilling.net.ua/aerialalerts/', { timeout: 10000 });
             if (data && data.states) {
@@ -29,5 +28,9 @@ export async function startAlertsWorker(io: Server) {
         } catch (error) {
             console.error("Error polling official alerts API (can be ignored if network is down)");
         }
-    }, 30000); // every 30 seconds
+    };
+
+    // Poll ubilling.net.ua open API for active alerts map every 5 seconds
+    fetchAlerts();
+    setInterval(fetchAlerts, 5000);
 }
