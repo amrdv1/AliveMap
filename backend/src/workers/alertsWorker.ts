@@ -19,16 +19,20 @@ export async function startAlertsWorker(io: Server) {
 
     const fetchAlerts = async () => {
         try {
-            const ALERTS_API_URL = 'https://ubilling.net.ua/aerialalerts/';
+            const ALERTS_API_URL = 'https://siren.pp.ua/api/v3/alerts';
             const { data } = await axios.get(ALERTS_API_URL, { timeout: 10000 });
-            if (data && data.states) {
-                const formattedStates: Record<string, { alertnow: boolean }> = {};
-                for (const [region, alertData] of Object.entries(data.states)) {
-                    // ubilling returns an object { alertnow: true/false, changed: ... }
-                    if ((alertData as any)?.alertnow === true) {
-                        formattedStates[region] = { alertnow: true };
+            
+            const formattedStates: Record<string, { alertnow: boolean, regionType?: string }> = {};
+            if (Array.isArray(data)) {
+                data.forEach((region: any) => {
+                    const hasAirAlert = region.activeAlerts?.some((a: any) => a.type === 'AIR');
+                    if (hasAirAlert) {
+                        formattedStates[region.regionName] = { 
+                            alertnow: true,
+                            regionType: region.regionType 
+                        };
                     }
-                }
+                });
                 io.emit('alerts:sync', formattedStates);
             }
         } catch (error) {

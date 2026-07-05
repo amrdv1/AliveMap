@@ -171,6 +171,7 @@ export default function Map() {
   const [mounted, setMounted] = useState(false);
   const [alerts, setAlerts] = useState<Record<string, any>>({});
   const [geoData, setGeoData] = useState<any>(null);
+  const [geoDataDistricts, setGeoDataDistricts] = useState<any>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -178,6 +179,11 @@ export default function Map() {
     fetch('/ukraine.geojson')
       .then(res => res.json())
       .then(data => setGeoData(data))
+      .catch(console.error);
+
+    fetch('/ukraine-districts.geojson')
+      .then(res => res.json())
+      .then(data => setGeoDataDistricts(data))
       .catch(console.error);
     
     const fetchThreats = async () => {
@@ -206,11 +212,7 @@ export default function Map() {
     });
 
     socket.on('alerts:sync', (states: any) => {
-      const statesMap: Record<string, any> = {};
-      for (const [regionName, alertData] of Object.entries(states)) {
-        statesMap[regionName] = { alertnow: (alertData as any)?.alertnow === true };
-      }
-      setAlerts(statesMap);
+      setAlerts(states);
     });
 
     const fetchAlerts = async () => {
@@ -218,12 +220,8 @@ export default function Map() {
         // Fetch from our Next.js API route which uses allorigins
         const res = await fetch('/api/alerts');
         const data = await res.json();
-        const statesMap: Record<string, any> = {};
         if (data && data.states) {
-          for (const [regionName, alertData] of Object.entries(data.states)) {
-            statesMap[regionName] = { alertnow: (alertData as any)?.alertnow === true };
-          }
-          setAlerts(statesMap);
+          setAlerts(data.states);
         }
       } catch (e) {
         console.error('Failed to fetch alerts', e);
@@ -307,15 +305,17 @@ export default function Map() {
           <AnimatedMarker key={threat.id} threat={threat} getIcon={getIcon} />
         ))}
 
+      {/* State level alarms */}
       {geoData && (
         <GeoJSON 
-          key={`geojson-${Object.keys(alerts).filter(k => alerts[k]?.alertnow).join('-')}`}
+          key={`geojson-states-${Object.keys(alerts).filter(k => alerts[k]?.alertnow && (!alerts[k]?.regionType || alerts[k]?.regionType === 'State')).join('-')}`}
           data={geoData}
           style={(feature) => {
             const regionName = feature?.properties?.name;
             const isActive = Object.keys(alerts).some(
               (alertRegion) => 
                 alerts[alertRegion]?.alertnow === true && 
+                (!alerts[alertRegion]?.regionType || alerts[alertRegion]?.regionType === 'State') &&
                 REGION_NAME_MAP[alertRegion] === regionName
             );
             
@@ -324,7 +324,30 @@ export default function Map() {
               weight: isActive ? 2 : 1,
               fillColor: isActive ? '#ef4444' : '#000000',
               fillOpacity: isActive ? 0.45 : 0.05,
+            };
+          }}
+        />
+      )}
 
+      {/* District level alarms */}
+      {geoDataDistricts && (
+        <GeoJSON 
+          key={`geojson-districts-${Object.keys(alerts).filter(k => alerts[k]?.alertnow && alerts[k]?.regionType === 'District').join('-')}`}
+          data={geoDataDistricts}
+          style={(feature) => {
+            const rayonName = feature?.properties?.rayon;
+            const isActive = Object.keys(alerts).some(
+              (alertRegion) => 
+                alerts[alertRegion]?.alertnow === true && 
+                alerts[alertRegion]?.regionType === 'District' &&
+                alertRegion === rayonName
+            );
+            
+            return {
+              color: isActive ? '#ef4444' : 'transparent',
+              weight: isActive ? 2 : 0,
+              fillColor: isActive ? '#ef4444' : 'transparent',
+              fillOpacity: isActive ? 0.6 : 0,
             };
           }}
         />
