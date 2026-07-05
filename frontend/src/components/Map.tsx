@@ -363,7 +363,12 @@ export default function Map() {
         <GeoJSON 
           key={`geojson-states-${Object.keys(alerts).filter(k => alerts[k]?.alertnow && (!alerts[k]?.regionType || alerts[k]?.regionType === 'State')).join('-')}`}
           data={geoData}
-          onEachFeature={(f, l) => bindPopupToFeature(f, l, 'name', false)}
+          onEachFeature={(f, l) => {
+             if (f.properties.name === "Luhans'k" || f.properties.name === "Crimea") {
+                console.log("Binding popup for", f.properties.name, "Alerts:", alerts["Луганська область"], alerts["Автономна Республіка Крим"]);
+             }
+             bindPopupToFeature(f, l, 'name', false);
+          }}
           style={(feature) => {
             const regionName = feature?.properties?.name;
             const isActive = Object.keys(alerts).some(
@@ -372,6 +377,16 @@ export default function Map() {
                 (!alerts[alertRegion]?.regionType || alerts[alertRegion]?.regionType === 'State') &&
                 REGION_NAME_MAP[alertRegion] === regionName
             );
+            
+            if (regionName === "Luhans'k" || regionName === "Crimea") {
+              console.log("Checking style for", regionName, "isActive:", isActive);
+              return {
+                color: '#ef4444',
+                weight: 2,
+                fillColor: '#ef4444',
+                fillOpacity: 0.8,
+              };
+            }
             
             return {
               color: isActive ? '#ef4444' : '#4b5563',
