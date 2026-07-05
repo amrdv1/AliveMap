@@ -161,6 +161,21 @@ function AnimatedMarker({ threat, getIcon }: { threat: any, getIcon: any }) {
     predictedPath = [[lat1, lon1], [lat2Rad * 180 / Math.PI, lon2Rad * 180 / Math.PI]];
   }
 
+const translateType = (type: string) => {
+  switch(type) {
+    case 'DRONE': return 'Шахед / БПЛА';
+    case 'CRUISE_MISSILE': return 'Крилата Ракета';
+    case 'BALLISTIC_MISSILE': return 'Балістика';
+    case 'MISSILE': return 'Ракета';
+    case 'AIRCRAFT': return 'Тактична Авіація';
+    case 'KAB': return 'КАБ / ФАБ';
+    case 'ZIRCON': return 'Гіперзвукова (Циркон)';
+    case 'RECON': return 'Розвідник';
+    case 'PPO': return 'ППО';
+    default: return type;
+  }
+};
+
   return (
     <>
       {pathPositions.length > 1 && (
@@ -187,13 +202,13 @@ function AnimatedMarker({ threat, getIcon }: { threat: any, getIcon: any }) {
       <Marker ref={markerRef} position={[currentLoc.lat, currentLoc.lng]} icon={getIcon(threat.type, threat.course, threat.confidence, threat.quantity)}>
         <Popup className="custom-popup">
           <div className="font-sans">
-            <div className="font-bold text-lg mb-1">{threat.type} {threat.quantity > 1 ? `(x${threat.quantity})` : ''}</div>
-            <div className="text-sm opacity-80 mb-2">Confidence: {(threat.confidence * 100).toFixed(0)}%</div>
+            <div className="font-bold text-lg mb-1">{translateType(threat.type)} {threat.quantity > 1 ? `(x${threat.quantity})` : ''}</div>
+            <div className="text-sm opacity-80 mb-2">Імовірність: {(threat.confidence * 100).toFixed(0)}%</div>
             {threat.targetName && <div className="text-sm text-red-500 font-bold mb-1">Ціль: {threat.targetName}</div>}
-            {threat.speed && <div className="text-sm">Speed: {threat.speed.toFixed(0)} km/h</div>}
-            {threat.course && <div className="text-sm">Course: {threat.course.toFixed(0)}°</div>}
+            {threat.speed && <div className="text-sm">Швидкість: {threat.speed.toFixed(0)} км/год</div>}
+            {threat.course && <div className="text-sm">Курс: {threat.course.toFixed(0)}°</div>}
             <div className="text-xs opacity-50 mt-2">
-              Updated: {new Date(currentLoc.time).toLocaleTimeString()}
+              Оновлено: {new Date(currentLoc.time).toLocaleTimeString()}
             </div>
           </div>
         </Popup>

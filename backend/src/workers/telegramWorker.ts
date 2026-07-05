@@ -167,17 +167,34 @@ export async function startTelegramWorker(io: Server) {
                     const channelDisplay = username || title || 'Monitoring';
                     const tags = [parsedThreats[0].type];
 
-                    try {
-                        const savedMsg = await prisma.monitoringMessage.create({
-                            data: {
-                                text: message.message,
-                                channelName: channelDisplay,
-                                timestamp: new Date(message.date * 1000),
-                                tags
+                    // Check if message is fresh enough for monitoring panel (< 12 hours old)
+                    const isFreshMonitoring = (Date.now() - msgTime) < 12 * 60 * 60 * 1000;
+
+                    if (isFreshMonitoring) {
+                        try {
+                            // Check if exact same message already exists
+                            const existing = await prisma.monitoringMessage.findFirst({
+                                where: { 
+                                    text: message.message,
+                                    timestamp: new Date(message.date * 1000)
+                                }
+                            });
+
+                            if (!existing) {
+                                const savedMsg = await prisma.monitoringMessage.create({
+                                    data: {
+                                        text: message.message,
+                                        channelName: channelDisplay,
+                                        timestamp: new Date(message.date * 1000),
+                                        tags
+                                    }
+                                });
+                                io.emit('monitoring:new_message', savedMsg);
                             }
-                        });
-                        io.emit('monitoring:new_message', savedMsg);
-                    } catch (e) {}
+                        } catch (e) {
+                            console.error('Failed to save monitoring message:', e);
+                        }
+                    }
 
                     // Only spawn threats on the map if the message is fresh (< 30 minutes old)
                     const isFresh = (Date.now() - msgTime) < 30 * 60 * 1000;

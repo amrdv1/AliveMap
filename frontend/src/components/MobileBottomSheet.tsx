@@ -25,11 +25,15 @@ export default function MobileBottomSheet() {
         
         <div className="flex-1">
           <h2 className="text-xl font-bold text-white tracking-wide">
-            {selectedThreat.type === 'DRONE' ? 'Shahed-136' : 
-             selectedThreat.type === 'CRUISE_MISSILE' ? 'Крилата ракета' : 
-             selectedThreat.type === 'BALLISTIC_MISSILE' ? 'Балістична ракета' :
-             selectedThreat.type === 'KAB' ? 'КАБ' :
-             selectedThreat.type === 'AIRCRAFT' ? 'Літак МіГ-31К' : selectedThreat.type}
+            {selectedThreat.type === 'DRONE' ? 'Шахед / БПЛА' : 
+             selectedThreat.type === 'CRUISE_MISSILE' ? 'Крилата Ракета' : 
+             selectedThreat.type === 'BALLISTIC_MISSILE' ? 'Балістика' :
+             selectedThreat.type === 'MISSILE' ? 'Ракета' :
+             selectedThreat.type === 'KAB' ? 'КАБ / ФАБ' :
+             selectedThreat.type === 'AIRCRAFT' ? 'Тактична Авіація' :
+             selectedThreat.type === 'ZIRCON' ? 'Гіперзвукова (Циркон)' :
+             selectedThreat.type === 'PPO' ? 'ППО' :
+             selectedThreat.type === 'RECON' ? 'Розвідник' : selectedThreat.type}
           </h2>
           <p className="text-sm text-gray-400">
             Україна

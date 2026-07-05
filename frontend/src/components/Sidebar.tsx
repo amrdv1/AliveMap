@@ -101,11 +101,15 @@ export default function Sidebar() {
               
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-semibold text-white/90 truncate">
-                  {threat.type === 'DRONE' ? 'Shahed-136' : 
-                   threat.type === 'CRUISE_MISSILE' ? 'Крилата ракета' : 
-                   threat.type === 'BALLISTIC_MISSILE' ? 'Балістична ракета' :
-                   threat.type === 'KAB' ? 'КАБ' :
-                   threat.type === 'AIRCRAFT' ? 'Військовий борт' : threat.type}
+                  {threat.type === 'DRONE' ? 'Шахед / БПЛА' : 
+                   threat.type === 'CRUISE_MISSILE' ? 'Крилата Ракета' : 
+                   threat.type === 'BALLISTIC_MISSILE' ? 'Балістика' :
+                   threat.type === 'MISSILE' ? 'Ракета' :
+                   threat.type === 'KAB' ? 'КАБ / ФАБ' :
+                   threat.type === 'AIRCRAFT' ? 'Тактична Авіація' :
+                   threat.type === 'ZIRCON' ? 'Гіперзвукова (Циркон)' :
+                   threat.type === 'PPO' ? 'ППО' :
+                   threat.type === 'RECON' ? 'Розвідник' : threat.type}
                 </div>
                 {locationName && (
                   <div className="text-[10px] text-white/50 font-medium truncate mt-0.5">
