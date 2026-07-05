@@ -22,17 +22,16 @@ const getIcon = (type: string, direction?: number | null) => {
   if (isDrone || isMissile) {
     const rot = direction || 0;
     const imgUrl = isDrone ? '/icons/drone.png' : '/icons/missile.png';
-    const shadowColor = isDrone ? 'rgba(255, 255, 0, 0.8)' : 'rgba(255, 0, 0, 0.8)';
     const arrowColor = isDrone ? '#ffff00' : '#ff0000';
     
     return L.divIcon({
       className: 'custom-div-icon',
-      html: `<div style="transform: rotate(${rot}deg); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; position: relative;">
-          <img src="${imgUrl}" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 8px ${shadowColor});" />
-          <div style="position: absolute; top: -12px; width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 12px solid ${arrowColor}; filter: drop-shadow(0 0 5px ${arrowColor})"></div>
+      html: `<div style="transform: rotate(${rot}deg); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; position: relative;">
+          <img src="${imgUrl}" style="width: 100%; height: 100%; object-fit: contain;" />
+          <div style="position: absolute; top: -8px; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 8px solid ${arrowColor};"></div>
         </div>`,
-      iconSize: [48, 48],
-      iconAnchor: [24, 24],
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
     });
   }
   
