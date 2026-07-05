@@ -25,21 +25,35 @@ const getIcon = (type: string, direction: number | undefined) => {
   if (isDrone || isMissile || isBallistic || isKab || isAircraft) {
     const rot = direction || 0;
     
-    let imgUrl = '/icons/drone.png';
-    let arrowColor = '#ffff00';
-    if (isMissile) { imgUrl = '/icons/missile.png'; arrowColor = '#ff0000'; }
-    if (isBallistic) { imgUrl = '/icons/ballistic.png'; arrowColor = '#ff8800'; }
-    if (isKab) { imgUrl = '/icons/kab.png'; arrowColor = '#aa00ff'; }
-    if (isAircraft) { imgUrl = '/icons/aircraft.png'; arrowColor = '#0088ff'; }
+    let svgIcon = '';
+    let colorClass = 'text-red-500';
+    let ringColor = 'rgba(239, 68, 68, 0.5)';
+    
+    if (isDrone) {
+      svgIcon = `<div class="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[16px] border-l-transparent border-r-transparent border-b-red-500"></div>`;
+    } else if (isMissile) {
+      svgIcon = `<div class="w-2 h-5 bg-red-500 relative before:content-[''] before:absolute before:-top-1.5 before:left-0 before:w-0 before:h-0 before:border-l-[4px] before:border-r-[4px] before:border-b-[6px] before:border-l-transparent before:border-r-transparent before:border-b-red-500"></div>`;
+    } else if (isBallistic) {
+      svgIcon = `<div class="w-2.5 h-6 bg-orange-500 relative before:content-[''] before:absolute before:-top-2 before:left-0 before:w-0 before:h-0 before:border-l-[5px] before:border-r-[5px] before:border-b-[8px] before:border-l-transparent before:border-r-transparent before:border-b-orange-500"></div>`;
+      ringColor = 'rgba(249, 115, 22, 0.5)';
+    } else if (isKab) {
+      svgIcon = `<div class="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[16px] border-l-transparent border-r-transparent border-b-purple-500"></div>`;
+      ringColor = 'rgba(168, 85, 247, 0.5)';
+    } else if (isAircraft) {
+      svgIcon = `<div class="w-6 h-6 bg-blue-500" style="clip-path: polygon(50% 0%, 100% 100%, 50% 80%, 0% 100%)"></div>`;
+      ringColor = 'rgba(59, 130, 246, 0.5)';
+    }
     
     return L.divIcon({
       className: 'custom-div-icon',
-      html: `<div style="transform: rotate(${rot}deg); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; position: relative;">
-          <img src="${imgUrl}" style="width: 100%; height: 100%; object-fit: contain;" />
-          <div style="position: absolute; top: -8px; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-bottom: 8px solid ${arrowColor};"></div>
-        </div>`,
-      iconSize: [28, 28],
-      iconAnchor: [14, 14],
+      html: `<div style="position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+               <div class="radar-pulse" style="--ring-color: ${ringColor}"></div>
+               <div style="transform: rotate(${rot}deg); z-index: 10; filter: drop-shadow(0 0 8px ${ringColor});">
+                 ${svgIcon}
+               </div>
+             </div>`,
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
     });
   }
   
@@ -142,48 +156,74 @@ export default function Map() {
   );
 
   return (
-    <MapContainer 
-      center={[48.3794, 31.1656]} 
-      zoom={6} 
-      className="w-full h-full z-0"
-      zoomControl={false}
-    >
-      <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-      />
-      <ZoomControl position="bottomright" />
-      
-      {filteredThreats.map((threat) => {
-        const currentLoc = threat.locations[0];
-        if (!currentLoc) return null;
-        
-        const pathPositions: [number, number][] = threat.locations.map(l => [l.lat, l.lng]);
-        
-        let predictedPath: [number, number][] = [];
-        if (threat.speed && threat.course) {
-          const lat1 = currentLoc.lat;
-          const lon1 = currentLoc.lng;
-          const d = (threat.speed / 60) * 10; 
-          const R = 6371; 
-          const brng = threat.course * Math.PI / 180;
-          const lat1Rad = lat1 * Math.PI / 180;
-          const lon1Rad = lon1 * Math.PI / 180;
-          
-          const lat2Rad = Math.asin(Math.sin(lat1Rad)*Math.cos(d/R) + Math.cos(lat1Rad)*Math.sin(d/R)*Math.cos(brng));
-          const lon2Rad = lon1Rad + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(lat1Rad), Math.cos(d/R)-Math.sin(lat1Rad)*Math.sin(lat2Rad));
-          
-          predictedPath = [[lat1, lon1], [lat2Rad * 180 / Math.PI, lon2Rad * 180 / Math.PI]];
+    <>
+      <style dangerouslySetInnerHTML={{__html: `
+        .leaflet-container { background: #050a14 !important; }
+        .radar-pulse {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          box-shadow: 0 0 0 0 var(--ring-color);
+          animation: pulse-ring 2s infinite cubic-bezier(0.66, 0, 0, 1);
         }
+        @keyframes pulse-ring {
+          to {
+            box-shadow: 0 0 0 40px rgba(255, 0, 0, 0);
+          }
+        }
+        .custom-popup .leaflet-popup-content-wrapper {
+          background: #0a0f18;
+          color: white;
+          border: 1px solid #1f2937;
+          border-radius: 8px;
+        }
+        .custom-popup .leaflet-popup-tip {
+          background: #0a0f18;
+        }
+      `}} />
+      <MapContainer 
+        center={[48.3794, 31.1656]} 
+        zoom={6} 
+        style={{ height: '100%', width: '100%', zIndex: 0 }}
+        zoomControl={false}
+      >
+        <TileLayer
+          url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        />
+        <ZoomControl position="bottomright" />
         
-        return (
-          <div key={threat.id}>
-            {pathPositions.length > 1 && (
-              <Polyline positions={pathPositions} pathOptions={{ color: 'red', weight: 2, opacity: 0.5 }} />
-            )}
-            {predictedPath.length > 0 && (
-              <Polyline positions={predictedPath} pathOptions={{ color: 'orange', weight: 2, dashArray: '5, 5' }} />
-            )}
+        {filteredThreats.map((threat) => {
+          const currentLoc = threat.locations[0];
+          if (!currentLoc) return null;
+          
+          const pathPositions: [number, number][] = threat.locations.map(l => [l.lat, l.lng]);
+          
+          let predictedPath: [number, number][] = [];
+          if (threat.speed && threat.course) {
+            const lat1 = currentLoc.lat;
+            const lon1 = currentLoc.lng;
+            const d = (threat.speed / 60) * 10; 
+            const R = 6371; 
+            const brng = threat.course * Math.PI / 180;
+            const lat1Rad = lat1 * Math.PI / 180;
+            const lon1Rad = lon1 * Math.PI / 180;
+            
+            const lat2Rad = Math.asin(Math.sin(lat1Rad)*Math.cos(d/R) + Math.cos(lat1Rad)*Math.sin(d/R)*Math.cos(brng));
+            const lon2Rad = lon1Rad + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(lat1Rad), Math.cos(d/R)-Math.sin(lat1Rad)*Math.sin(lat2Rad));
+            
+            predictedPath = [[lat1, lon1], [lat2Rad * 180 / Math.PI, lon2Rad * 180 / Math.PI]];
+          }
+          
+          return (
+            <div key={threat.id}>
+              {pathPositions.length > 1 && (
+                <Polyline positions={pathPositions} pathOptions={{ color: '#e63946', weight: 2, opacity: 0.8, dashArray: '5, 10' }} />
+              )}
+              {predictedPath.length > 0 && (
+                <Polyline positions={predictedPath} pathOptions={{ color: '#ffb703', weight: 2, dashArray: '4, 8', opacity: 0.6 }} />
+              )}
             <Marker 
               position={[currentLoc.lat, currentLoc.lng]}
               icon={getIcon(threat.type, threat.course)}
@@ -225,5 +265,6 @@ export default function Map() {
         />
       )}
     </MapContainer>
+    </>
   );
 }

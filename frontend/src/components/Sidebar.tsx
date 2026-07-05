@@ -5,60 +5,63 @@ import { Settings, Filter, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Sidebar() {
-  const { threats, filters, setFilter } = useStore();
+  const { threats } = useStore();
 
-  const activeThreats = threats.filter(t => t.status === 'ACTIVE');
-  const dronesCount = activeThreats.filter(t => t.type === 'DRONE').length;
-  const missilesCount = activeThreats.filter(t => t.type === 'MISSILE' || t.type === 'CRUISE_MISSILE' || t.type === 'BALLISTIC_MISSILE').length;
-  const kabCount = activeThreats.filter(t => t.type === 'KAB').length;
+  const activeThreats = threats.filter(t => t.status === 'ACTIVE').slice(0, 20);
 
   return (
-    <div className="w-80 h-full bg-[#0a0f18] text-white p-4 border-r border-gray-800 flex flex-col z-20 shadow-2xl overflow-y-auto">
-      <div className="mb-6">
-        <h2 className="text-xl font-bold mb-4 tracking-wider flex items-center">
-          <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-          LIVE FEED
-        </h2>
-        
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          <div className="bg-[#121a28] p-2 rounded text-center border border-gray-800">
-            <div className="text-2xl font-bold text-yellow-500">{dronesCount}</div>
-            <div className="text-xs text-gray-500">UAVs</div>
-          </div>
-          <div className="bg-[#121a28] p-2 rounded text-center border border-gray-800">
-            <div className="text-2xl font-bold text-red-500">{missilesCount}</div>
-            <div className="text-xs text-gray-500">Missiles</div>
-          </div>
-          <div className="bg-[#121a28] p-2 rounded text-center border border-gray-800">
-            <div className="text-2xl font-bold text-purple-500">{kabCount}</div>
-            <div className="text-xs text-gray-500">KABs</div>
-          </div>
-        </div>
-      </div>
+    <div className="hidden lg:flex w-72 h-full bg-[#070b14]/90 backdrop-blur-md border-l border-gray-800/50 flex-col z-20 text-white shadow-2xl overflow-y-auto custom-scrollbar p-6">
+      <h3 className="text-gray-500 text-xs font-bold tracking-widest mb-6 uppercase flex items-center gap-2">
+        АКТИВНІ ЦІЛІ
+        <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+      </h3>
 
-      <div className="flex-grow flex flex-col gap-3">
-        {threats.slice(0, 50).map(threat => (
-          <div key={threat.id} className="bg-[#121a28] rounded p-3 text-sm border border-gray-800 hover:border-gray-600 transition-colors">
-            <div className="flex justify-between items-start mb-2">
-              <span className={`px-2 py-0.5 rounded text-xs font-bold ${
-                threat.type === 'DRONE' ? 'bg-yellow-500/20 text-yellow-500' :
-                threat.type === 'BALLISTIC_MISSILE' ? 'bg-orange-500/20 text-orange-500' :
-                threat.type === 'KAB' ? 'bg-purple-500/20 text-purple-500' :
-                threat.type === 'AIRCRAFT' ? 'bg-blue-500/20 text-blue-500' :
-                threat.type === 'ALERT' ? 'bg-red-500/20 text-red-500' :
-                'bg-red-500/20 text-red-500'
-              }`}>
-                {threat.type}
-              </span>
-              <span className="text-gray-500 text-xs">
-                {new Date(threat.updatedAt).toLocaleTimeString()}
-              </span>
+      <div className="flex-grow flex flex-col gap-4">
+        {activeThreats.map(threat => (
+          <div key={threat.id} className="flex items-center gap-4 bg-[#0a0f18]/80 rounded p-3 text-sm border border-gray-800/60 hover:border-gray-700 hover:bg-[#0d1421] transition-all cursor-pointer">
+            {/* Simple vector icon representation for sidebar */}
+            <div className={`w-8 h-8 rounded-full flex justify-center items-center ${
+              threat.type === 'DRONE' || threat.type.includes('MISSILE') ? 'bg-red-500/10 border border-red-500/30' : 'bg-blue-500/10 border border-blue-500/30'
+            }`}>
+              {threat.type === 'DRONE' ? (
+                <div className="w-0 h-0 border-l-[4px] border-r-[4px] border-b-[8px] border-l-transparent border-r-transparent border-b-red-500"></div>
+              ) : threat.type.includes('MISSILE') ? (
+                <div className="w-1 h-3 bg-red-500 relative before:content-[''] before:absolute before:-top-1 before:left-0 before:w-0 before:h-0 before:border-l-[2px] before:border-r-[2px] before:border-b-[3px] before:border-l-transparent before:border-r-transparent before:border-b-red-500"></div>
+              ) : (
+                <div className="w-3 h-3 bg-blue-500" style={{ clipPath: 'polygon(50% 0%, 100% 100%, 50% 80%, 0% 100%)' }}></div>
+              )}
             </div>
-            {threat.speed && <div className="text-gray-400 mt-1 text-xs">Speed: {Math.round(threat.speed)} km/h</div>}
-            {threat.course && <div className="text-gray-400 text-xs">Course: {Math.round(threat.course)}°</div>}
+            
+            <div className="flex-1">
+              <div className="text-xs font-bold text-gray-200">
+                {threat.type === 'DRONE' ? 'Shahed-136' : 
+                 threat.type === 'CRUISE_MISSILE' ? 'Крилата ракета' : 
+                 threat.type === 'BALLISTIC_MISSILE' ? 'Балістична ракета' :
+                 threat.type === 'KAB' ? 'КАБ' :
+                 threat.type === 'AIRCRAFT' ? 'Літак МіГ-31К' : threat.type}
+              </div>
+              {threat.locations[0]?.source?.name && (
+                <div className="text-[10px] text-gray-500 mt-0.5">
+                  {threat.locations[0].source.name}
+                </div>
+              )}
+            </div>
+            
+            <div className="text-[10px] text-gray-400 font-mono">
+              {new Date(threat.updatedAt).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}
+            </div>
           </div>
         ))}
+        {activeThreats.length === 0 && (
+          <div className="text-xs text-gray-600 text-center py-10 italic">
+            Немає активних цілей
+          </div>
+        )}
       </div>
+      
+      <button className="mt-4 w-full py-3 bg-[#0a0f18] border border-gray-800 rounded text-xs text-gray-400 hover:text-white hover:border-gray-600 transition-colors uppercase tracking-widest font-bold">
+        Переглянути всі
+      </button>
     </div>
   );
 }

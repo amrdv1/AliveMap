@@ -2,8 +2,11 @@
 
 import dynamic from 'next/dynamic';
 import Sidebar from '@/components/Sidebar';
-import TopPanel from '@/components/TopPanel';
-import BottomPanel from '@/components/BottomPanel';
+import LegendSidebar from '@/components/LegendSidebar';
+import Navbar from '@/components/Navbar';
+import MobileTopBar from '@/components/MobileTopBar';
+import MobileBottomNav from '@/components/MobileBottomNav';
+import MobileBottomSheet from '@/components/MobileBottomSheet';
 
 const Map = dynamic(() => import('@/components/Map'), { 
   ssr: false,
@@ -12,15 +15,20 @@ const Map = dynamic(() => import('@/components/Map'), {
 
 export default function Home() {
   return (
-    <main className="flex h-screen w-full bg-[#05070A] overflow-hidden text-white font-sans">
-      <Sidebar />
-      <div className="flex-1 flex flex-col relative">
-        <TopPanel />
-        <div className="flex-1 relative">
+    <main className="flex flex-col h-[100dvh] w-screen bg-[#050A14] overflow-hidden font-sans text-white">
+      <div className="hidden lg:block">
+        <Navbar />
+      </div>
+      <MobileTopBar />
+      <div className="flex flex-1 relative overflow-hidden">
+        <LegendSidebar />
+        <div className="flex-1 relative z-0">
           <Map />
         </div>
-        <BottomPanel />
+        <Sidebar />
       </div>
+      <MobileBottomSheet />
+      <MobileBottomNav />
     </main>
   );
 }
