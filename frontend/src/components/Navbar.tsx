@@ -19,7 +19,7 @@ export default function Navbar() {
       <div className="flex items-center gap-3">
         <div className="relative flex items-center justify-center w-8 h-8">
           <div className="absolute inset-0 bg-red-500/20 rounded-full animate-ping"></div>
-          <Radar className="text-red-500 relative z-10 w-6 h-6 animate-[spin_4s_linear_infinite]" />
+          <img src="/logo.svg" alt="AliveMap Logo" className="relative z-10 w-7 h-7 object-contain drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
         </div>
         <h1 className="text-lg font-bold tracking-widest text-white/90 flex items-center gap-1 uppercase">
           Alive<span className="text-red-500">Map</span>
@@ -79,8 +79,8 @@ export default function Navbar() {
             </button>
             
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 bg-red-500/10 rounded-2xl border border-red-500/20">
-                <Radar className="w-8 h-8 text-red-500" />
+              <div className="p-2 bg-red-500/10 rounded-2xl border border-red-500/20 flex items-center justify-center w-14 h-14">
+                <img src="/logo.svg" alt="Logo" className="w-10 h-10 object-contain drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
               </div>
               <div>
                 <h2 className="text-2xl font-black text-white uppercase tracking-wider">ALIVEMAP</h2>

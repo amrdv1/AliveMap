@@ -17,7 +17,7 @@ export default function StatsBottomPanel() {
       {/* Stats Pill - Premium Dark Edition */}
       <div className="pointer-events-auto bg-[#070b14]/80 backdrop-blur-xl border border-white/10 rounded-2xl px-6 py-3 flex flex-wrap justify-center md:flex-nowrap items-center gap-6 shadow-[0_10px_40px_rgba(0,0,0,0.8)]">
         <div className="hidden md:flex items-center gap-2 pr-2 border-r border-gray-700/50">
-          <Radar className="w-4 h-4 text-red-500 animate-[spin_3s_linear_infinite]" />
+          <img src="/logo.svg" alt="Logo" className="w-5 h-5 object-contain drop-shadow-[0_0_5px_rgba(239,68,68,0.8)]" />
           <span className="text-white text-xs font-black tracking-widest drop-shadow-[0_0_8px_rgba(239,68,68,0.3)]">ALIVEMAP</span>
         </div>
         
