@@ -58,7 +58,7 @@ export async function processExternalThreat(
 
   // 2. Fuzzy match via distance and type (Deduplication)
   const recentThreats = await prisma.threatObject.findMany({
-    where: { status: ReportStatus.ACTIVE, type: threatType },
+    where: { status: ReportStatus.ACTIVE, type: threatType as ReportType },
     include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
   });
 
@@ -96,7 +96,7 @@ export async function processExternalThreat(
   const newThreat = await prisma.threatObject.create({
     data: {
       externalId,
-      type: threatType,
+      type: threatType as ReportType,
       confidence,
       status: ReportStatus.ACTIVE,
       speed,
