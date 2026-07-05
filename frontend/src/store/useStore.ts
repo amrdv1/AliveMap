@@ -42,6 +42,7 @@ export interface AppState {
     minConfidence: number;
   };
   isAboutOpen: boolean;
+  activeTab: 'MAP' | 'SUMMARY' | 'MONITORING';
   setThreats: (threats: ThreatObject[]) => void;
   updateThreat: (threat: ThreatObject) => void;
   setAlerts: (alerts: AlertsData) => void;
@@ -49,6 +50,7 @@ export interface AppState {
   addMessage: (message: MonitoringMessage) => void;
   setFilter: (key: keyof AppState['filters'], value: any) => void;
   setAboutOpen: (open: boolean) => void;
+  setActiveTab: (tab: 'MAP' | 'SUMMARY' | 'MONITORING') => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -56,6 +58,7 @@ export const useStore = create<AppState>((set) => ({
   alerts: {},
   messages: [],
   isAboutOpen: false,
+  activeTab: 'MAP',
   filters: {
     types: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KAB', 'AIRCRAFT', 'ALERT'],
     showArchived: false,
@@ -77,5 +80,6 @@ export const useStore = create<AppState>((set) => ({
   setFilter: (key, value) => set((state) => ({
     filters: { ...state.filters, [key]: value }
   })),
-  setAboutOpen: (isAboutOpen) => set({ isAboutOpen })
+  setAboutOpen: (isAboutOpen) => set({ isAboutOpen }),
+  setActiveTab: (activeTab) => set({ activeTab })
 }));

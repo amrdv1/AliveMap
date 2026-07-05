@@ -1,12 +1,11 @@
 import React, { useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { Search, X } from 'lucide-react';
+import { Search, X, Activity } from 'lucide-react';
 
-export default function MonitoringFeed() {
-  const { messages, setMessages, addMessage } = useStore();
+export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
+  const { messages, setMessages } = useStore();
 
   useEffect(() => {
-    // Fetch initial messages
     fetch('/api/messages')
       .then(res => res.json())
       .then(data => {
@@ -16,46 +15,53 @@ export default function MonitoringFeed() {
   }, [setMessages]);
 
   return (
-    <div className="absolute top-24 left-4 w-80 max-h-[calc(100vh-8rem)] bg-[#070b14]/50 backdrop-blur-xl border border-white/5 rounded-2xl flex flex-col z-20 overflow-hidden font-sans">
+    <div className={`flex flex-col bg-[#070b14]/70 backdrop-blur-xl border border-white/5 font-sans overflow-hidden shadow-2xl ${
+      isMobile ? 'w-full h-full rounded-none' : 'w-full h-full rounded-2xl'
+    }`}>
       {/* Header */}
-      <div className="p-4 border-b border-white/5 flex items-center justify-between">
-        <h2 className="text-base font-semibold text-white/90 flex items-center gap-2">
+      <div className="p-5 border-b border-white/5 flex items-center justify-between bg-black/20">
+        <h2 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-3">
+          <Activity className="text-red-500 w-5 h-5" />
           Моніторинг
-          <span className="bg-red-500/10 text-red-400 border border-red-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full">{messages.length}</span>
+          <span className="bg-red-500 text-white text-xs font-black px-2 py-0.5 rounded-md shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+            {messages.length}
+          </span>
         </h2>
-        <button className="text-white/40 hover:text-white/90 rounded-full p-1 transition-colors"><X size={16} /></button>
       </div>
 
       {/* Search and Filters */}
-      <div className="p-4 border-b border-white/5 space-y-3">
+      <div className="p-4 border-b border-white/5 space-y-3 bg-black/10">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 w-4 h-4" />
-          <input type="text" placeholder="Пошук..." 
-                 className="w-full bg-white/5 text-white/90 text-sm rounded-xl pl-9 pr-4 py-2 outline-none border border-transparent focus:border-white/10 transition-all placeholder:text-white/30" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
+          <input type="text" placeholder="Пошук повідомлень..." 
+                 className="w-full bg-white/5 text-white text-sm rounded-xl pl-11 pr-4 py-3 outline-none border border-white/5 focus:border-red-500/50 focus:bg-white/10 transition-all placeholder:text-gray-600 font-medium" />
         </div>
-        <div className="flex gap-2">
-          <button className="bg-white/10 hover:bg-white/20 text-white text-xs font-medium px-4 py-1.5 rounded-full transition-all">Усі</button>
-          <button className="text-white/50 hover:text-white hover:bg-white/5 text-xs font-medium px-4 py-1.5 rounded-full transition-colors border border-transparent">Важливе</button>
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+          <button className="bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold px-4 py-2 rounded-xl transition-all tracking-wide">Усі</button>
+          <button className="bg-white/5 text-gray-400 border border-transparent hover:bg-white/10 hover:text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors tracking-wide">Важливе</button>
+          <button className="bg-white/5 text-gray-400 border border-transparent hover:bg-white/10 hover:text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors tracking-wide">Збиття</button>
         </div>
       </div>
 
       {/* Message List */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
         {messages.map(msg => (
-          <div key={msg.id} className="p-3 hover:bg-white/5 rounded-xl transition-colors cursor-pointer mb-1 border border-transparent hover:border-white/5">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-xs font-semibold text-white/70">@{msg.channelName}</span>
-              <span className="text-[10px] text-white/30 font-medium">
+          <div key={msg.id} className="p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all cursor-pointer border border-white/5 hover:border-white/10 group">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-xs font-bold text-blue-400 tracking-wider">@{msg.channelName}</span>
+              <span className="text-xs text-gray-500 font-medium">
                 {new Date(msg.timestamp).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
             
-            {msg.tags.length > 0 && (
-              <div className="flex gap-1 mb-2">
+            {msg.tags && msg.tags.length > 0 && (
+              <div className="flex gap-1.5 mb-3 flex-wrap">
                 {msg.tags.map(tag => (
-                  <span key={tag} className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md border ${
-                    tag === 'Загроза' ? 'bg-orange-500/10 text-orange-400 border-orange-500/10' :
-                    tag === 'Тривога' ? 'bg-red-500/10 text-red-400 border-red-500/10' : 'bg-white/5 text-white/50 border-white/5'
+                  <span key={tag} className={`text-[10px] font-bold px-2 py-1 rounded-md tracking-wider uppercase ${
+                    tag === 'Загроза' || tag === 'УВАГА' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
+                    tag === 'Тривога' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 
+                    tag === 'ВІДБІЙ' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                    'bg-gray-500/20 text-gray-400 border border-gray-500/30'
                   }`}>
                     {tag}
                   </span>
@@ -63,11 +69,16 @@ export default function MonitoringFeed() {
               </div>
             )}
             
-            <p className="text-xs text-white/60 leading-relaxed whitespace-pre-line font-medium">
+            <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line font-medium group-hover:text-white transition-colors">
               {msg.text}
             </p>
           </div>
         ))}
+        {messages.length === 0 && (
+          <div className="text-center py-10 text-gray-500 text-sm font-medium">
+            Немає повідомлень
+          </div>
+        )}
       </div>
     </div>
   );

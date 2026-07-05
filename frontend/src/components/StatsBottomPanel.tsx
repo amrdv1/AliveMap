@@ -1,33 +1,44 @@
 import React from 'react';
 import { useStore } from '../store/useStore';
+import { Radar } from 'lucide-react';
 
 export default function StatsBottomPanel() {
   const { threats } = useStore();
   
+  const activeThreats = threats.filter(t => t.status === 'ACTIVE');
+  
   const alertsCount = threats.filter(t => t.type === 'ALERT').length;
-  const targetsCount = threats.filter(t => t.type !== 'ALERT').length;
-  const onlineCount = Math.floor(Math.random() * 5000) + 2000; // Mock online count
+  const dronesCount = activeThreats.filter(t => t.type === 'DRONE').length;
+  const missilesCount = activeThreats.filter(t => t.type === 'CRUISE_MISSILE' || t.type === 'BALLISTIC_MISSILE' || t.type === 'MISSILE').length;
+  const aircraftCount = activeThreats.filter(t => t.type === 'AIRCRAFT').length;
 
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-30">
+    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-30 pointer-events-none">
       {/* Stats Pill - Premium Dark Edition */}
-      <div className="bg-[#070b14]/90 backdrop-blur-lg border border-gray-700/50 rounded-full px-6 py-3 flex items-center gap-6 shadow-[0_8px_32px_rgba(0,0,0,0.8)]">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div>
-          <span className="text-white text-sm font-bold tracking-widest drop-shadow-[0_0_8px_rgba(239,68,68,0.3)]">ALIVEMAP</span>
+      <div className="pointer-events-auto bg-[#070b14]/80 backdrop-blur-xl border border-white/10 rounded-2xl px-6 py-3 flex flex-wrap justify-center md:flex-nowrap items-center gap-6 shadow-[0_10px_40px_rgba(0,0,0,0.8)]">
+        <div className="hidden md:flex items-center gap-2 pr-2 border-r border-gray-700/50">
+          <Radar className="w-4 h-4 text-red-500 animate-[spin_3s_linear_infinite]" />
+          <span className="text-white text-xs font-black tracking-widest drop-shadow-[0_0_8px_rgba(239,68,68,0.3)]">ALIVEMAP</span>
         </div>
-        <div className="h-5 w-px bg-gray-700"></div>
-        <div className="flex gap-2 text-sm">
-          <span className="text-gray-400 font-medium">Тривоги</span>
-          <span className="text-red-500 font-bold">{alertsCount}</span>
+        
+        <div className="flex gap-2 items-center">
+          <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Шахеди:</span>
+          <span className="text-red-500 font-black text-base drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]">{dronesCount}</span>
         </div>
-        <div className="flex gap-2 text-sm">
-          <span className="text-gray-400 font-medium">Цілі</span>
-          <span className="text-white font-bold drop-shadow-[0_0_4px_rgba(255,255,255,0.5)]">{targetsCount}</span>
+        <div className="flex gap-2 items-center">
+          <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Ракети:</span>
+          <span className="text-orange-500 font-black text-base drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]">{missilesCount}</span>
         </div>
-        <div className="flex gap-2 text-sm">
-          <span className="text-gray-400 font-medium">Онлайн</span>
-          <span className="text-green-400 font-bold drop-shadow-[0_0_8px_rgba(74,222,128,0.3)]">{onlineCount.toLocaleString()}</span>
+        <div className="flex gap-2 items-center">
+          <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Літаки:</span>
+          <span className="text-blue-500 font-black text-base drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]">{aircraftCount}</span>
+        </div>
+        
+        <div className="hidden md:block h-5 w-px bg-gray-700/50"></div>
+        
+        <div className="flex gap-2 items-center">
+          <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Тривоги:</span>
+          <span className="text-white font-black text-base drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">{alertsCount}</span>
         </div>
       </div>
     </div>
