@@ -30,6 +30,7 @@ export interface MonitoringMessage {
   tags: string[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AlertsData = Record<string, any>;
 
 export interface AppState {
@@ -48,6 +49,7 @@ export interface AppState {
   setAlerts: (alerts: AlertsData) => void;
   setMessages: (messages: MonitoringMessage[]) => void;
   addMessage: (message: MonitoringMessage) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setFilter: (key: keyof AppState['filters'], value: any) => void;
   setAboutOpen: (open: boolean) => void;
   setActiveTab: (tab: 'MAP' | 'SUMMARY' | 'MONITORING') => void;
