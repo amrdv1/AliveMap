@@ -26,7 +26,7 @@ export default function ThreatFilters() {
 
   return (
     <div className="absolute top-[88px] left-1/2 -translate-x-1/2 z-20 flex gap-2 overflow-x-auto w-full px-4 md:w-auto md:px-0 scrollbar-hide pointer-events-none">
-      <div className="pointer-events-auto flex gap-2 mx-auto bg-[#030b1d] p-2 rounded-2xl border border-white/5 shadow-lg min-w-max">
+      <div className="pointer-events-auto flex gap-2 mx-auto bg-[#010a1b] p-2 rounded-2xl border border-white/5 shadow-lg min-w-max">
         {filterOptions.map(opt => {
           const active = isSelected(opt.type);
           return (

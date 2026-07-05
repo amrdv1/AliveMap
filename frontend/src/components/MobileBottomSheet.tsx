@@ -13,7 +13,7 @@ export default function MobileBottomSheet() {
   if (!selectedThreat) return null;
 
   return (
-    <div className="lg:hidden fixed bottom-16 left-0 w-full bg-[#030b1d] border-t border-gray-800 rounded-t-3xl z-40 p-5 pb-6 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+    <div className="lg:hidden fixed bottom-16 left-0 w-full bg-[#010a1b] border-t border-gray-800 rounded-t-3xl z-40 p-5 pb-6 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
       <div className="w-12 h-1 bg-gray-700 rounded-full mx-auto mb-4"></div>
       
       <div className="flex items-center gap-4 mb-6">

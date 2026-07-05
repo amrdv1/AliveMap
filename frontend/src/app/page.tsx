@@ -46,7 +46,7 @@ export default function Home() {
         {/* Right Side Panels */}
         {activeTab === 'MAP' && (
           <div className="absolute top-28 right-6 bottom-24 z-20 flex flex-col gap-4 w-80">
-            <div className="bg-[#030b1d] rounded-2xl border border-white/5 flex-1 min-h-[150px] overflow-hidden shadow-xl">
+            <div className="bg-[#010a1b] rounded-2xl border border-white/5 flex-1 min-h-[150px] overflow-hidden shadow-xl">
               <Sidebar />
             </div>
           </div>

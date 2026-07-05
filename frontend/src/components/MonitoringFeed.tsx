@@ -15,7 +15,7 @@ export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
   }, [setMessages]);
 
   return (
-    <div className={`flex flex-col bg-[#030b1d] border border-white/5 font-sans overflow-hidden shadow-2xl ${
+    <div className={`flex flex-col bg-[#010a1b] border border-white/5 font-sans overflow-hidden shadow-2xl ${
       isMobile ? 'w-full h-full rounded-none' : 'w-full h-full rounded-2xl'
     }`}>
       {/* Header */}

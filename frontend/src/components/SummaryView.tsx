@@ -18,7 +18,7 @@ export default function SummaryView() {
       <div className="w-full max-w-4xl flex flex-col gap-6">
         
         {/* Header */}
-        <div className="bg-[#030b1d] border border-white/10 rounded-3xl p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-2xl">
+        <div className="bg-[#010a1b] border border-white/10 rounded-3xl p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-2xl">
           <div>
             <h1 className="text-3xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
               <ShieldAlert className="text-red-500 w-8 h-8" />

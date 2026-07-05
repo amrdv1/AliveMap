@@ -10,10 +10,9 @@ export default function MobileTopBar() {
   }, []);
 
   return (
-    <div className="lg:hidden h-14 bg-[#030b1d] border-b border-gray-800/50 flex items-center justify-between px-4 z-40 absolute top-0 w-full pointer-events-none">
+    <div className="lg:hidden h-14 bg-[#010a1b] border-b border-gray-800/50 flex items-center justify-between px-4 z-40 absolute top-0 w-full pointer-events-none">
       <div className="pointer-events-auto flex items-center gap-2">
         <div className="relative flex items-center justify-center w-8 h-8">
-          <div className="absolute inset-0 bg-red-500/20 rounded-full animate-ping"></div>
           <img src="/logo.png" alt="AliveMap Logo" className="relative z-10 w-6 h-6 object-contain" />
         </div>
         <h1 className="text-lg font-bold tracking-widest text-white flex items-center gap-1 uppercase">
