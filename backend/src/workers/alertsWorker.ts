@@ -22,9 +22,15 @@ export async function startAlertsWorker(io: Server) {
             const ALERTS_API_URL = 'https://ubilling.net.ua/aerialalerts/';
             const { data } = await axios.get(ALERTS_API_URL, { timeout: 10000 });
             if (data && data.states) {
-                // data.states is an object: { "Київська область": "2023-11-20T...", ... }
-                // We broadcast this directly to all clients for real-time region painting
-                io.emit('alerts:sync', data.states);
+                // Transform data.states into format expected by frontend: { "Region": { alertnow: true } }
+                const formattedStates: Record<string, { alertnow: boolean }> = {};
+                for (const [region, timestamp] of Object.entries(data.states)) {
+                    // ubilling returns a timestamp string if active, null if not
+                    if (timestamp) {
+                        formattedStates[region] = { alertnow: true };
+                    }
+                }
+                io.emit('alerts:sync', formattedStates);
             }
         } catch (error) {
             console.error("Error polling official alerts API (can be ignored if network is down)");
