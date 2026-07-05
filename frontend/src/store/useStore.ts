@@ -22,33 +22,55 @@ export interface ThreatObject {
   locations: ThreatLocation[];
 }
 
-interface AppState {
+export interface MonitoringMessage {
+  id: string;
+  text: string;
+  channelName: string;
+  timestamp: string;
+  tags: string[];
+}
+
+export type AlertsData = Record<string, any>;
+
+export interface AppState {
   threats: ThreatObject[];
+  alerts: AlertsData;
+  messages: MonitoringMessage[];
   filters: {
     types: ReportType[];
-    minConfidence: number;
     showArchived: boolean;
+    minConfidence: number;
   };
   setThreats: (threats: ThreatObject[]) => void;
   updateThreat: (threat: ThreatObject) => void;
+  setAlerts: (alerts: AlertsData) => void;
+  setMessages: (messages: MonitoringMessage[]) => void;
+  addMessage: (message: MonitoringMessage) => void;
   setFilter: (key: keyof AppState['filters'], value: any) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
   threats: [],
+  alerts: {},
+  messages: [],
   filters: {
     types: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KAB', 'AIRCRAFT', 'ALERT'],
-    minConfidence: 0,
     showArchived: false,
+    minConfidence: 0.5,
   },
   setThreats: (threats) => set({ threats }),
-  updateThreat: (updatedThreat) => set((state) => {
-    const exists = state.threats.some(t => t.id === updatedThreat.id);
-    if (exists) {
-      return { threats: state.threats.map((t) => t.id === updatedThreat.id ? updatedThreat : t) };
+  updateThreat: (newThreat) => set((state) => {
+    const existingIndex = state.threats.findIndex(t => t.id === newThreat.id);
+    if (existingIndex >= 0) {
+      const newThreats = [...state.threats];
+      newThreats[existingIndex] = newThreat;
+      return { threats: newThreats };
     }
-    return { threats: [updatedThreat, ...state.threats] };
+    return { threats: [...state.threats, newThreat] };
   }),
+  setAlerts: (alerts) => set({ alerts }),
+  setMessages: (messages) => set({ messages }),
+  addMessage: (message) => set((state) => ({ messages: [message, ...state.messages].slice(0, 50) })),
   setFilter: (key, value) => set((state) => ({
     filters: { ...state.filters, [key]: value }
   }))

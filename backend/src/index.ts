@@ -28,7 +28,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/reports', reportRoutes);
 
 import threatRoutes from './routes/threats';
+import messageRoutes from './routes/messages';
+
 app.use('/api/threats', threatRoutes);
+app.use('/api/messages', messageRoutes);
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {

@@ -143,7 +143,14 @@ export default function Map() {
   return (
     <>
       <style dangerouslySetInnerHTML={{__html: `
-        .leaflet-container { background: #050a14 !important; }
+        .leaflet-container { background: #000 !important; }
+        .map-overlay {
+          position: absolute;
+          inset: 0;
+          background: rgba(5, 10, 20, 0.6);
+          pointer-events: none;
+          z-index: 400; /* Leaflet layers are 1-399 */
+        }
         .radar-pulse {
           position: absolute;
           width: 100%;
@@ -174,9 +181,10 @@ export default function Map() {
         zoomControl={false}
       >
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
         />
+        <div className="map-overlay" />
         <ZoomControl position="bottomright" />
         
         {filteredThreats.map((threat) => {

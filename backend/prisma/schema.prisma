@@ -127,3 +127,12 @@ model Log {
   timestamp DateTime @default(now())
   details   String?
 }
+
+model MonitoringMessage {
+  id          String   @id @default(uuid())
+  text        String
+  channelName String
+  timestamp   DateTime
+  tags        String[]
+  createdAt   DateTime @default(now())
+}

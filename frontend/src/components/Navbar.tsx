@@ -10,18 +10,18 @@ export default function Navbar() {
   }, []);
 
   return (
-    <div className="h-16 bg-[#070b14]/90 backdrop-blur-md border-b border-gray-800/50 flex items-center justify-between px-6 z-30 relative shadow-md">
+    <div className="absolute top-4 left-4 right-4 h-16 bg-white/95 backdrop-blur-md rounded-2xl flex items-center justify-between px-6 z-30 shadow-xl border border-gray-100">
       {/* Logo */}
       <div className="flex items-center gap-3">
         <div className="relative flex items-center justify-center">
-          <img src="/logo.png" alt="AliveMap Logo" className="w-10 h-10 object-contain relative z-10" 
+          <img src="/logo.png" alt="AliveMap Logo" className="w-10 h-10 object-contain relative z-10 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]" 
                onError={(e) => {
                  e.currentTarget.style.display = 'none';
                  e.currentTarget.parentElement!.innerHTML += '<svg class="text-red-500 w-6 h-6 relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>';
                }} 
           />
         </div>
-        <h1 className="text-xl font-bold tracking-widest text-white flex items-center gap-1 uppercase">
+        <h1 className="text-xl font-bold tracking-widest text-gray-900 flex items-center gap-1 uppercase">
           Alive<span className="text-red-500">Map</span>
         </h1>
       </div>

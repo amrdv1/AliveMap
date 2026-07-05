@@ -69,6 +69,33 @@ export async function startTelegramWorker(io: Server) {
 
       if (isPublicMatch || isPrivateMatch) {
         const text = message.message;
+        const channelName = title || username || 'Unknown';
+        
+        // Save raw message to Monitoring Feed
+        let tags: string[] = [];
+        const lowerText = text.toLowerCase();
+        if (lowerText.includes('увага') || lowerText.includes('загроза') || lowerText.includes('небезпека')) {
+          tags.push('Загроза');
+        } else if (lowerText.includes('тривога')) {
+          tags.push('Тривога');
+        } else {
+          tags.push('Інфо');
+        }
+
+        try {
+          await prisma.monitoringMessage.create({
+            data: {
+              text,
+              channelName,
+              timestamp: new Date(message.date * 1000),
+              tags
+            }
+          });
+          io.emit('monitoring:new_message', { text, channelName, timestamp: new Date(message.date * 1000), tags });
+        } catch (e) {
+          console.error('Failed to save monitoring message', e);
+        }
+
         const parsed = parseTelegramText(text);
 
         if (parsed.lat !== null && parsed.lng !== null) {
@@ -80,7 +107,7 @@ export async function startTelegramWorker(io: Server) {
             sourceId
           );
 
-          console.log(`Telegram Threat Tracked: ${parsed.type} at [${parsed.lat}, ${parsed.lng}] from ${username || title}`);
+          console.log(`Telegram Threat Tracked: ${parsed.type} at [${parsed.lat}, ${parsed.lng}] from ${channelName}`);
         }
       }
     }, new NewMessage({}));
