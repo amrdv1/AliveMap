@@ -11,16 +11,15 @@ export const THREAT_COLORS = {
   'RECON': '#9ca3af', // Flat gray
 };
 
-// Flat tactical vectors
 export const THREAT_SVGS = {
-  'DRONE': `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L14.5 10L21 18L19 21.5L12 14.5L5 21.5L3 18L9.5 10L12 2Z"/></svg>`,
-  'MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L11 2V7L7 9V11L11 10.5V17L9 19V21L12 20.5L15 21V19L13 17V10.5L17 11V9L13 7V2L12 1Z"/></svg>`,
-  'CRUISE_MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L11 2V7L7 9V11L11 10.5V17L9 19V21L12 20.5L15 21V19L13 17V10.5L17 11V9L13 7V2L12 1Z"/></svg>`,
-  'BALLISTIC_MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 0L14 8V18L16 22H8L10 18V8L12 0Z"/></svg>`,
-  'AIRCRAFT': `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L13 4V9L22 14V16L13 13.5V19L16 21V22L12 21.5L8 22V21L11 19V13.5L2 16V14L11 9V4L12 1Z"/></svg>`,
+  'DRONE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L14.5 12L22 17L21.5 19L13 16V20L15 22H9L11 20V16L2.5 19L2 17L9.5 12L12 2Z"/><path d="M12 4L13 12L18 16L12 15L6 16L11 12L12 4Z" fill="black" fill-opacity="0.25"/></svg>`,
+  'MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C11.5 1 11 1.5 11 2.5V8L6 11V13L11 12V17.5L8 20V22L12 21L16 22V20L13 17.5V12L18 13V11L13 8V2.5C13 1.5 12.5 1 12 1Z"/><path d="M12 3V8L14 11V12L12 11.5V17L14 19V20L12 19.5V3Z" fill="black" fill-opacity="0.25"/></svg>`,
+  'CRUISE_MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C11.5 1 11 1.5 11 2.5V8L6 11V13L11 12V17.5L8 20V22L12 21L16 22V20L13 17.5V12L18 13V11L13 8V2.5C13 1.5 12.5 1 12 1Z"/><path d="M12 3V8L14 11V12L12 11.5V17L14 19V20L12 19.5V3Z" fill="black" fill-opacity="0.25"/></svg>`,
+  'BALLISTIC_MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C11 0 10 2 10 4V16L7 22H17L14 16V4C14 2 13 0 12 0Z"/><path d="M12 2V16L14 20H12V2Z" fill="black" fill-opacity="0.25"/><path d="M10 22L10 24H14L14 22H10Z" fill="#fbbf24" /></svg>`,
+  'AIRCRAFT': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L13 3V7L22 14V16L13 13V19L16 21V22L12 21L8 22V21L11 19V13L2 16V14L11 7V3L12 1Z"/><path d="M12 3V7L16 12V14L12 12V19L14 20V21L12 20.5V3Z" fill="black" fill-opacity="0.25"/></svg>`,
   'PPO': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M4 2L2 4L19 21L21 19L4 2Z"/><path d="M21 4L19 2L2 19L4 21L21 4Z"/></svg>`,
-  'KAB': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.5 2 7.5 7 7.5 11L5 15V18H9.5V22H14.5V18H19V15L16.5 11C16.5 7 15.5 2 12 2Z"/></svg>`,
-  'RECON': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><path d="M12 4L14 9H20L15 13L17 19L12 16L7 19L9 13L4 9H10L12 4Z"/></svg>`,
+  'KAB': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C9 2 8 5 8 10V15L6 18V20H18V18L16 15V10C16 5 15 2 12 2Z"/><path d="M10 20V22H14V20H10Z" fill="black" fill-opacity="0.3"/><path d="M12 4C10.5 4 10 6 10 10V15L12 17V4Z" fill="white" fill-opacity="0.2"/></svg>`,
+  'RECON': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L13 6V9L22 10V12L13 11V16L15 19V20L12 19L9 20V19L11 16V11L2 12V10L11 9V6L12 3Z"/><circle cx="12" cy="14" r="1.5" fill="black" fill-opacity="0.4"/></svg>`,
 };
 
 interface ThreatIconProps {

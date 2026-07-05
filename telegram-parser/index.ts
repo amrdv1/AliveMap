@@ -33,7 +33,15 @@ const CHANNELS = [
   'khmelnytskyi_radar',
   'chernivtsi_radar',
   'ivanofrankivsk_radar',
-  'zakarpattia_radar'
+  'zakarpattia_radar',
+  'suspilne_news',
+  'tsnua',
+  'ukrpravda_news',
+  'uniannet',
+  'insiderUKR',
+  'novyna_ua',
+  'operativnoZSU',
+  'kievreal1'
 ];
 
 const PRIVATE_CHANNEL_TITLES = [
