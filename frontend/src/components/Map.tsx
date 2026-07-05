@@ -171,9 +171,15 @@ export default function Map() {
   const [mounted, setMounted] = useState(false);
   const [geoData, setGeoData] = useState<any>(null);
   const [geoDataDistricts, setGeoDataDistricts] = useState<any>(null);
+  const [geoBorder, setGeoBorder] = useState<any>(null);
 
   useEffect(() => {
     setMounted(true);
+
+    fetch('/ukraine-border.geojson')
+      .then(res => res.json())
+      .then(data => setGeoBorder(data))
+      .catch(console.error);
 
     fetch('/ukraine.geojson')
       .then(res => res.json())
@@ -357,13 +363,27 @@ export default function Map() {
           <AnimatedMarker key={threat.id} threat={threat} getIcon={getIcon} />
         ))}
 
-      {/* Base Map State Outlines (always visible, beautiful borders) */}
+      {/* Base Map State Outlines (subtle internal borders) */}
       {geoData && (
         <GeoJSON 
           data={geoData}
           style={() => ({
-            color: 'rgba(255, 255, 255, 0.25)',
-            weight: 1.5,
+            color: 'rgba(255, 255, 255, 0.15)',
+            weight: 1,
+            fillColor: 'transparent',
+            fillOpacity: 0,
+            interactive: false
+          })}
+        />
+      )}
+
+      {/* Main Country Border Outline (Thick Green) */}
+      {geoBorder && (
+        <GeoJSON 
+          data={geoBorder}
+          style={() => ({
+            color: '#22c55e', // Bright green as requested
+            weight: 3.5, // Thick outline
             fillColor: 'transparent',
             fillOpacity: 0,
             interactive: false
