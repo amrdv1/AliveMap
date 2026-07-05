@@ -23,12 +23,18 @@ export default function Home() {
   const { activeTab, setMessages } = useStore();
 
   React.useEffect(() => {
-    fetch('/api/messages')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setMessages(data);
-      })
-      .catch(console.error);
+    const fetchMessages = () => {
+      fetch('/api/messages')
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) setMessages(data);
+        })
+        .catch(console.error);
+    };
+
+    fetchMessages();
+    const interval = setInterval(fetchMessages, 60000); // Refresh every 60 seconds
+    return () => clearInterval(interval);
   }, [setMessages]);
 
   return (

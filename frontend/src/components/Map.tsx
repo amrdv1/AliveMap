@@ -39,7 +39,7 @@ const getIcon = (type: string, direction: number | null | undefined, confidence:
       html: `<div style="position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; opacity: ${opacity};">
                ${quantityBadge}
                <div class="radar-pulse" style="--ring-color: ${ringColor}"></div>
-               <div style="transform: rotate(${rot}deg); z-index: 10; width: 20px; height: 20px; color: ${THREAT_COLORS[type as keyof typeof THREAT_COLORS]}; filter: drop-shadow(0 0 8px ${ringColor});">
+               <div style="transform: rotate(${rot}deg); z-index: 10; width: 24px; height: 24px; color: #ffffff; filter: drop-shadow(0 0 6px ${THREAT_COLORS[type as keyof typeof THREAT_COLORS]}) drop-shadow(0 0 12px ${THREAT_COLORS[type as keyof typeof THREAT_COLORS]}) drop-shadow(0 0 2px #000);">
                  ${svgIcon}
                </div>
              </div>`,
@@ -410,9 +410,33 @@ export default function Map() {
         
         <ZoomControl position="bottomright" />
 
-        {filteredThreats.map((threat) => (
-          <AnimatedMarker key={threat.id} threat={threat} getIcon={getIcon} />
-        ))}
+        {filteredThreats.flatMap((threat) => {
+          const qty = threat.quantity || 1;
+          if (qty <= 1) {
+            return [<AnimatedMarker key={threat.id} threat={threat} getIcon={getIcon} />];
+          }
+          // Spread multiple markers in a small cluster around the main position
+          return Array.from({ length: qty }, (_, i) => {
+            if (i === 0) {
+              return <AnimatedMarker key={`${threat.id}-0`} threat={{...threat, quantity: 1}} getIcon={getIcon} />;
+            }
+            // Offset each clone ~3-8km in a circle around the main point
+            const angle = (2 * Math.PI * i) / qty;
+            const offsetKm = 3 + Math.random() * 5;
+            const latOffset = (offsetKm / 111) * Math.cos(angle);
+            const lngOffset = (offsetKm / (111 * Math.cos((threat.locations[0]?.lat || 48) * Math.PI / 180))) * Math.sin(angle);
+            const clonedLocations = threat.locations.map((loc: any) => ({
+              ...loc,
+              lat: loc.lat + latOffset,
+              lng: loc.lng + lngOffset
+            }));
+            return <AnimatedMarker 
+              key={`${threat.id}-${i}`} 
+              threat={{...threat, id: `${threat.id}-${i}`, locations: clonedLocations, quantity: 1}} 
+              getIcon={getIcon} 
+            />;
+          });
+        })}
 
       {/* Base Map State Outlines (subtle internal borders) */}
       {geoData && (
@@ -482,10 +506,10 @@ export default function Map() {
             );
             
             return {
-              color: isActive ? '#ff4d4f' : 'transparent',
-              weight: isActive ? 1 : 0,
+              color: isActive ? '#ff6b6b' : 'transparent',
+              weight: isActive ? 1.5 : 0,
               fillColor: isActive ? '#ef4444' : 'transparent',
-              fillOpacity: isActive ? 0.25 : 0, // Slightly higher than state to be visible inside state
+              fillOpacity: isActive ? 0.15 : 0,
             };
           }}
         />
