@@ -16,7 +16,10 @@ enum Role {
 enum ReportType {
   DRONE
   MISSILE
+  CRUISE_MISSILE
+  BALLISTIC_MISSILE
   AIRCRAFT
+  KAB
   ALERT
 }
 
@@ -63,6 +66,29 @@ model Report {
   updatedAt  DateTime     @updatedAt
 }
 
+model ThreatObject {
+  id        String   @id @default(uuid())
+  type      ReportType
+  status    ReportStatus @default(ACTIVE)
+  speed     Float?
+  course    Float?
+  confidence Float       @default(1.0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  locations ThreatLocation[]
+}
+
+model ThreatLocation {
+  id             String       @id @default(uuid())
+  threatObjectId String
+  threatObject   ThreatObject @relation(fields: [threatObjectId], references: [id], onDelete: Cascade)
+  lat            Float
+  lng            Float
+  time           DateTime     @default(now())
+  sourceId       String?
+  source         Source?      @relation(fields: [sourceId], references: [id])
+}
+
 model Source {
   id        String     @id @default(uuid())
   name      String
@@ -72,6 +98,7 @@ model Source {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   reports   Report[]
+  threatLocations ThreatLocation[]
 }
 
 model Session {

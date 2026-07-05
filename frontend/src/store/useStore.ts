@@ -1,47 +1,54 @@
 import { create } from 'zustand';
 
-export type ReportType = 'DRONE' | 'MISSILE' | 'AIRCRAFT' | 'ALERT';
+export type ReportType = 'DRONE' | 'MISSILE' | 'CRUISE_MISSILE' | 'BALLISTIC_MISSILE' | 'KAB' | 'AIRCRAFT' | 'ALERT';
 export type ReportStatus = 'ACTIVE' | 'ARCHIVED';
 
-export interface Report {
+export interface ThreatLocation {
   id: string;
-  type: ReportType;
   lat: number;
   lng: number;
-  direction?: number;
-  speed?: number;
   time: string;
+}
+
+export interface ThreatObject {
+  id: string;
+  type: ReportType;
   status: ReportStatus;
+  speed?: number | null;
+  course?: number | null;
   confidence: number;
-  sourceId?: string;
   createdAt: string;
+  updatedAt: string;
+  locations: ThreatLocation[];
 }
 
 interface AppState {
-  reports: Report[];
+  threats: ThreatObject[];
   filters: {
     types: ReportType[];
     minConfidence: number;
     showArchived: boolean;
   };
-  setReports: (reports: Report[]) => void;
-  addReport: (report: Report) => void;
-  updateReport: (report: Report) => void;
+  setThreats: (threats: ThreatObject[]) => void;
+  updateThreat: (threat: ThreatObject) => void;
   setFilter: (key: keyof AppState['filters'], value: any) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
-  reports: [],
+  threats: [],
   filters: {
-    types: ['DRONE', 'MISSILE', 'AIRCRAFT', 'ALERT'],
+    types: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KAB', 'AIRCRAFT', 'ALERT'],
     minConfidence: 0,
     showArchived: false,
   },
-  setReports: (reports) => set({ reports }),
-  addReport: (report) => set((state) => ({ reports: [report, ...state.reports] })),
-  updateReport: (updatedReport) => set((state) => ({
-    reports: state.reports.map((r) => r.id === updatedReport.id ? updatedReport : r)
-  })),
+  setThreats: (threats) => set({ threats }),
+  updateThreat: (updatedThreat) => set((state) => {
+    const exists = state.threats.some(t => t.id === updatedThreat.id);
+    if (exists) {
+      return { threats: state.threats.map((t) => t.id === updatedThreat.id ? updatedThreat : t) };
+    }
+    return { threats: [updatedThreat, ...state.threats] };
+  }),
   setFilter: (key, value) => set((state) => ({
     filters: { ...state.filters, [key]: value }
   }))

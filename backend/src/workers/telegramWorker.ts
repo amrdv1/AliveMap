@@ -2,7 +2,8 @@ import { TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
 import { NewMessage, NewMessageEvent } from 'telegram/events';
 import { parseTelegramText } from '../services/parser';
-import { PrismaClient } from '@prisma/client';
+import { processNewThreatLocation } from '../services/trackingService';
+import { PrismaClient, ReportType } from '@prisma/client';
 import { Server } from 'socket.io';
 
 const prisma = new PrismaClient();
@@ -71,21 +72,15 @@ export async function startTelegramWorker(io: Server) {
         const parsed = parseTelegramText(text);
 
         if (parsed.lat !== null && parsed.lng !== null) {
-          const report = await prisma.report.create({
-            data: {
-              type: parsed.type,
-              lat: parsed.lat,
-              lng: parsed.lng,
-              confidence: parsed.confidence,
-              direction: parsed.direction,
-              time: new Date(message.date * 1000),
-              sourceId: sourceId
-            },
-            include: { source: true }
-          });
+          const threat = await processNewThreatLocation(
+            parsed.type as ReportType,
+            parsed.lat,
+            parsed.lng,
+            new Date(message.date * 1000),
+            sourceId
+          );
 
-          io.emit('report:new', report);
-          console.log(`Telegram Threat Detected: ${parsed.type} at [${parsed.lat}, ${parsed.lng}] from ${username || title}`);
+          console.log(`Telegram Threat Tracked: ${parsed.type} at [${parsed.lat}, ${parsed.lng}] from ${username || title}`);
         }
       }
     }, new NewMessage({}));
@@ -130,19 +125,13 @@ async function fetchHistory(client: TelegramClient, sourceId: string, io: Server
           const parsed = parseTelegramText(text);
           
           if (parsed.lat !== null && parsed.lng !== null) {
-            const report = await prisma.report.create({
-              data: {
-                type: parsed.type,
-                lat: parsed.lat,
-                lng: parsed.lng,
-                confidence: parsed.confidence,
-                direction: parsed.direction,
-                time: new Date(message.date * 1000),
-                sourceId: sourceId
-              },
-              include: { source: true }
-            });
-            io.emit('report:new', report);
+            await processNewThreatLocation(
+              parsed.type as ReportType,
+              parsed.lat,
+              parsed.lng,
+              new Date(message.date * 1000),
+              sourceId
+            );
           }
         }
       }
