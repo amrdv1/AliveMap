@@ -1,6 +1,7 @@
 import React from 'react';
 import { useStore } from '../store/useStore';
 import { Target } from 'lucide-react';
+import { ThreatIcon } from './ThreatIcon';
 
 export default function MobileBottomSheet() {
   const { threats } = useStore();
@@ -19,13 +20,7 @@ export default function MobileBottomSheet() {
         <div className={`w-12 h-12 rounded-full flex justify-center items-center ${
           selectedThreat.type === 'DRONE' || selectedThreat.type.includes('MISSILE') ? 'bg-red-500/10 border border-red-500/30' : 'bg-blue-500/10 border border-blue-500/30'
         }`}>
-          {selectedThreat.type === 'DRONE' ? (
-            <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[12px] border-l-transparent border-r-transparent border-b-red-500"></div>
-          ) : selectedThreat.type.includes('MISSILE') ? (
-            <div className="w-1.5 h-4 bg-red-500 relative before:content-[''] before:absolute before:-top-1 before:left-0 before:w-0 before:h-0 before:border-l-[3px] before:border-r-[3px] before:border-b-[4px] before:border-l-transparent before:border-r-transparent before:border-b-red-500"></div>
-          ) : (
-            <div className="w-5 h-5 bg-blue-500" style={{ clipPath: 'polygon(50% 0%, 100% 100%, 50% 80%, 0% 100%)' }}></div>
-          )}
+          <ThreatIcon type={selectedThreat.type} className="w-6 h-6" />
         </div>
         
         <div className="flex-1">

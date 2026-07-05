@@ -15,40 +15,25 @@ L.Icon.Default.mergeOptions({
   shadowUrl: '/marker-shadow.png',
 });
 
+import { THREAT_SVGS, THREAT_COLORS } from './ThreatIcon';
+
 const getIcon = (type: string, direction: number | null | undefined) => {
-  const isDrone = type === 'DRONE';
-  const isMissile = type === 'MISSILE' || type === 'CRUISE_MISSILE';
-  const isBallistic = type === 'BALLISTIC_MISSILE';
-  const isKab = type === 'KAB';
-  const isAircraft = type === 'AIRCRAFT';
+  const isThreat = Object.keys(THREAT_SVGS).includes(type);
   
-  if (isDrone || isMissile || isBallistic || isKab || isAircraft) {
+  if (isThreat) {
     const rot = direction || 0;
     
-    let svgIcon = '';
-    let colorClass = 'text-red-500';
-    let ringColor = 'rgba(239, 68, 68, 0.5)';
+    let svgIcon = THREAT_SVGS[type as keyof typeof THREAT_SVGS] || THREAT_SVGS['DRONE'];
+    let ringColor = THREAT_COLORS[type as keyof typeof THREAT_COLORS] || '#ffffff';
     
-    if (isDrone) {
-      svgIcon = `<div class="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[16px] border-l-transparent border-r-transparent border-b-red-500"></div>`;
-    } else if (isMissile) {
-      svgIcon = `<div class="w-2 h-5 bg-red-500 relative before:content-[''] before:absolute before:-top-1.5 before:left-0 before:w-0 before:h-0 before:border-l-[4px] before:border-r-[4px] before:border-b-[6px] before:border-l-transparent before:border-r-transparent before:border-b-red-500"></div>`;
-    } else if (isBallistic) {
-      svgIcon = `<div class="w-2.5 h-6 bg-orange-500 relative before:content-[''] before:absolute before:-top-2 before:left-0 before:w-0 before:h-0 before:border-l-[5px] before:border-r-[5px] before:border-b-[8px] before:border-l-transparent before:border-r-transparent before:border-b-orange-500"></div>`;
-      ringColor = 'rgba(249, 115, 22, 0.5)';
-    } else if (isKab) {
-      svgIcon = `<div class="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[16px] border-l-transparent border-r-transparent border-b-purple-500"></div>`;
-      ringColor = 'rgba(168, 85, 247, 0.5)';
-    } else if (isAircraft) {
-      svgIcon = `<div class="w-6 h-6 bg-blue-500" style="clip-path: polygon(50% 0%, 100% 100%, 50% 80%, 0% 100%)"></div>`;
-      ringColor = 'rgba(59, 130, 246, 0.5)';
-    }
+    // Add opacity to ring color
+    ringColor = ringColor + '80'; // 50% opacity hex
     
     return L.divIcon({
       className: 'custom-div-icon',
       html: `<div style="position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                <div class="radar-pulse" style="--ring-color: ${ringColor}"></div>
-               <div style="transform: rotate(${rot}deg); z-index: 10; filter: drop-shadow(0 0 8px ${ringColor});">
+               <div style="transform: rotate(${rot}deg); z-index: 10; width: 24px; height: 24px; color: ${THREAT_COLORS[type as keyof typeof THREAT_COLORS]}; filter: drop-shadow(0 0 6px ${ringColor});">
                  ${svgIcon}
                </div>
              </div>`,
