@@ -9,7 +9,8 @@ import reportRoutes from './routes/reports';
 import threatRoutes from './routes/threats';
 import messageRoutes from './routes/messages';
 import adminRoutes from './routes/admin';
-import { startTelegramWorker } from './workers/telegramWorker';
+import webhookRoutes from './routes/webhooks';
+
 import { startAlertsWorker } from './workers/alertsWorker';
 import { startMapaWorker } from './workers/mapaWorker';
 
@@ -34,13 +35,13 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/threats', threatRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/webhooks', webhookRoutes);
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   
-  // Start background workers
-  startTelegramWorker(io);
+  // Start remaining background workers
   startAlertsWorker(io);
   startMapaWorker(io);
 });
