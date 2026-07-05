@@ -7,11 +7,11 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path((?!alerts).*)',
-        destination: `${internalBackend}/api/:path*`
+        destination: process.env.BACKEND_URL ? `${process.env.BACKEND_URL}/api/:path*` : `${internalBackend}/api/:path*`
       },
       {
         source: '/socket.io/:path*',
-        destination: `${internalBackend}/socket.io/:path*`
+        destination: process.env.BACKEND_URL ? `${process.env.BACKEND_URL}/socket.io/:path*` : `${internalBackend}/socket.io/:path*`
       }
     ];
   }
