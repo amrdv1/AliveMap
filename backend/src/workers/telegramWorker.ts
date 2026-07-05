@@ -16,7 +16,10 @@ const CHANNELS = [
   'kyiv_golovne',
   'war_monitor',
   'monitor_ukraine',
-  'radar_ua_top'
+  'radar_ua_top',
+  'kyiv_vanek',
+  'nebo_raketa',
+  'sectorv666'
 ];
 
 export async function startTelegramWorker(io: Server) {
