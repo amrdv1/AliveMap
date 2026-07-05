@@ -5,7 +5,7 @@ export const revalidate = 0;
 
 export async function GET() {
   try {
-    const res = await fetch('https://ubilling.net.ua/aerialalerts/', {
+    const res = await fetch('https://alerts.com.ua/api/states', {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; ALIVEMAP/1.0)',
         'Accept': 'application/json'
@@ -18,7 +18,16 @@ export async function GET() {
     }
     
     const data = await res.json();
-    return NextResponse.json(data);
+    
+    // Transform alerts.com.ua array format to match Map.tsx expectations
+    const statesMap: Record<string, any> = {};
+    if (data.states && Array.isArray(data.states)) {
+      data.states.forEach((s: any) => {
+        statesMap[s.name] = { alertnow: s.alert };
+      });
+    }
+    
+    return NextResponse.json({ states: statesMap });
   } catch (error: any) {
     console.error('Error fetching alerts via Next.js API proxy:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
