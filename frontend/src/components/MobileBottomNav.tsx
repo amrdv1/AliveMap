@@ -6,7 +6,7 @@ export default function MobileBottomNav() {
   const { activeTab, setActiveTab, setAboutOpen } = useStore();
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 w-full h-16 bg-[#070b14]/95 backdrop-blur-xl border-t border-gray-800 flex items-center justify-around z-50 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
+    <div className="lg:hidden fixed bottom-0 left-0 w-full h-16 bg-[#030b1d] border-t border-gray-800 flex items-center justify-around z-50 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
       <button 
         onClick={() => setActiveTab('MAP')}
         className={`flex flex-col items-center justify-center gap-1 w-1/4 transition-colors ${activeTab === 'MAP' ? 'text-red-500' : 'text-gray-500 hover:text-gray-300'}`}

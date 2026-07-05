@@ -15,9 +15,9 @@ export default function StatsBottomPanel() {
   return (
     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-30 pointer-events-none">
       {/* Stats Pill - Premium Dark Edition */}
-      <div className="pointer-events-auto bg-[#070b14]/80 backdrop-blur-xl border border-white/10 rounded-2xl px-6 py-3 flex flex-wrap justify-center md:flex-nowrap items-center gap-6 shadow-[0_10px_40px_rgba(0,0,0,0.8)]">
+      <div className="pointer-events-auto bg-[#030b1d] border border-white/10 rounded-2xl px-6 py-3 flex flex-wrap justify-center md:flex-nowrap items-center gap-6 shadow-[0_10px_40px_rgba(0,0,0,0.8)]">
         <div className="hidden md:flex items-center gap-2 pr-2 border-r border-gray-700/50">
-          <img src="/logo.png" alt="Logo" className="w-5 h-5 object-contain drop-shadow-[0_0_5px_rgba(239,68,68,0.8)]" />
+          <img src="/logo.png" alt="Logo" className="w-5 h-5 object-contain" />
           <span className="text-white text-xs font-black tracking-widest drop-shadow-[0_0_8px_rgba(239,68,68,0.3)]">ALIVEMAP</span>
         </div>
         

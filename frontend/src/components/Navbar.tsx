@@ -14,12 +14,12 @@ export default function Navbar() {
   }, []);
 
   return (
-    <div className="absolute top-4 left-4 right-4 h-16 bg-[#070b14]/70 backdrop-blur-xl rounded-2xl flex items-center justify-between px-6 z-30 border border-white/10 shadow-lg">
+    <div className="absolute top-4 left-4 right-4 h-16 bg-[#030b1d] rounded-2xl flex items-center justify-between px-6 z-30 border border-white/10 shadow-lg">
       {/* Logo */}
       <div className="flex items-center gap-3">
         <div className="relative flex items-center justify-center w-8 h-8">
           <div className="absolute inset-0 bg-red-500/20 rounded-full animate-ping"></div>
-          <img src="/logo.png" alt="AliveMap Logo" className="relative z-10 w-7 h-7 object-contain drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+          <img src="/logo.png" alt="AliveMap Logo" className="relative z-10 w-7 h-7 object-contain" />
         </div>
         <h1 className="text-lg font-bold tracking-widest text-white/90 flex items-center gap-1 uppercase">
           Alive<span className="text-red-500">Map</span>
@@ -70,7 +70,7 @@ export default function Navbar() {
       {/* About Modal */}
       {useStore((state) => state.isAboutOpen) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md" onClick={() => setAboutOpen(false)}>
-          <div className="bg-[#05080f] border border-gray-800 rounded-3xl p-8 w-[550px] shadow-[0_0_50px_rgba(0,0,0,1)] relative overflow-hidden" onClick={e => e.stopPropagation()}>
+          <div className="bg-[#030b1d] border border-gray-800 rounded-3xl p-8 w-[550px] shadow-[0_0_50px_rgba(0,0,0,1)] relative overflow-hidden" onClick={e => e.stopPropagation()}>
             {/* Background glowing effects */}
             <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-red-500/10 to-transparent pointer-events-none"></div>
             
@@ -80,7 +80,7 @@ export default function Navbar() {
             
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-red-500/10 rounded-2xl border border-red-500/20 flex items-center justify-center w-14 h-14">
-                <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
+                <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
               </div>
               <div>
                 <h2 className="text-2xl font-black text-white uppercase tracking-wider">ALIVEMAP</h2>
