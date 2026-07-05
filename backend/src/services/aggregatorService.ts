@@ -93,13 +93,28 @@ export async function processExternalThreat(
   }
 
   // 3. Create new threat
+  
+  // Assign default realistic speeds for animation if none provided
+  let defaultSpeed = speed;
+  if (defaultSpeed == null) {
+      switch (threatType as ReportType) {
+          case 'DRONE': defaultSpeed = 150; break;
+          case 'MISSILE': 
+          case 'CRUISE_MISSILE': defaultSpeed = 800; break;
+          case 'BALLISTIC_MISSILE': defaultSpeed = 3000; break;
+          case 'KAB': defaultSpeed = 600; break;
+          case 'AIRCRAFT': defaultSpeed = 800; break;
+          case 'RECON': defaultSpeed = 100; break;
+      }
+  }
+
   const newThreat = await prisma.threatObject.create({
     data: {
       externalId,
       type: threatType as ReportType,
       confidence,
       status: ReportStatus.ACTIVE,
-      speed,
+      speed: defaultSpeed,
       course,
       locations: {
         createMany: {

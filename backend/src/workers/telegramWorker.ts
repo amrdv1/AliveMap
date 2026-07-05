@@ -20,7 +20,15 @@ const CHANNELS = [
   'kyiv_vanek',
   'nebo_raketa',
   'sectorv666',
-  'deraketaua'
+  'deraketaua',
+  'eradarrrua',
+  'kherson_non_drone',
+  'rozvidkaneba',
+  'kudy_letyt',
+  'nablydatel_dozor',
+  'krolevetsnews',
+  'place_kharkiv',
+  'ukraineradar_24_7'
 ];
 
 const PRIVATE_TITLES = [
@@ -81,8 +89,7 @@ export async function startTelegramWorker(io: Server) {
         if (!parsedThreats || parsedThreats.length === 0) return; // Ignore generic alerts
         
         const channelDisplay = username || title || 'Monitoring';
-        const isSummary = parsedThreats.some(t => t.lat === null && t.lng === null);
-        const tags = isSummary ? ['SUMMARY'] : [parsedThreats[0].type];
+        const tags = [parsedThreats[0].type];
 
         try {
             const savedMsg = await prisma.monitoringMessage.create({
@@ -152,8 +159,7 @@ export async function startTelegramWorker(io: Server) {
                     if (!parsedThreats || parsedThreats.length === 0) continue;
                     
                     const channelDisplay = username || title || 'Monitoring';
-                    const isSummary = parsedThreats.some(t => t.lat === null && t.lng === null);
-                    const tags = isSummary ? ['SUMMARY'] : [parsedThreats[0].type];
+                    const tags = [parsedThreats[0].type];
 
                     try {
                         const savedMsg = await prisma.monitoringMessage.create({

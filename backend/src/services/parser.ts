@@ -129,7 +129,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
   // Capture summaries and informational noise as a special ALERT type with null coordinates
   // so it gets saved to the message history but doesn't spawn a map marker
   if (lowerText.match(/(збито|знищено|за добу|наслідки|втрати|підсумки|статистика|постраждал|загинул|відбій|ліквідаці|інформаці|зведення|уламк|загалом)/)) {
-      return [{ type: 'ALERT', lat: null, lng: null, confidence: 100, direction: null }];
+      return [{ type: 'SUMMARY', lat: null, lng: null, confidence: 100, direction: null }];
   }
   
   // Filter out generic alerts that do not mention movement, takeoffs, or specific presence
@@ -139,7 +139,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
 
   // Must contain an active action word, or a direct pointing word like "на" (e.g., "КАБ на Харків")
   if (!lowerText.match(/(летить|рух|зліт|пуск|напрямок|загроза|фіксує|повітрі|пускові|курс|вибух|атака|йде|на |до |увага|небезпека|відмічено)/)) {
-      return [];
+      return [{ type: 'INFO', lat: null, lng: null, confidence: 100, direction: null }];
   }
   
   const matchedLocations: {lat: number, lng: number, conf: number}[] = [];
