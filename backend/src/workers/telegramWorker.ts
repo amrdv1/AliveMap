@@ -83,12 +83,68 @@ export async function startTelegramWorker(io: Server) {
           });
 
           io.emit('report:new', report);
-          console.log(`Telegram Threat Detected: ${parsed.type} at [${parsed.lat}, ${parsed.lng}] from ${username}`);
+          console.log(`Telegram Threat Detected: ${parsed.type} at [${parsed.lat}, ${parsed.lng}] from ${username || title}`);
         }
       }
     }, new NewMessage({}));
 
+    // Fetch history asynchronously
+    fetchHistory(client, sourceId, io);
+
   } catch (err) {
     console.error("Failed to start Telegram Worker:", err);
+  }
+}
+
+async function fetchHistory(client: TelegramClient, sourceId: string, io: Server) {
+  try {
+    console.log("Cleaning up old Telegram reports...");
+    await prisma.report.deleteMany({ where: { sourceId } });
+
+    console.log("Fetching history for tracked channels...");
+    const dialogs = await client.getDialogs();
+    
+    for (const dialog of dialogs) {
+      // For some dialogs, entity might be undefined
+      if (!dialog.entity) continue;
+      
+      const username = ('username' in dialog.entity && dialog.entity.username) 
+        ? dialog.entity.username.toLowerCase() 
+        : null;
+      const title = dialog.title;
+      
+      const isPublicMatch = username && CHANNELS.some(c => c.toLowerCase() === username);
+      const isPrivateMatch = title && PRIVATE_CHANNEL_TITLES.includes(title);
+      
+      if (isPublicMatch || isPrivateMatch) {
+        console.log(`Fetching history for ${title || username}...`);
+        const messages = await client.getMessages(dialog.entity, { limit: 20 });
+        
+        // Reverse to process oldest first
+        for (const message of messages.reverse()) {
+          if (!message || !message.message) continue;
+          
+          const text = message.message;
+          const parsed = parseTelegramText(text);
+          
+          if (parsed.lat !== null && parsed.lng !== null) {
+            const report = await prisma.report.create({
+              data: {
+                type: parsed.type,
+                lat: parsed.lat,
+                lng: parsed.lng,
+                confidence: parsed.confidence,
+                sourceId: sourceId
+              },
+              include: { source: true }
+            });
+            io.emit('report:new', report);
+          }
+        }
+      }
+    }
+    console.log("History fetch complete.");
+  } catch (err) {
+    console.error("Error fetching history:", err);
   }
 }
