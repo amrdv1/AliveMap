@@ -3,7 +3,7 @@ import { ReportType, ReportStatus, ThreatObject } from '@prisma/client';
 
 export async function processExternalThreat(
   externalId: string | null,
-  threatType: ReportType,
+  threatType: ReportType | string,
   lat: number,
   lng: number,
   time: Date,

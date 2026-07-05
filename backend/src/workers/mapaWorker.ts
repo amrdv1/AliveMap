@@ -82,7 +82,9 @@ export async function startMapaWorker(io: Server) {
           trailLocations
         );
 
-        updatedThreats.push(savedThreat);
+        if (savedThreat) {
+          updatedThreats.push(savedThreat);
+        }
       }
 
       // Mark older threats as ARCHIVED if they weren't matched

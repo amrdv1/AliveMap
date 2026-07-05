@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, Type } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
 export interface ParsedThreat {
   type: 'DRONE' | 'MISSILE' | 'CRUISE_MISSILE' | 'BALLISTIC_MISSILE' | 'AIRCRAFT' | 'KAB' | 'RECON' | 'PPO' | 'ALERT';
@@ -124,14 +124,14 @@ export async function parseTelegramText(text: string): Promise<ParsedThreat> {
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
-          type: Type.OBJECT,
+          type: SchemaType.OBJECT,
           properties: {
-            type: { type: Type.STRING, enum: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'AIRCRAFT', 'KAB', 'RECON', 'PPO', 'ALERT'] },
-            lat: { type: Type.NUMBER, nullable: true },
-            lng: { type: Type.NUMBER, nullable: true },
-            confidence: { type: Type.NUMBER, description: "0 to 100" },
-            direction: { type: Type.NUMBER, nullable: true, description: "0 to 360 degrees" },
-            speed: { type: Type.NUMBER, nullable: true, description: "km/h" }
+            type: { type: SchemaType.STRING, enum: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'AIRCRAFT', 'KAB', 'RECON', 'PPO', 'ALERT'] },
+            lat: { type: SchemaType.NUMBER, nullable: true },
+            lng: { type: SchemaType.NUMBER, nullable: true },
+            confidence: { type: SchemaType.NUMBER, description: "0 to 100" },
+            direction: { type: SchemaType.NUMBER, nullable: true, description: "0 to 360 degrees" },
+            speed: { type: SchemaType.NUMBER, nullable: true, description: "km/h" }
           },
           required: ["type", "confidence"]
         }
