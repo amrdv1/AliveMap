@@ -64,7 +64,7 @@ if (!apiId || !apiHash || !sessionStr) {
 
 const stringSession = new StringSession(sessionStr);
 const backendPort = process.env.PORT || 3001;
-const WEBHOOK_URL = process.env.WEBHOOK_URL || `http://127.0.0.1:${backendPort}/api/webhooks/telegram`;
+const WEBHOOK_URL = process.env.WEBHOOK_URL || `https://alivemap-production.up.railway.app/api/webhooks/telegram`;
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'your-super-secret-key';
 
 const client = new TelegramClient(stringSession, apiId, apiHash, {

@@ -59,7 +59,7 @@ export const useStore = create<AppState>((set) => ({
   filters: {
     types: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KAB', 'AIRCRAFT', 'ALERT'],
     showArchived: false,
-    minConfidence: 0.5,
+    minConfidence: 0.0,
   },
   setThreats: (threats) => set({ threats }),
   updateThreat: (newThreat) => set((state) => {
