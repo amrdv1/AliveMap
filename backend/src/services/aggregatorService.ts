@@ -21,7 +21,7 @@ export async function processExternalThreat(
       include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
     });
     if (existing) {
-      return await updateThreat(existing, lat, lng, time, sourceId, speed, course, trailLocations);
+      return await updateThreat(existing, lat, lng, time, sourceId, speed, course, trailLocations, confidence);
     }
   }
 
@@ -58,7 +58,7 @@ export async function processExternalThreat(
       }
     }
 
-    return await updateThreat(matchedThreat, lat, lng, time, sourceId, finalSpeed, finalCourse, trailLocations);
+    return await updateThreat(matchedThreat, lat, lng, time, sourceId, finalSpeed, finalCourse, trailLocations, confidence);
   }
 
   // 3. Create new threat
@@ -95,7 +95,8 @@ async function updateThreat(
   sourceId: string, 
   speed?: number | null, 
   course?: number | null,
-  trailLocations?: Array<{lat: number, lng: number, time: Date, sourceId: string}>
+  trailLocations?: Array<{lat: number, lng: number, time: Date, sourceId: string}>,
+  newConfidence: number = 1.0
 ) {
   let newLocations = trailLocations;
   
@@ -107,11 +108,15 @@ async function updateThreat(
   const lastSavedTime = existingThreat.locations[0]?.time.getTime() || 0;
   const pointsToSave = newLocations.filter(t => t.time.getTime() > lastSavedTime);
 
+  // Preserve highest confidence (e.g., if Telegram AI sets 1.0, don't downgrade it to 0.3 from Mapa)
+  const finalConfidence = Math.max(existingThreat.confidence || 0, newConfidence);
+
   return await prisma.threatObject.update({
     where: { id: existingThreat.id },
     data: {
       speed: speed ?? existingThreat.speed,
       course: course ?? existingThreat.course,
+      confidence: finalConfidence,
       locations: pointsToSave.length > 0 ? { createMany: { data: pointsToSave } } : undefined
     },
     include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }

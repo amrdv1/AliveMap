@@ -1,9 +1,12 @@
+import { GoogleGenerativeAI, Type } from "@google/generative-ai";
+
 export interface ParsedThreat {
   type: 'DRONE' | 'MISSILE' | 'CRUISE_MISSILE' | 'BALLISTIC_MISSILE' | 'AIRCRAFT' | 'KAB' | 'RECON' | 'PPO' | 'ALERT';
   lat: number | null;
   lng: number | null;
   confidence: number;
   direction?: number;
+  speed?: number;
 }
 
 const EXTENDED_CITY_COORDS: Record<string, {lat: number, lng: number}> = {
@@ -66,31 +69,19 @@ const EXTENDED_CITY_COORDS: Record<string, {lat: number, lng: number}> = {
   "сміл": { lat: 49.2272, lng: 31.8797 },
 };
 
-export function parseTelegramText(text: string): ParsedThreat {
+function parseTelegramTextRegex(text: string): ParsedThreat {
   const lowerText = text.toLowerCase();
   
   let type: ParsedThreat['type'] = 'ALERT';
-  
-  // Threat Types Identification
-  if (lowerText.match(/(шахед|бпла|мопед|безпілотник|герань)/)) {
-    type = 'DRONE';
-  } else if (lowerText.match(/(каб|фаб|керован.*бомб|авіабомб)/)) {
-    type = 'KAB';
-  } else if (lowerText.match(/(розвід|орлан|zala|зала|supercam)/)) {
-    type = 'RECON';
-  } else if (lowerText.match(/(ппо|збито|відпрацювало|протиповітр)/)) {
-    type = 'PPO';
-  } else if (lowerText.match(/(кинджал|балістик|іскандер-м)/)) {
-    type = 'BALLISTIC_MISSILE';
-  } else if (lowerText.match(/(х-101|калібр|крилат.*ракет|іскандер-к)/)) {
-    type = 'CRUISE_MISSILE';
-  } else if (lowerText.match(/(ракет|х-)/)) {
-    type = 'MISSILE';
-  } else if (lowerText.match(/(ту-95|ту-22|міг-31|авіаці|су-34|су-35)/)) {
-    type = 'AIRCRAFT';
-  }
+  if (lowerText.match(/(шахед|бпла|мопед|безпілотник|герань)/)) type = 'DRONE';
+  else if (lowerText.match(/(каб|фаб|керован.*бомб|авіабомб)/)) type = 'KAB';
+  else if (lowerText.match(/(розвід|орлан|zala|зала|supercam)/)) type = 'RECON';
+  else if (lowerText.match(/(ппо|збито|відпрацювало|протиповітр)/)) type = 'PPO';
+  else if (lowerText.match(/(кинджал|балістик|іскандер-м)/)) type = 'BALLISTIC_MISSILE';
+  else if (lowerText.match(/(х-101|калібр|крилат.*ракет|іскандер-к)/)) type = 'CRUISE_MISSILE';
+  else if (lowerText.match(/(ракет|х-)/)) type = 'MISSILE';
+  else if (lowerText.match(/(ту-95|ту-22|міг-31|авіаці|су-34|су-35)/)) type = 'AIRCRAFT';
 
-  // Course / Direction Identification (Rough estimation from keywords)
   let direction = undefined;
   if (lowerText.match(/(курс(ом)?\s*на\s*північ|вектор\s*північ|на\s*північ)/)) direction = 0;
   else if (lowerText.match(/(курс(ом)?\s*на\s*північний.*схід|на\s*північний.*схід)/)) direction = 45;
@@ -100,27 +91,77 @@ export function parseTelegramText(text: string): ParsedThreat {
   else if (lowerText.match(/(курс(ом)?\s*на\s*південний.*захід|на\s*південний.*захід)/)) direction = 225;
   else if (lowerText.match(/(курс(ом)?\s*на\s*захід|вектор\s*захід|на\s*захід)/)) direction = 270;
   else if (lowerText.match(/(курс(ом)?\s*на\s*північний.*захід|на\s*північний.*захід)/)) direction = 315;
-  else if (lowerText.match(/курс/)) direction = Math.floor(Math.random() * 360); // fallback if course mentioned but not compass
+  else if (lowerText.match(/курс/)) direction = Math.floor(Math.random() * 360); 
 
   let lat = null;
   let lng = null;
   let confidence = 0;
-  
-  // Random offset to avoid stacking exact same coordinates
   const jitter = () => (Math.random() - 0.5) * 0.15; 
   
-  // Search for cities in text
   for (const [cityKey, coords] of Object.entries(EXTENDED_CITY_COORDS)) {
     if (lowerText.includes(cityKey)) {
       lat = coords.lat + jitter();
       lng = coords.lng + jitter();
       confidence = 85;
-      
-      // If we found a city and "курс на [місто]", point the direction somewhat towards the city center if we could calculate it, 
-      // but without a from-location, it's hard. So we just rely on compass directions.
       break;
     }
   }
   
   return { type, lat, lng, confidence, direction };
 }
+
+export async function parseTelegramText(text: string): Promise<ParsedThreat> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.warn("No GEMINI_API_KEY found, falling back to Regex parser");
+    return parseTelegramTextRegex(text);
+  }
+
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            type: { type: Type.STRING, enum: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'AIRCRAFT', 'KAB', 'RECON', 'PPO', 'ALERT'] },
+            lat: { type: Type.NUMBER, nullable: true },
+            lng: { type: Type.NUMBER, nullable: true },
+            confidence: { type: Type.NUMBER, description: "0 to 100" },
+            direction: { type: Type.NUMBER, nullable: true, description: "0 to 360 degrees" },
+            speed: { type: Type.NUMBER, nullable: true, description: "km/h" }
+          },
+          required: ["type", "confidence"]
+        }
+      }
+    });
+
+    const prompt = \`You are a military intelligence parser. Read the following Ukrainian Telegram message about an air raid threat and extract the details.
+Calculate the exact latitude and longitude based on the mentioned city, region, or direction in Ukraine.
+If it's a threat (drone, missile, aircraft), output coordinates. If it's general news or PPO (air defense) working, set lat/lng to null.
+If you know the coordinates of the city/region, output them. Be as precise as possible.
+Set confidence to 100 if you found exact coordinates, 0 if not.
+Text: "\${text}"\`;
+
+    const result = await model.generateContent(prompt);
+    const parsed = JSON.parse(result.response.text());
+    
+    // Safety check and jitter
+    const jitter = () => (Math.random() - 0.5) * 0.05;
+    
+    return {
+      type: parsed.type,
+      lat: parsed.lat ? parsed.lat + jitter() : null,
+      lng: parsed.lng ? parsed.lng + jitter() : null,
+      confidence: parsed.confidence || 0,
+      direction: parsed.direction || undefined,
+      speed: parsed.speed || undefined
+    };
+  } catch (error) {
+    console.error("Gemini API Error, falling back to Regex:", error);
+    return parseTelegramTextRegex(text);
+  }
+}
+

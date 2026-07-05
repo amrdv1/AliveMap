@@ -106,8 +106,8 @@ async function start() {
         const text = message.message;
         const channelName = isPublicMatch ? username : title;
         
-        // 1. Analyze with regex
-        const parsed = parseTelegramText(text);
+        // 1. Analyze with AI/Regex
+        const parsed = await parseTelegramText(text);
         
         // 2. Extract tags
         const tags = [];

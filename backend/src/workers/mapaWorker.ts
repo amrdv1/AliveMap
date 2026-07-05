@@ -63,7 +63,7 @@ export async function startMapaWorker(io: Server) {
 
         const threatData = {
           type: threatType,
-          confidence: 1.0, 
+          confidence: 0.3, // Lower confidence for mapa.ua (background layer)
           status: ReportStatus.ACTIVE,
           speed: obj.speed_kmh || null,
           course: latestLoc.heading || obj.heading || null,
@@ -78,7 +78,7 @@ export async function startMapaWorker(io: Server) {
           source!.id,
           threatData.speed,
           threatData.course,
-          1.0,
+          0.3, // confidence
           trailLocations
         );
 

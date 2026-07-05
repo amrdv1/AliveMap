@@ -54,12 +54,7 @@ const PORT = process.env.PORT || 3001;
 server.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   
-  // Wipe DB for testing purely Telegram parser
-  console.log("WIPING DB FOR TEST...");
-  await prisma.threatObject.deleteMany({});
-  await prisma.report.deleteMany({});
-
   // Start remaining background workers
   startAlertsWorker(io);
-  // startMapaWorker(io); // Disabled for testing Telegram parser purely
+  startMapaWorker(io); // Re-enabled mapa.ua as background layer
 });
