@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path((?!alerts).*)',
-        destination: 'http://localhost:3001/api/:path*' // Proxy to Backend
+        destination: process.env.BACKEND_URL ? `${process.env.BACKEND_URL}/api/:path*` : 'http://localhost:3001/api/:path*' // Proxy to Backend
       }
     ];
   }

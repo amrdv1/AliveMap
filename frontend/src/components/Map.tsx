@@ -191,8 +191,7 @@ export default function Map() {
     
     const fetchThreats = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const res = await fetch(`${apiUrl}/api/threats`);
+        const res = await fetch('/api/threats');
         const data = await res.json();
         setThreats(data);
       } catch (e) {
