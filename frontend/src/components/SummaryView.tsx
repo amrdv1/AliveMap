@@ -9,7 +9,7 @@ export default function SummaryView() {
   const alertRegions = Object.entries(alerts).filter(([_, data]) => data.alertnow).map(([region]) => region);
 
   const drones = activeThreats.filter(t => t.type === 'DRONE');
-  const missiles = activeThreats.filter(t => t.type.includes('MISSILE'));
+  const missiles = activeThreats.filter(t => t.type.includes('MISSILE') || t.type === 'ZIRCON');
   const aircraft = activeThreats.filter(t => t.type === 'AIRCRAFT');
   const kabs = activeThreats.filter(t => t.type === 'KAB');
 
@@ -35,11 +35,12 @@ export default function SummaryView() {
         </div>
 
         {/* Detailed Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <StatCard title="Шахеди" count={drones.length} color="bg-red-500" icon="🛸" />
           <StatCard title="Ракети" count={missiles.length} color="bg-orange-500" icon="🚀" />
-          <StatCard title="Тактична Авіація" count={aircraft.length} color="bg-blue-500" icon="✈️" />
-          <StatCard title="КАБи / БПЛА" count={kabs.length + activeThreats.filter(t=>t.type==='RECON').length} color="bg-yellow-500" icon="🎯" />
+          <StatCard title="Авіація" count={aircraft.length} color="bg-blue-500" icon="✈️" />
+          <StatCard title="КАБи" count={kabs.length} color="bg-yellow-500" icon="🎯" />
+          <StatCard title="Розвідка" count={activeThreats.filter(t=>t.type==='RECON').length} color="bg-gray-500" icon="👁️" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

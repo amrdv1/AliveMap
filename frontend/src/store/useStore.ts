@@ -68,7 +68,7 @@ export const useStore = create<AppState>((set) => ({
   isAboutOpen: false,
   activeTab: 'MAP',
   filters: {
-    types: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KAB', 'AIRCRAFT', 'ALERT'],
+    types: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KAB', 'AIRCRAFT', 'ALERT', 'ZIRCON', 'PPO', 'RECON'],
     showArchived: false,
     minConfidence: 0.0,
   },
@@ -84,7 +84,7 @@ export const useStore = create<AppState>((set) => ({
   }),
   setAlerts: (alerts) => set({ alerts }),
   setMessages: (messages) => set({ messages }),
-  addMessage: (message) => set((state) => ({ messages: [message, ...state.messages].slice(0, 50) })),
+  addMessage: (message) => set((state) => ({ messages: [message, ...state.messages].slice(0, 200) })),
   setFilter: (key, value) => set((state) => ({
     filters: { ...state.filters, [key]: value }
   })),

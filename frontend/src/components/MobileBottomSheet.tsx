@@ -50,7 +50,7 @@ export default function MobileBottomSheet() {
         </div>
         <div className="text-center border-l border-r border-gray-800">
           <div className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-medium">Швидкість</div>
-          <div className="text-lg font-bold text-white">{selectedThreat.speed ? `${Math.round(selectedThreat.speed)} км/г` : '—'}</div>
+          <div className="text-lg font-bold text-white">{selectedThreat.speed ? `${Math.round(selectedThreat.speed)} км/год` : '—'}</div>
         </div>
         <div className="text-center">
           <div className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-medium">Висота</div>

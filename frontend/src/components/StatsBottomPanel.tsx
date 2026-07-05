@@ -11,7 +11,7 @@ export default function StatsBottomPanel() {
   const alertsCount = Object.values(alerts).filter(a => a?.alertnow === true).length;
   
   const dronesCount = activeThreats.filter(t => t.type === 'DRONE').length;
-  const missilesCount = activeThreats.filter(t => t.type === 'CRUISE_MISSILE' || t.type === 'BALLISTIC_MISSILE' || t.type === 'MISSILE').length;
+  const missilesCount = activeThreats.filter(t => t.type === 'CRUISE_MISSILE' || t.type === 'BALLISTIC_MISSILE' || t.type === 'MISSILE' || t.type === 'ZIRCON').length;
   const aircraftCount = activeThreats.filter(t => t.type === 'AIRCRAFT').length;
 
   return (

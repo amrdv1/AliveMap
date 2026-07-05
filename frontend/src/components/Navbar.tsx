@@ -63,7 +63,7 @@ export default function Navbar() {
         </div>
         <div className="flex items-center gap-2 bg-red-500/10 px-3 py-1.5 rounded-full border border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]">
           <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,1)]"></div>
-          <span className="text-red-500 text-xs font-black tracking-widest uppercase">LIVE</span>
+          <span className="text-red-500 text-xs font-black tracking-widest uppercase">НАЖИВО</span>
         </div>
       </div>
       
