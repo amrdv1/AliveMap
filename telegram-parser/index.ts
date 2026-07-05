@@ -8,6 +8,8 @@ import { parseTelegramText } from './parser';
 dotenv.config();
 
 const CHANNELS = [
+  'smolii_ukraine',
+  'kyiv_golovne',
   'vanek_nikolaev',
   'kievreal1',
   'war_monitor',
