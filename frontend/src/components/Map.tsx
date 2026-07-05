@@ -15,7 +15,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: '/marker-shadow.png',
 });
 
-const getIcon = (type: string, direction: number | undefined) => {
+const getIcon = (type: string, direction: number | null | undefined) => {
   const isDrone = type === 'DRONE';
   const isMissile = type === 'MISSILE' || type === 'CRUISE_MISSILE';
   const isBallistic = type === 'BALLISTIC_MISSILE';
