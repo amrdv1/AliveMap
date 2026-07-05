@@ -41,18 +41,21 @@ export interface AppState {
     showArchived: boolean;
     minConfidence: number;
   };
+  isAboutOpen: boolean;
   setThreats: (threats: ThreatObject[]) => void;
   updateThreat: (threat: ThreatObject) => void;
   setAlerts: (alerts: AlertsData) => void;
   setMessages: (messages: MonitoringMessage[]) => void;
   addMessage: (message: MonitoringMessage) => void;
   setFilter: (key: keyof AppState['filters'], value: any) => void;
+  setAboutOpen: (open: boolean) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
   threats: [],
   alerts: {},
   messages: [],
+  isAboutOpen: false,
   filters: {
     types: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KAB', 'AIRCRAFT', 'ALERT'],
     showArchived: false,
@@ -73,5 +76,6 @@ export const useStore = create<AppState>((set) => ({
   addMessage: (message) => set((state) => ({ messages: [message, ...state.messages].slice(0, 50) })),
   setFilter: (key, value) => set((state) => ({
     filters: { ...state.filters, [key]: value }
-  }))
+  })),
+  setAboutOpen: (isAboutOpen) => set({ isAboutOpen })
 }));
