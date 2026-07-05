@@ -57,4 +57,25 @@ server.listen(PORT, async () => {
   // Start remaining background workers
   startAlertsWorker(io);
   startMapaWorker(io); // Re-enabled mapa.ua as background layer
+  
+  // Auto-archive stale targets (no updates in 15 mins)
+  setInterval(async () => {
+    try {
+      const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
+      const updated = await prisma.threatObject.updateMany({
+        where: {
+          status: 'ACTIVE',
+          updatedAt: { lt: fifteenMinsAgo }
+        },
+        data: { status: 'ARCHIVED' }
+      });
+      if (updated.count > 0) {
+        console.log(`[Archiver] Archived ${updated.count} stale targets.`);
+        // Note: Frontend fetches the whole list, so it will update on next polling,
+        // or we could emit a socket event if needed. But for now, DB update is fine.
+      }
+    } catch (e) {
+      console.error('[Archiver] Error:', e);
+    }
+  }, 60000); // Check every 1 minute
 });

@@ -6,7 +6,7 @@ export const revalidate = 0;
 export async function GET() {
   try {
     // We fetch directly because Next.js API route runs on server (bypasses CORS) and ubilling doesn't block Railway IPs
-    const res = await fetch('https://ubilling.net.ua/aerialalerts/', {
+    const res = await fetch('https://siren.pp.ua/api/v3/alerts', {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
         'Accept': 'application/json'
@@ -20,12 +20,16 @@ export async function GET() {
     
     const data = await res.json();
     
-    // Transform ubilling format to match Map.tsx expectations
+    // Transform siren.pp.ua format to match Map.tsx expectations
     const statesMap: Record<string, any> = {};
-    if (data.states) {
-      for (const [regionName, alertData] of Object.entries(data.states)) {
-        statesMap[regionName] = { alertnow: (alertData as any)?.alertnow === true };
-      }
+    if (Array.isArray(data)) {
+      data.forEach((region: any) => {
+        // Check if there is an active AIR alert in this region
+        const hasAirAlert = region.activeAlerts?.some((a: any) => a.type === 'AIR');
+        if (hasAirAlert) {
+          statesMap[region.regionName] = { alertnow: true };
+        }
+      });
     }
     
     return NextResponse.json({ states: statesMap });

@@ -138,12 +138,13 @@ export async function parseTelegramText(text: string): Promise<ParsedThreat> {
       }
     });
 
-    const prompt = \`You are a military intelligence parser. Read the following Ukrainian Telegram message about an air raid threat and extract the details.
+    const prompt = `You are a military intelligence parser. Read the following Ukrainian Telegram message about an air raid threat and extract the details.
 Calculate the exact latitude and longitude based on the mentioned city, region, or direction in Ukraine.
-If it's a threat (drone, missile, aircraft), output coordinates. If it's general news or PPO (air defense) working, set lat/lng to null.
+If the text says a target was SHOT DOWN or DESTROYED ("збили", "знищено", "відпрацювала ППО", "чисто", "мінус"), output type: "PPO" AND output the lat/lng of where it happened so we can remove it from the map.
+If it's an active threat (drone, missile, aircraft), output its type and coordinates.
 If you know the coordinates of the city/region, output them. Be as precise as possible.
 Set confidence to 100 if you found exact coordinates, 0 if not.
-Text: "\${text}"\`;
+Text: "${text}"`;
 
     const result = await model.generateContent(prompt);
     const parsed = JSON.parse(result.response.text());

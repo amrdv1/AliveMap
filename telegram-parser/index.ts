@@ -141,6 +141,45 @@ async function start() {
     }, new NewMessage({}));
 
     console.log(`Listening for messages from ${CHANNELS.length} public channels and ${PRIVATE_CHANNEL_TITLES.length} private channels.`);
+
+    // Retroactive fetching
+    console.log("Fetching messages from the last 10 minutes...");
+    const tenMinsAgo = Math.floor(Date.now() / 1000) - (10 * 60);
+    
+    for (const channel of CHANNELS) {
+      try {
+        const messages = await client.getMessages(channel, { limit: 5 });
+        for (const msg of messages) {
+          if (msg.message && msg.date && msg.date >= tenMinsAgo) {
+            console.log(`[Retro] Parsing missed message from ${channel}`);
+            // Re-use parser logic
+            const channelName = channel;
+            
+            const parsed = await parseTelegramText(msg.message);
+            const tags: string[] = [];
+            if (msg.message.toLowerCase().includes('увага')) tags.push('УВАГА');
+            if (msg.message.toLowerCase().includes('відбій')) tags.push('ВІДБІЙ');
+            
+            if (parsed && typeof parsed === 'object') {
+                const payload = {
+                  text: msg.message,
+                  channelName: channelName,
+                  timestamp: new Date(msg.date * 1000).toISOString(),
+                  tags,
+                  parsedThreat: (parsed.lat !== null && parsed.lng !== null) ? parsed : null
+                };
+                
+                await axios.post(WEBHOOK_URL, payload, {
+                  headers: { 'x-webhook-secret': WEBHOOK_SECRET }
+                }).catch(e => console.error('[Retro Webhook Error]', e.message));
+            }
+          }
+        }
+      } catch (err: any) {
+        console.warn(`[Retro] Failed to fetch history for ${channel}: ${err.message}`);
+      }
+    }
+    console.log("Retroactive fetching completed.");
     
   } catch (err) {
     console.error("Fatal Error in Telegram Worker:", err);

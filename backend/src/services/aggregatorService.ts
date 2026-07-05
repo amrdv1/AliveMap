@@ -12,8 +12,39 @@ export async function processExternalThreat(
   course?: number | null,
   confidence: number = 1.0,
   trailLocations?: Array<{lat: number, lng: number, time: Date, sourceId: string}>
-): Promise<ThreatObject> {
-  
+): Promise<ThreatObject | null> {
+  // If it's a PPO event (Shot down / Destroyed)
+  if (threatType === 'PPO') {
+    // Find closest ACTIVE threat
+    const activeThreats = await prisma.threatObject.findMany({
+      where: { status: 'ACTIVE' },
+      include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
+    });
+    
+    let closestThreat = null;
+    let minDistance = 50; // Max radius to consider (50km)
+    
+    for (const t of activeThreats) {
+      if (t.locations.length > 0) {
+        const d = getDistanceFromLatLonInKm(lat, lng, t.locations[0].lat, t.locations[0].lng);
+        if (d < minDistance) {
+          minDistance = d;
+          closestThreat = t;
+        }
+      }
+    }
+    
+    if (closestThreat) {
+      console.log(`[PPO] Archiving closest threat ${closestThreat.id} (${minDistance.toFixed(1)} km away)`);
+      return await prisma.threatObject.update({
+        where: { id: closestThreat.id },
+        data: { status: 'ARCHIVED' },
+        include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
+      });
+    }
+    return null; // Nothing to destroy nearby
+  }
+
   // 1. Exact match via externalId
   if (externalId) {
     const existing = await prisma.threatObject.findUnique({
