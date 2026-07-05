@@ -22,14 +22,15 @@ export async function startAlertsWorker(io: Server) {
             const ALERTS_API_URL = 'https://siren.pp.ua/api/v3/alerts';
             const { data } = await axios.get(ALERTS_API_URL, { timeout: 10000 });
             
-            const formattedStates: Record<string, { alertnow: boolean, regionType?: string }> = {};
+            const formattedStates: Record<string, { alertnow: boolean, regionType?: string, lastUpdate?: string }> = {};
             if (Array.isArray(data)) {
                 data.forEach((region: any) => {
-                    const hasAirAlert = region.activeAlerts?.some((a: any) => a.type === 'AIR');
-                    if (hasAirAlert) {
+                    const airAlert = region.activeAlerts?.find((a: any) => a.type === 'AIR');
+                    if (airAlert) {
                         formattedStates[region.regionName] = { 
                             alertnow: true,
-                            regionType: region.regionType 
+                            regionType: region.regionType,
+                            lastUpdate: airAlert.lastUpdate || region.lastUpdate
                         };
                     }
                 });

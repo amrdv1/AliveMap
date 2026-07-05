@@ -251,6 +251,58 @@ export default function Map() {
     t.locations && t.locations.length > 0
   );
 
+  const bindPopupToFeature = (feature: any, layer: any, regionNameKey: string, isDistrict: boolean) => {
+    const regionName = feature.properties[regionNameKey];
+    
+    // Find matching alert
+    const matchedAlertKey = Object.keys(alerts).find(alertRegion => {
+      if (isDistrict) {
+        return alerts[alertRegion]?.alertnow === true && alerts[alertRegion]?.regionType === 'District' && alertRegion === regionName;
+      } else {
+        return alerts[alertRegion]?.alertnow === true && (!alerts[alertRegion]?.regionType || alerts[alertRegion]?.regionType === 'State') && REGION_NAME_MAP[alertRegion] === regionName;
+      }
+    });
+
+    const alertInfo = matchedAlertKey ? alerts[matchedAlertKey] : null;
+    let popupContent = `<div class="font-sans text-sm p-1">
+      <div class="font-bold text-lg mb-1">${matchedAlertKey || regionName}</div>
+      <div style="color: ${alertInfo ? '#ef4444' : '#9ca3af'}; font-weight: ${alertInfo ? 'bold' : 'normal'}">
+        ${alertInfo ? '🚨 ПОВІТРЯНА ТРИВОГА' : '✅ Немає тривоги'}
+      </div>
+    `;
+
+    if (alertInfo && alertInfo.lastUpdate) {
+      const start = new Date(alertInfo.lastUpdate);
+      const diffMs = Date.now() - start.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const hours = Math.floor(diffMins / 60);
+      const mins = diffMins % 60;
+      
+      const durationStr = hours > 0 ? `${hours} год ${mins} хв` : `${mins} хв`;
+      popupContent += `<div style="margin-top: 8px; color: #d1d5db;">Триває: <span style="color: white; font-family: monospace;">${durationStr}</span></div>`;
+      popupContent += `<div style="font-size: 11px; color: #6b7280; margin-top: 4px;">Початок: ${start.toLocaleTimeString('uk-UA')}</div>`;
+    }
+
+    popupContent += `</div>`;
+    layer.bindPopup(popupContent, { className: 'custom-popup' });
+
+    // Hover effect
+    layer.on({
+      mouseover: (e: any) => {
+        const l = e.target;
+        l.setStyle({ fillOpacity: alertInfo ? 0.8 : 0.3, weight: alertInfo ? 3 : 2, color: alertInfo ? '#f87171' : '#9ca3af' });
+      },
+      mouseout: (e: any) => {
+        const l = e.target;
+        l.setStyle({ 
+          color: alertInfo ? '#ef4444' : (isDistrict ? 'transparent' : '#4b5563'),
+          weight: alertInfo ? 2 : (isDistrict ? 0 : 1),
+          fillOpacity: alertInfo ? (isDistrict ? 0.6 : 0.45) : (isDistrict ? 0 : 0.05) 
+        });
+      }
+    });
+  };
+
   return (
     <>
       <style dangerouslySetInnerHTML={{__html: `
@@ -272,7 +324,8 @@ export default function Map() {
           background: #0a0f18;
           color: white;
           border: 1px solid #1f2937;
-          border-radius: 8px;
+          border-radius: 12px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
         .custom-popup .leaflet-popup-tip {
           background: #0a0f18;
@@ -310,6 +363,7 @@ export default function Map() {
         <GeoJSON 
           key={`geojson-states-${Object.keys(alerts).filter(k => alerts[k]?.alertnow && (!alerts[k]?.regionType || alerts[k]?.regionType === 'State')).join('-')}`}
           data={geoData}
+          onEachFeature={(f, l) => bindPopupToFeature(f, l, 'name', false)}
           style={(feature) => {
             const regionName = feature?.properties?.name;
             const isActive = Object.keys(alerts).some(
@@ -334,6 +388,7 @@ export default function Map() {
         <GeoJSON 
           key={`geojson-districts-${Object.keys(alerts).filter(k => alerts[k]?.alertnow && alerts[k]?.regionType === 'District').join('-')}`}
           data={geoDataDistricts}
+          onEachFeature={(f, l) => bindPopupToFeature(f, l, 'rayon', true)}
           style={(feature) => {
             const rayonName = feature?.properties?.rayon;
             const isActive = Object.keys(alerts).some(

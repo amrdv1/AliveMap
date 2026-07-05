@@ -22,11 +22,12 @@ export async function GET() {
     const statesMap: Record<string, any> = {};
     if (Array.isArray(data)) {
       data.forEach((region: any) => {
-        const hasAirAlert = region.activeAlerts?.some((a: any) => a.type === 'AIR');
-        if (hasAirAlert) {
+        const airAlert = region.activeAlerts?.find((a: any) => a.type === 'AIR');
+        if (airAlert) {
           statesMap[region.regionName] = { 
             alertnow: true,
-            regionType: region.regionType // 'State' | 'District' | 'Community'
+            regionType: region.regionType, // 'State' | 'District' | 'Community'
+            lastUpdate: airAlert.lastUpdate || region.lastUpdate
           };
         }
       });
