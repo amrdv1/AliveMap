@@ -159,6 +159,8 @@ export async function startTelegramWorker(io: Server) {
                 const messages = await client.getMessages(dialog.entity, { limit: 50 });
                 for (const message of messages.reverse()) {
                     if (!message || !message.message) continue;
+                    const msgTime = message.date * 1000;
+                    
                     const parsedThreats = parseTelegramText(message.message);
                     if (!parsedThreats || parsedThreats.length === 0) continue;
                     
@@ -177,14 +179,19 @@ export async function startTelegramWorker(io: Server) {
                         io.emit('monitoring:new_message', savedMsg);
                     } catch (e) {}
 
-                    for (const parsed of parsedThreats) {
-                        if (parsed.lat !== null && parsed.lng !== null) {
-                            const savedThreat = await processExternalThreat(
-                                null, parsed.type as any, parsed.lat, parsed.lng,
-                                new Date((message.date || Math.floor(Date.now()/1000)) * 1000),
-                                sourceId, null, parsed.direction, parsed.confidence / 100
-                            );
-                            if (savedThreat) io.emit('threat:update', savedThreat);
+                    // Only spawn threats on the map if the message is fresh (< 30 minutes old)
+                    const isFresh = (Date.now() - msgTime) < 30 * 60 * 1000;
+                    
+                    if (isFresh) {
+                        for (const parsed of parsedThreats) {
+                            if (parsed.lat !== null && parsed.lng !== null) {
+                                const savedThreat = await processExternalThreat(
+                                    null, parsed.type as any, parsed.lat, parsed.lng,
+                                    new Date(msgTime),
+                                    sourceId, null, parsed.direction, parsed.confidence / 100
+                                );
+                                if (savedThreat) io.emit('threat:update', savedThreat);
+                            }
                         }
                     }
                 }

@@ -165,11 +165,11 @@ export function parseTelegramText(text: string): ParsedThreat[] {
   }
   
   // 3. Fallback: Assign default generic coordinates based on context
+  if (!hasActionWord) {
+      return []; // Drop generic chatter
+  }
+  
   if (matchedLocations.length === 0) {
-      if (!hasActionWord) {
-          return []; // Drop generic chatter
-      }
-
       if (type === 'AIRCRAFT') {
           matchedLocations.push({ lat: GENERIC_SPAWN.AIRCRAFT.lat, lng: GENERIC_SPAWN.AIRCRAFT.lng, conf: 50 });
       } else if (type === 'CRUISE_MISSILE' && lowerText.match(/(морі|море|ракетонос)/)) {
