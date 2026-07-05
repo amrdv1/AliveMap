@@ -6,8 +6,12 @@ const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
   try {
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
     const reports = await prisma.report.findMany({
-      where: { status: 'ACTIVE' },
+      where: { 
+        status: 'ACTIVE',
+        time: { gte: twoHoursAgo }
+      },
       orderBy: { time: 'desc' },
       take: 100
     });

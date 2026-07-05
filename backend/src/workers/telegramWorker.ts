@@ -78,6 +78,7 @@ export async function startTelegramWorker(io: Server) {
               lng: parsed.lng,
               confidence: parsed.confidence,
               direction: parsed.direction,
+              time: new Date(message.date * 1000),
               sourceId: sourceId
             },
             include: { source: true }
@@ -136,6 +137,7 @@ async function fetchHistory(client: TelegramClient, sourceId: string, io: Server
                 lng: parsed.lng,
                 confidence: parsed.confidence,
                 direction: parsed.direction,
+                time: new Date(message.date * 1000),
                 sourceId: sourceId
               },
               include: { source: true }

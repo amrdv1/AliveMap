@@ -82,7 +82,7 @@ const REGION_NAME_MAP: Record<string, string> = {
 export default function Map() {
   const { reports, filters, addReport, setReports } = useStore();
   const [mounted, setMounted] = useState(false);
-  const [alerts, setAlerts] = useState<Record<string, string>>({});
+  const [alerts, setAlerts] = useState<Record<string, any>>({});
   const [geoData, setGeoData] = useState<any>(null);
 
   useEffect(() => {
@@ -121,10 +121,12 @@ export default function Map() {
 
   if (!mounted) return <div className="w-full h-full bg-[#05070A] animate-pulse" />;
 
+  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
   const filteredReports = reports.filter((r) => 
     filters.types.includes(r.type) &&
     r.confidence >= filters.minConfidence &&
-    (filters.showArchived ? true : r.status === 'ACTIVE')
+    (filters.showArchived ? true : r.status === 'ACTIVE') &&
+    new Date(r.time) >= twoHoursAgo
   );
 
   return (
@@ -162,7 +164,9 @@ export default function Map() {
           style={(feature) => {
             const regionName = feature?.properties?.name;
             const isActive = Object.keys(alerts).some(
-              alertRegion => REGION_NAME_MAP[alertRegion] === regionName
+              (alertRegion) => 
+                alerts[alertRegion]?.alertnow === true && 
+                REGION_NAME_MAP[alertRegion] === regionName
             );
             
             return {
