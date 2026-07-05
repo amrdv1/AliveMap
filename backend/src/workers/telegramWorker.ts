@@ -19,7 +19,8 @@ const CHANNELS = [
   'radar_ua_top',
   'kyiv_vanek',
   'nebo_raketa',
-  'sectorv666'
+  'sectorv666',
+  'deraketaua'
 ];
 
 export async function startTelegramWorker(io: Server) {
