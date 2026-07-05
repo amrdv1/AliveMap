@@ -35,9 +35,6 @@ export async function startTelegramWorker(io: Server) {
   });
 
   try {
-    // Suppress verbose gramjs logging
-    client.setLogLevel("none");
-    
     await client.connect();
     console.log("Telegram Userbot connected successfully. Listening to monitoring channels...");
 
