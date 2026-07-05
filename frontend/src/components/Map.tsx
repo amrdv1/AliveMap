@@ -203,7 +203,7 @@ export default function Map() {
     socket.on('alerts:sync', (states: any) => {
       const statesMap: Record<string, any> = {};
       for (const [regionName, alertData] of Object.entries(states)) {
-        statesMap[regionName] = { alertnow: !!alertData };
+        statesMap[regionName] = { alertnow: (alertData as any)?.alertnow === true };
       }
       setAlerts(statesMap);
     });

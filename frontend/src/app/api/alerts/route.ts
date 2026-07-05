@@ -23,8 +23,7 @@ export async function GET() {
     const statesMap: Record<string, any> = {};
     if (data.states) {
       for (const [regionName, alertData] of Object.entries(data.states)) {
-        // ubilling returns a truthy value (timestamp string) if active
-        statesMap[regionName] = { alertnow: !!alertData };
+        statesMap[regionName] = { alertnow: (alertData as any)?.alertnow === true };
       }
     }
     
