@@ -92,7 +92,13 @@ export async function startTelegramWorker(io: Server) {
     // Fetch initial history
     try {
         console.log("Fetching recent Telegram history...");
-        await prisma.threatObject.deleteMany({ where: { sourceId } });
+        await prisma.threatObject.deleteMany({
+            where: {
+                locations: {
+                    some: { sourceId }
+                }
+            }
+        });
         const dialogs = await client.getDialogs();
         
         for (const dialog of dialogs) {
