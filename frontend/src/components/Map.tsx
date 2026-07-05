@@ -378,16 +378,6 @@ export default function Map() {
                 REGION_NAME_MAP[alertRegion] === regionName
             );
             
-            if (regionName === "Luhans'k" || regionName === "Crimea") {
-              console.log("Checking style for", regionName, "isActive:", isActive);
-              return {
-                color: '#ef4444',
-                weight: 2,
-                fillColor: '#ef4444',
-                fillOpacity: 0.8,
-              };
-            }
-            
             return {
               color: isActive ? '#ef4444' : '#4b5563',
               weight: isActive ? 2 : 1,
