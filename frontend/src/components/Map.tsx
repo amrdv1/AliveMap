@@ -305,6 +305,11 @@ export default function Map() {
 
   return (
     <>
+      <div style={{ position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', zIndex: 9999, background: 'rgba(0,0,0,0.8)', color: 'white', padding: 10, borderRadius: 5, fontSize: 12, fontFamily: 'monospace' }}>
+        Luhansk: {JSON.stringify(alerts['Луганська область']) || 'undefined'} <br/>
+        Crimea: {JSON.stringify(alerts['Автономна Республіка Крим']) || 'undefined'} <br/>
+        Has Luhans'k match? {Object.keys(alerts).some(alertRegion => alerts[alertRegion]?.alertnow === true && (!alerts[alertRegion]?.regionType || alerts[alertRegion]?.regionType === 'State') && REGION_NAME_MAP[alertRegion] === "Luhans'k") ? 'YES' : 'NO'}
+      </div>
       <style dangerouslySetInnerHTML={{__html: `
         .leaflet-container { background: #000 !important; }
         .radar-pulse {
