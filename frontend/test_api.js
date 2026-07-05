@@ -1,6 +1,10 @@
-async function test() {
-  const res = await fetch('https://alerts.com.ua/api/states');
-  const data = await res.json();
-  console.log(data.states[0]);
+async function check() {
+  try {
+    const res = await fetch('https://ubilling.net.ua/aerialalerts/');
+    const data = await res.json();
+    console.log("Ubilling API:", Object.keys(data.states).filter(k => data.states[k].alertnow));
+  } catch (e) {
+    console.error("Ubilling failed", e.message);
+  }
 }
-test();
+check();

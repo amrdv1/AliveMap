@@ -211,6 +211,14 @@ export default function Map() {
       useStore.getState().addMessage(message);
     });
 
+    socket.on('alerts:sync', (states: any) => {
+      const statesMap: Record<string, any> = {};
+      for (const [regionName, alertData] of Object.entries(states)) {
+        statesMap[regionName] = { alertnow: !!alertData };
+      }
+      setAlerts(statesMap);
+    });
+
     const fetchAlerts = async () => {
       try {
         const res = await fetch('/api/alerts');
@@ -230,6 +238,7 @@ export default function Map() {
       socket.disconnect();
       socket.off('threat:update');
       socket.off('monitoring:new_message');
+      socket.off('alerts:sync');
       clearInterval(alertInterval);
     };
   }, [setThreats, updateThreat]);
