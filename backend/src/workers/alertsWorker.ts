@@ -19,7 +19,7 @@ export async function startAlertsWorker(io: Server) {
 
     const fetchAlerts = async () => {
         try {
-            const ALERTS_API_URL = 'https://api.allorigins.win/raw?url=https://ubilling.net.ua/aerialalerts/';
+            const ALERTS_API_URL = 'https://ubilling.net.ua/aerialalerts/';
             const { data } = await axios.get(ALERTS_API_URL, { timeout: 10000 });
             if (data && data.states) {
                 // data.states is an object: { "Київська область": "2023-11-20T...", ... }

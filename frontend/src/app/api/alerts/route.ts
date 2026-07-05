@@ -5,10 +5,10 @@ export const revalidate = 0;
 
 export async function GET() {
   try {
-    // Use allorigins to bypass IP blocks when deployed on cloud platforms like Railway
-    const res = await fetch('https://api.allorigins.win/raw?url=https://ubilling.net.ua/aerialalerts/', {
+    // We fetch directly because Next.js API route runs on server (bypasses CORS) and ubilling doesn't block Railway IPs
+    const res = await fetch('https://ubilling.net.ua/aerialalerts/', {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; ALIVEMAP/1.0)',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
         'Accept': 'application/json'
       },
       cache: 'no-store'

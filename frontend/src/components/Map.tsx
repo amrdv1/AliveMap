@@ -210,8 +210,8 @@ export default function Map() {
 
     const fetchAlerts = async () => {
       try {
-        // Fetch directly from client using corsproxy to avoid Railway IP block
-        const res = await fetch('https://corsproxy.io/?https://ubilling.net.ua/aerialalerts/');
+        // Fetch from our Next.js API route which uses allorigins
+        const res = await fetch('/api/alerts');
         const data = await res.json();
         const statesMap: Record<string, any> = {};
         if (data && data.states) {
