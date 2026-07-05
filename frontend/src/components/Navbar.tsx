@@ -3,9 +3,12 @@ import { useStore } from '../store/useStore';
 
 export default function Navbar() {
   const [time, setTime] = useState(new Date());
+  const [mounted, setMounted] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const { setAboutOpen } = useStore();
 
   useEffect(() => {
+    setMounted(true);
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
@@ -15,12 +18,13 @@ export default function Navbar() {
       {/* Logo */}
       <div className="flex items-center gap-3">
         <div className="relative flex items-center justify-center">
-          <img src="/logo.png" alt="AliveMap Logo" className="w-10 h-10 object-contain relative z-10 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]" 
-               onError={(e) => {
-                 e.currentTarget.style.display = 'none';
-                 e.currentTarget.parentElement!.innerHTML += '<svg class="text-red-500 w-6 h-6 relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>';
-               }} 
-          />
+          {!imgError ? (
+            <img src="/logo.png" alt="AliveMap Logo" className="w-10 h-10 object-contain relative z-10 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]" 
+                 onError={() => setImgError(true)} 
+            />
+          ) : (
+            <svg className="text-red-500 w-6 h-6 relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          )}
         </div>
         <h1 className="text-xl font-bold tracking-widest text-white flex items-center gap-1 uppercase">
           Alive<span className="text-red-500">Map</span>
@@ -38,7 +42,7 @@ export default function Navbar() {
       {/* Time & Live Indicator */}
       <div className="flex items-center gap-4">
         <div className="text-gray-300 font-mono text-lg">
-          {time.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}
+          {mounted ? time.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
         </div>
         <div className="flex items-center gap-2 bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">
           <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
