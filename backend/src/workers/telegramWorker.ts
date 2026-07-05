@@ -12,7 +12,15 @@ const CHANNELS = [
   'monitor', 
   'kievreal1', 
   'operativnoZSU',
-  'insiderUKR'
+  'insiderUKR',
+  'ukraine_pyxx',
+  'kpszsu',
+  'war_monitor',
+  'kyivske_nebo'
+];
+
+const PRIVATE_CHANNEL_TITLES = [
+  'Труха⚡️Радар'
 ];
 
 export async function startTelegramWorker(io: Server) {
@@ -50,11 +58,15 @@ export async function startTelegramWorker(io: Server) {
       if (!message || !message.message) return;
 
       const chat = await message.getChat();
-      if (!chat || !('username' in chat) || !chat.username) return;
+      if (!chat) return;
       
-      const username = chat.username.toLowerCase();
+      const username = 'username' in chat && chat.username ? chat.username.toLowerCase() : null;
+      const title = 'title' in chat && chat.title ? chat.title : null;
       
-      if (CHANNELS.some(c => c.toLowerCase() === username)) {
+      const isPublicMatch = username && CHANNELS.some(c => c.toLowerCase() === username);
+      const isPrivateMatch = title && PRIVATE_CHANNEL_TITLES.includes(title);
+
+      if (isPublicMatch || isPrivateMatch) {
         const text = message.message;
         const parsed = parseTelegramText(text);
 
