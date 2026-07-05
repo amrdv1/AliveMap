@@ -7,11 +7,15 @@ export async function processExternalThreat(
   lat: number,
   lng: number,
   time: Date,
-  sourceId: string,
+  sourceId: string | null,
   speed?: number | null,
   course?: number | null,
   confidence: number = 1.0,
-  trailLocations?: Array<{lat: number, lng: number, time: Date, sourceId: string}>
+  quantity: number = 1,
+  targetName: string | null = null,
+  targetLat: number | null = null,
+  targetLng: number | null = null,
+  trailLocations?: Array<{lat: number, lng: number, time: Date, sourceId: string | null}>
 ): Promise<ThreatObject | null> {
   // If it's a PPO event (Shot down / Destroyed)
   if (threatType === 'PPO') {
@@ -117,6 +121,10 @@ export async function processExternalThreat(
       status: ReportStatus.ACTIVE,
       speed: defaultSpeed,
       course,
+      quantity,
+      targetName,
+      targetLat,
+      targetLng,
       locations: {
         createMany: {
           data: trailLocations && trailLocations.length > 0 ? trailLocations : [{
@@ -139,11 +147,15 @@ async function updateThreat(
   lat: number, 
   lng: number, 
   time: Date, 
-  sourceId: string, 
+  sourceId: string | null, 
   speed?: number | null, 
   course?: number | null,
-  trailLocations?: Array<{lat: number, lng: number, time: Date, sourceId: string}>,
-  newConfidence: number = 1.0
+  trailLocations?: Array<{lat: number, lng: number, time: Date, sourceId: string | null}>,
+  newConfidence: number = 1.0,
+  quantity?: number,
+  targetName?: string | null,
+  targetLat?: number | null,
+  targetLng?: number | null
 ) {
   let newLocations = trailLocations;
   
@@ -163,6 +175,10 @@ async function updateThreat(
     data: {
       speed: speed ?? existingThreat.speed,
       course: course ?? existingThreat.course,
+      quantity: quantity ?? existingThreat.quantity,
+      targetName: targetName ?? existingThreat.targetName,
+      targetLat: targetLat ?? existingThreat.targetLat,
+      targetLng: targetLng ?? existingThreat.targetLng,
       confidence: finalConfidence,
       updatedAt: new Date(),
       locations: pointsToSave.length > 0 ? { createMany: { data: pointsToSave } } : undefined

@@ -77,6 +77,10 @@ model ThreatObject {
   status    ReportStatus @default(ACTIVE)
   speed     Float?
   course    Float?
+  quantity  Int          @default(1)
+  targetName String?
+  targetLat  Float?
+  targetLng  Float?
   confidence Float       @default(1.0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

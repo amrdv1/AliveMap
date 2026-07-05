@@ -188,7 +188,8 @@ export async function startTelegramWorker(io: Server) {
                                 const savedThreat = await processExternalThreat(
                                     null, parsed.type as any, parsed.lat, parsed.lng,
                                     new Date(msgTime),
-                                    sourceId, null, parsed.direction, parsed.confidence / 100
+                                    sourceId, null, parsed.direction, parsed.confidence / 100,
+                                    parsed.quantity, parsed.targetName ?? null, parsed.targetLat ?? null, parsed.targetLng ?? null
                                 );
                                 if (savedThreat) io.emit('threat:update', savedThreat);
                             }

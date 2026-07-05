@@ -4,6 +4,10 @@ export interface ParsedThreat {
   lng: number | null;
   confidence: number;
   direction?: number | null;
+  quantity?: number;
+  targetName?: string | null;
+  targetLat?: number | null;
+  targetLng?: number | null;
 }
 
 // Ukrainian Regions & Cities (Extended)
@@ -191,14 +195,50 @@ export function parseTelegramText(text: string): ParsedThreat[] {
       }
   }
   
+  // Parse quantity
+  let quantity = 1;
+  const qtyMatch = lowerText.match(/(?:(\d+)\s*(?:шт|шахед|ракет|бпла|ціл))/i);
+  if (qtyMatch && qtyMatch[1]) {
+      quantity = parseInt(qtyMatch[1], 10);
+  } else if (lowerText.match(/(?:кілька|група|зграя)/i)) {
+      quantity = 3; // Approximate group size
+  }
+
+  // Parse target vector
+  let targetName: string | null = null;
+  let targetLat: number | null = null;
+  let targetLng: number | null = null;
+  
+  const targetMatch = lowerText.match(/(?:на|курс|вектор|у напрямку)\s+([а-яіїєґ'-]+)/i);
+  if (targetMatch && targetMatch[1]) {
+      const possibleTarget = targetMatch[1];
+      // Search in CITY_COORDS
+      for (const [cityKey, coords] of Object.entries(CITY_COORDS)) {
+          if (possibleTarget.includes(cityKey)) {
+              targetName = cityKey;
+              targetLat = coords.lat;
+              targetLng = coords.lng;
+              break;
+          }
+      }
+  }
+
   const jitter = () => (Math.random() - 0.5) * 0.4; 
   let direction = parseDirection(lowerText) ?? Math.floor(Math.random() * 360);
 
-  return matchedLocations.map(loc => ({
-      type: type!,
-      lat: loc.lat + jitter(),
-      lng: loc.lng + jitter(),
-      confidence: loc.conf,
-      direction
-  }));
+  return matchedLocations.map(loc => {
+      // If the matched location IS the target, and we don't have a distinct origin, we should probably still emit it but maybe with a default origin.
+      // But for now, we just pass the parsed data.
+      return {
+          type: type!,
+          lat: loc.lat + jitter(),
+          lng: loc.lng + jitter(),
+          confidence: loc.conf,
+          direction,
+          quantity,
+          targetName,
+          targetLat,
+          targetLng
+      };
+  });
 }

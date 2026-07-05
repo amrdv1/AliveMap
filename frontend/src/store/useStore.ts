@@ -12,11 +12,15 @@ export interface ThreatLocation {
 
 export interface ThreatObject {
   id: string;
-  type: ReportType;
+  type: ReportType | 'SUMMARY' | 'INFO' | 'ZIRCON' | 'PPO' | 'RECON' | 'ALERT';
   status: ReportStatus;
   speed?: number | null;
   course?: number | null;
   confidence: number;
+  quantity: number;
+  targetName?: string | null;
+  targetLat?: number | null;
+  targetLng?: number | null;
   createdAt: string;
   updatedAt: string;
   locations: ThreatLocation[];
@@ -33,15 +37,17 @@ export interface MonitoringMessage {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AlertsData = Record<string, any>;
 
+export interface FilterState {
+  types: (ReportType | 'SUMMARY' | 'INFO' | 'ZIRCON' | 'PPO' | 'RECON' | 'ALERT')[];
+  minConfidence: number;
+  showArchived: boolean;
+}
+
 export interface AppState {
   threats: ThreatObject[];
   alerts: AlertsData;
   messages: MonitoringMessage[];
-  filters: {
-    types: ReportType[];
-    showArchived: boolean;
-    minConfidence: number;
-  };
+  filters: FilterState;
   isAboutOpen: boolean;
   activeTab: 'MAP' | 'SUMMARY' | 'MONITORING';
   setThreats: (threats: ThreatObject[]) => void;

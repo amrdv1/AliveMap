@@ -9,6 +9,7 @@ export const THREAT_COLORS = {
   'PPO': '#4ade80', // Soft green
   'KAB': '#c084fc', // Soft purple
   'RECON': '#9ca3af', // Flat gray
+  'ZIRCON': '#ff0000', // Neon glowing red
 };
 
 export const THREAT_SVGS = {
@@ -16,6 +17,7 @@ export const THREAT_SVGS = {
   'MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C11.5 1 11 1.5 11 2.5V8L6 11V13L11 12V17.5L8 20V22L12 21L16 22V20L13 17.5V12L18 13V11L13 8V2.5C13 1.5 12.5 1 12 1Z"/><path d="M12 3V8L14 11V12L12 11.5V17L14 19V20L12 19.5V3Z" fill="black" fill-opacity="0.25"/></svg>`,
   'CRUISE_MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C11.5 1 11 1.5 11 2.5V8L6 11V13L11 12V17.5L8 20V22L12 21L16 22V20L13 17.5V12L18 13V11L13 8V2.5C13 1.5 12.5 1 12 1Z"/><path d="M12 3V8L14 11V12L12 11.5V17L14 19V20L12 19.5V3Z" fill="black" fill-opacity="0.25"/></svg>`,
   'BALLISTIC_MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C11 0 10 2 10 4V16L7 22H17L14 16V4C14 2 13 0 12 0Z"/><path d="M12 2V16L14 20H12V2Z" fill="black" fill-opacity="0.25"/><path d="M10 22L10 24H14L14 22H10Z" fill="#fbbf24" /></svg>`,
+  'ZIRCON': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 0L14 10L22 14L14 15L12 24L10 15L2 14L10 10L12 0Z" filter="drop-shadow(0px 0px 8px #ff0000)" /><path d="M12 2L13 10L18 14L13 14.5L12 21L11 14.5L6 14L11 10L12 2Z" fill="#ffffff" /></svg>`,
   'AIRCRAFT': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L13 3V7L22 14V16L13 13V19L16 21V22L12 21L8 22V21L11 19V13L2 16V14L11 7V3L12 1Z"/><path d="M12 3V7L16 12V14L12 12V19L14 20V21L12 20.5V3Z" fill="black" fill-opacity="0.25"/></svg>`,
   'PPO': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M4 2L2 4L19 21L21 19L4 2Z"/><path d="M21 4L19 2L2 19L4 21L21 4Z"/></svg>`,
   'KAB': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C9 2 8 5 8 10V15L6 18V20H18V18L16 15V10C16 5 15 2 12 2Z"/><path d="M10 20V22H14V20H10Z" fill="black" fill-opacity="0.3"/><path d="M12 4C10.5 4 10 6 10 10V15L12 17V4Z" fill="white" fill-opacity="0.2"/></svg>`,

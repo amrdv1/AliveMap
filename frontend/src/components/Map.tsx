@@ -17,7 +17,7 @@ L.Icon.Default.mergeOptions({
 
 import { THREAT_SVGS, THREAT_COLORS } from './ThreatIcon';
 
-const getIcon = (type: string, direction: number | null | undefined, confidence: number = 1.0) => {
+const getIcon = (type: string, direction: number | null | undefined, confidence: number = 1.0, quantity: number = 1) => {
   const isThreat = Object.keys(THREAT_SVGS).includes(type);
   const opacity = confidence < 0.5 ? 0.3 : 1.0;
   
@@ -30,9 +30,14 @@ const getIcon = (type: string, direction: number | null | undefined, confidence:
     // Add opacity to ring color for the pulse
     ringColor = ringColor + '40'; // 25% opacity hex for softer pulse
     
+    const quantityBadge = quantity > 1 
+      ? `<div style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 10px; font-weight: bold; border-radius: 4px; padding: 1px 4px; z-index: 20; border: 1px solid #7f1d1d; box-shadow: 0 0 5px #ef4444;">x${quantity}</div>` 
+      : '';
+
     return L.divIcon({
       className: 'custom-div-icon',
       html: `<div style="position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; opacity: ${opacity};">
+               ${quantityBadge}
                <div class="radar-pulse" style="--ring-color: ${ringColor}"></div>
                <div style="transform: rotate(${rot}deg); z-index: 10; width: 20px; height: 20px; color: ${THREAT_COLORS[type as keyof typeof THREAT_COLORS]}; filter: drop-shadow(0 0 8px ${ringColor});">
                  ${svgIcon}
@@ -137,7 +142,11 @@ function AnimatedMarker({ threat, getIcon }: { threat: any, getIcon: any }) {
   const pathPositions: [number, number][] = threat.locations.map((l: any) => [l.lat, l.lng]);
   let predictedPath: [number, number][] = [];
   
-  if (threat.course !== null && threat.course !== undefined) {
+  const hasTarget = threat.targetLat != null && threat.targetLng != null;
+
+  if (hasTarget) {
+    predictedPath = [[currentLoc.lat, currentLoc.lng], [threat.targetLat!, threat.targetLng!]];
+  } else if (threat.course !== null && threat.course !== undefined) {
     const lat1 = currentLoc.lat;
     const lon1 = currentLoc.lng;
     const d = 50; // Fixed 50km visual vector
@@ -158,11 +167,29 @@ function AnimatedMarker({ threat, getIcon }: { threat: any, getIcon: any }) {
         <Polyline positions={pathPositions} pathOptions={{ color: '#ef4444', weight: 1, opacity: 0.3, dashArray: '4' }} />
       )}
 
-      <Marker ref={markerRef} position={[currentLoc.lat, currentLoc.lng]} icon={getIcon(threat.type, threat.course, threat.confidence)}>
+      {predictedPath.length > 0 && (
+        <Polyline positions={predictedPath} pathOptions={{ color: '#ef4444', weight: 1.5, opacity: 0.6, dashArray: '6, 6' }} />
+      )}
+
+      {hasTarget && (
+        <Marker position={[threat.targetLat!, threat.targetLng!]} icon={L.divIcon({
+          className: 'target-marker',
+          html: `<div style="width: 16px; height: 16px; border: 2px solid #ef4444; border-radius: 50%; opacity: 0.5; display: flex; align-items: center; justify-content: center;"><div style="width: 4px; height: 4px; background: #ef4444; border-radius: 50%;"></div></div>`,
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
+        })}>
+          <Popup className="custom-popup">
+            <div className="font-sans text-sm font-bold text-red-500 text-center">Ціль: {threat.targetName}</div>
+          </Popup>
+        </Marker>
+      )}
+
+      <Marker ref={markerRef} position={[currentLoc.lat, currentLoc.lng]} icon={getIcon(threat.type, threat.course, threat.confidence, threat.quantity)}>
         <Popup className="custom-popup">
           <div className="font-sans">
-            <div className="font-bold text-lg mb-1">{threat.type}</div>
+            <div className="font-bold text-lg mb-1">{threat.type} {threat.quantity > 1 ? `(x${threat.quantity})` : ''}</div>
             <div className="text-sm opacity-80 mb-2">Confidence: {(threat.confidence * 100).toFixed(0)}%</div>
+            {threat.targetName && <div className="text-sm text-red-500 font-bold mb-1">Ціль: {threat.targetName}</div>}
             {threat.speed && <div className="text-sm">Speed: {threat.speed.toFixed(0)} km/h</div>}
             {threat.course && <div className="text-sm">Course: {threat.course.toFixed(0)}°</div>}
             <div className="text-xs opacity-50 mt-2">
