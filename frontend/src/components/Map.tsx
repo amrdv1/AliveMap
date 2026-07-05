@@ -285,6 +285,7 @@ export default function Map() {
 
       {geoData && (
         <GeoJSON 
+          key={`geojson-${Object.keys(alerts).filter(k => alerts[k]?.alertnow).join('-')}`}
           data={geoData}
           style={(feature) => {
             const regionName = feature?.properties?.name;
@@ -296,9 +297,9 @@ export default function Map() {
             
             return {
               color: isActive ? '#ef4444' : '#6b7280',
-              weight: isActive ? 2 : 1.5,
-              fillColor: isActive ? '#ef4444' : '#374151',
-              fillOpacity: isActive ? 0.35 : 0.15,
+              weight: isActive ? 2 : 1,
+              fillColor: isActive ? '#ef4444' : '#000000',
+              fillOpacity: isActive ? 0.35 : 0.0, // hide fill completely if not active
             };
           }}
         />
