@@ -60,30 +60,32 @@ export async function startTelegramWorker(io: Server) {
       
       if (username && CHANNELS.some(c => c.toLowerCase() === username)) {
         const text = message.message;
-        const parsedThreat = parseTelegramText(text);
+        const parsed = parseTelegramText(text);
+        if (!parsed) return; // Ignore generic alerts
+        
+        let confidence = parsed.confidence || 0.8;
 
         // Forward raw message to frontend chat panel
         io.emit('monitoring:new_message', { 
-            text, channelName: username, timestamp: new Date(), tags: [parsedThreat.type] 
+            text, channelName: username, timestamp: new Date(), tags: [parsed.type] 
         });
 
         // Add target to map
-        if (parsedThreat.lat !== null && parsedThreat.lng !== null) {
+        if (parsed.lat !== null && parsed.lng !== null) {
             const savedThreat = await processExternalThreat(
                 null,
-                parsedThreat.type as any,
-                parsedThreat.lat,
-                parsedThreat.lng,
-                new Date(),
+                parsed.type as any,
+                parsed.lat,
+                parsed.lng,
+                parsed.course || null,
+                parsed.speed || null,
+                confidence,
                 sourceId,
-                null,
-                parsedThreat.direction,
-                parsedThreat.confidence / 100
+                text
             );
-
             if (savedThreat) {
                 io.emit('threat:update', savedThreat);
-                console.log(`Telegram Threat Detected: ${parsedThreat.type} at [${parsedThreat.lat}, ${parsedThreat.lng}] from ${username}`);
+                console.log(`Telegram Threat Detected: ${parsed.type} at [${parsed.lat}, ${parsed.lng}] from ${username}`);
             }
         }
       }

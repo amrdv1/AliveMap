@@ -33,16 +33,20 @@ const CITY_COORDS: Record<string, {lat: number, lng: number}> = {
   "крив": { lat: 47.9100, lng: 33.3918 }, // Kryvyi Rih
 };
 
-export function parseTelegramText(text: string): ParsedThreat {
+export function parseTelegramText(text: string): ParsedThreat | null {
   const lowerText = text.toLowerCase();
   
-  let type: ParsedThreat['type'] = 'ALERT';
+  let type: ParsedThreat['type'] | null = null;
   if (lowerText.match(/(шахед|бпла|мопед|безпілотник)/)) {
     type = 'DRONE';
   } else if (lowerText.match(/(ракет|балістик|кинджал|іскандер|х-101|кх-)/)) {
     type = 'MISSILE';
   } else if (lowerText.match(/(ту-95|міг-31|авіаці|су-34)/)) {
     type = 'AIRCRAFT';
+  }
+
+  if (!type) {
+    return null; // Ignore generic messages, only map specific threats
   }
   
   let lat = null;

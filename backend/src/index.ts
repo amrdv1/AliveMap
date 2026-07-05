@@ -40,11 +40,23 @@ app.use('/api/webhooks', webhookRoutes);
 
 app.get('/api/alerts', async (req, res) => {
   try {
-    const response = await fetch('https://ubilling.net.ua/aerialalerts/');
+    const response = await fetch('https://siren.pp.ua/api/v3/alerts');
     const data = await response.json();
-    res.json(data);
+    const formattedStates: Record<string, any> = {};
+    if (Array.isArray(data)) {
+        data.forEach((region: any) => {
+            const airAlert = region.activeAlerts?.find((a: any) => a.type === 'AIR');
+            if (airAlert) {
+                formattedStates[region.regionName] = { 
+                    alertnow: true,
+                    regionType: region.regionType,
+                    lastUpdate: airAlert.lastUpdate || region.lastUpdate
+                };
+            }
+        });
+    }
+    res.json(formattedStates);
   } catch (error) {
-    console.error('Failed to proxy alerts:', error);
     res.status(500).json({ error: 'Failed to fetch alerts' });
   }
 });
