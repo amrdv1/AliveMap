@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+const nextConfig: any = {
   async rewrites() {
     // The backend is always running on localhost:3001 inside the Railway container
     const internalBackend = 'http://127.0.0.1:3001';
