@@ -14,29 +14,29 @@ export default function Navbar() {
   }, []);
 
   return (
-    <div className="absolute top-4 left-4 right-4 h-16 bg-[#070b14]/80 backdrop-blur-lg rounded-2xl flex items-center justify-between px-6 z-30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-gray-700/50">
+    <div className="absolute top-4 left-4 right-4 h-16 bg-[#070b14]/50 backdrop-blur-xl rounded-2xl flex items-center justify-between px-6 z-30 border border-white/5">
       {/* Logo */}
       <div className="flex items-center gap-3">
         <div className="relative flex items-center justify-center">
           {!imgError ? (
-            <img src="/logo.png" alt="AliveMap Logo" className="w-10 h-10 object-contain relative z-10 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]" 
+            <img src="/logo.png" alt="AliveMap Logo" className="w-8 h-8 object-contain relative z-10 opacity-90" 
                  onError={() => setImgError(true)} 
             />
           ) : (
-            <svg className="text-red-500 w-6 h-6 relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <svg className="text-red-500/80 w-6 h-6 relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
           )}
         </div>
-        <h1 className="text-xl font-bold tracking-widest text-white flex items-center gap-1 uppercase">
-          Alive<span className="text-red-500">Map</span>
+        <h1 className="text-lg font-semibold tracking-widest text-white/90 flex items-center gap-1 uppercase">
+          Alive<span className="text-red-500/80">Map</span>
         </h1>
       </div>
 
       {/* Tabs */}
-      <div className="hidden md:flex items-center gap-8 text-sm font-medium tracking-wider">
-        <div className="text-white border-b-2 border-red-500 pb-1 cursor-pointer font-bold drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]">МАПА</div>
-        <div className="text-gray-400 hover:text-white cursor-pointer pb-1 transition-colors">ЗВЕДЕННЯ</div>
-        <div className="text-gray-400 hover:text-white cursor-pointer pb-1 transition-colors">СТАТИСТИКА</div>
-        <div onClick={() => setAboutOpen(true)} className="text-gray-400 hover:text-white cursor-pointer pb-1 transition-colors">ІНФОРМАЦІЯ</div>
+      <div className="hidden md:flex items-center gap-8 text-sm font-medium tracking-widest">
+        <div className="text-white border-b border-red-500/50 pb-1 cursor-pointer">МАПА</div>
+        <div className="text-white/40 hover:text-white/80 cursor-pointer pb-1 transition-colors">ЗВЕДЕННЯ</div>
+        <div className="text-white/40 hover:text-white/80 cursor-pointer pb-1 transition-colors">СТАТИСТИКА</div>
+        <div onClick={() => setAboutOpen(true)} className="text-white/40 hover:text-white/80 cursor-pointer pb-1 transition-colors">ІНФОРМАЦІЯ</div>
       </div>
 
       {/* Time & Live Indicator */}

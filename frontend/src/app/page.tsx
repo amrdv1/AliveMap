@@ -31,7 +31,7 @@ export default function Home() {
         
         {/* Right Side Panels (Flex Column to avoid overlap) */}
         <div className="absolute top-24 right-6 bottom-24 z-20 flex flex-col gap-4 w-80">
-          <div className="bg-[#070b14]/80 backdrop-blur-md rounded-2xl border border-gray-800/50 shadow-xl overflow-hidden flex-1 min-h-[150px]">
+          <div className="bg-[#070b14]/50 backdrop-blur-xl rounded-2xl border border-white/5 flex-1 min-h-[150px] overflow-hidden">
             <Sidebar />
           </div>
         </div>

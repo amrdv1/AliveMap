@@ -26,14 +26,14 @@ const getIcon = (type: string, direction: number | null | undefined) => {
     let svgIcon = THREAT_SVGS[type as keyof typeof THREAT_SVGS] || THREAT_SVGS['DRONE'];
     let ringColor = THREAT_COLORS[type as keyof typeof THREAT_COLORS] || '#ffffff';
     
-    // Add opacity to ring color
-    ringColor = ringColor + '80'; // 50% opacity hex
+    // Add opacity to ring color for the pulse
+    ringColor = ringColor + '40'; // 25% opacity hex for softer pulse
     
     return L.divIcon({
       className: 'custom-div-icon',
       html: `<div style="position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                <div class="radar-pulse" style="--ring-color: ${ringColor}"></div>
-               <div style="transform: rotate(${rot}deg); z-index: 10; width: 24px; height: 24px; color: ${THREAT_COLORS[type as keyof typeof THREAT_COLORS]}; filter: drop-shadow(0 0 6px ${ringColor});">
+               <div style="transform: rotate(${rot}deg); z-index: 10; width: 20px; height: 20px; color: ${THREAT_COLORS[type as keyof typeof THREAT_COLORS]};">
                  ${svgIcon}
                </div>
              </div>`,
