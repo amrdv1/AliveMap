@@ -26,12 +26,18 @@ const SESSION_STRING = process.env.TELEGRAM_SESSION;
 const WEBHOOK_URL = process.env.WEBHOOK_URL || 'http://localhost:3001/api/webhooks/telegram';
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'your-super-secret-key';
 
-if (!API_ID || !API_HASH || !SESSION_STRING) {
-  console.error("Missing Telegram credentials in .env. Exiting.");
+const readline = require('readline').createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+const question = (query: string) => new Promise((resolve) => readline.question(query, resolve));
+
+if (!API_ID || !API_HASH) {
+  console.error("Missing TELEGRAM_API_ID or TELEGRAM_API_HASH in .env. Exiting.");
   process.exit(1);
 }
 
-const stringSession = new StringSession(SESSION_STRING);
+const stringSession = new StringSession(SESSION_STRING || '');
 const client = new TelegramClient(stringSession, API_ID, API_HASH, {
   connectionRetries: 5,
 });
@@ -39,8 +45,18 @@ const client = new TelegramClient(stringSession, API_ID, API_HASH, {
 async function start() {
   console.log("Starting Telegram Parser Microservice...");
   try {
-    await client.connect();
+    await client.start({
+      phoneNumber: async () => (await question('Please enter your number (with +): ')) as string,
+      password: async () => (await question('Please enter your password (if 2FA enabled): ')) as string,
+      phoneCode: async () => (await question('Please enter the code you received: ')) as string,
+      onError: (err) => console.log(err),
+    });
     console.log("Connected to Telegram successfully.");
+    if (!SESSION_STRING) {
+      console.log('SAVE THIS SESSION STRING TO YOUR .env AS TELEGRAM_SESSION:');
+      console.log(client.session.save());
+      console.log('------------------------------------------------------------');
+    }
 
     client.addEventHandler(async (event: NewMessageEvent) => {
       const message = event.message;
