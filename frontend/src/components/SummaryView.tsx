@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import { ShieldAlert, Map, AlertTriangle, Info } from 'lucide-react';
 
 export default function SummaryView() {
-  const { threats, alerts } = useStore();
+  const { threats, alerts, messages } = useStore();
   
   const activeThreats = threats.filter(t => t.status === 'ACTIVE');
   const alertRegions = Object.entries(alerts).filter(([_, data]) => data.alertnow).map(([region]) => region);
