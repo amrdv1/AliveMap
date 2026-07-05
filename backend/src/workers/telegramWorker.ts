@@ -39,9 +39,7 @@ export async function startTelegramWorker(io: Server) {
       source = await prisma.source.create({
         data: {
           name: 'Telegram Worker',
-          type: 'API',
-          reliability: 90,
-          isActive: true
+          type: 'API'
         }
       });
     }

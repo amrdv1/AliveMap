@@ -10,9 +10,7 @@ export async function startAlertsWorker(io: Server) {
       source = await prisma.source.create({
         data: {
           name: 'Official Alerts',
-          type: 'API',
-          reliability: 100,
-          isActive: true
+          type: 'API'
         }
       });
     }
