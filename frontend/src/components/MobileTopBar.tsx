@@ -14,7 +14,7 @@ export default function MobileTopBar() {
       <div className="pointer-events-auto flex items-center gap-2">
         <div className="relative flex items-center justify-center w-8 h-8">
           <div className="absolute inset-0 bg-red-500/20 rounded-full animate-ping"></div>
-          <img src="/logo.svg" alt="AliveMap Logo" className="relative z-10 w-6 h-6 object-contain drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+          <img src="/logo.png" alt="AliveMap Logo" className="relative z-10 w-6 h-6 object-contain drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
         </div>
         <h1 className="text-lg font-bold tracking-widest text-white flex items-center gap-1 uppercase">
           Alive<span className="text-red-500">Map</span>
