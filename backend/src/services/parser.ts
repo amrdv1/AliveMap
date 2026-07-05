@@ -124,11 +124,20 @@ export function parseTelegramText(text: string): ParsedThreat[] {
     type = 'KAB';
   }
 
-  // If no specific threat type is found, or it's a generic "tryvoha" message, ignore.
   if (!type) return [];
+
+  // Ignore summaries, historical data, and post-action reports
+  if (lowerText.match(/(збито|знищено|за добу|наслідки|втрати|підсумки|статистика|постраждал|загинул|відбій|ліквідаці|інформаці|зведення|уламк|загалом)/)) {
+      return [];
+  }
   
   // Filter out generic alerts that do not mention movement, takeoffs, or specific presence
-  if (lowerText.match(/(увага|повітряна тривога|відбій)/) && !lowerText.match(/(летить|рух|зліт|пуск|напрямок|загроза|фіксує|повітрі|пускові|курс)/)) {
+  if (lowerText.match(/(увага|повітряна тривога)/) && !lowerText.match(/(летить|рух|зліт|пуск|напрямок|загроза|фіксує|повітрі|пускові|курс)/)) {
+      return [];
+  }
+
+  // Must contain an active action word, or a direct pointing word like "на" (e.g., "КАБ на Харків")
+  if (!lowerText.match(/(летить|рух|зліт|пуск|напрямок|загроза|фіксує|повітрі|пускові|курс|вибух|атака|йде|на |до |увага|небезпека|відмічено)/)) {
       return [];
   }
   
@@ -142,7 +151,8 @@ export function parseTelegramText(text: string): ParsedThreat[] {
   }
 
   // 2. Check if Ukrainian City/Region is mentioned (collect ALL)
-  if (matchedLocations.length === 0) {
+  // BUT do not put strategic aircraft directly over Ukrainian cities!
+  if (matchedLocations.length === 0 && type !== 'AIRCRAFT') {
       for (const [cityKey, coords] of Object.entries(CITY_COORDS)) {
         if (lowerText.includes(cityKey)) {
           matchedLocations.push({ lat: coords.lat, lng: coords.lng, conf: 80 });
@@ -152,7 +162,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
   
   // 3. Fallback: Assign default generic coordinates based on context
   if (matchedLocations.length === 0) {
-      if (type === 'AIRCRAFT' && lowerText.match(/(зліт|в повітрі|активність|на пускових|рубіж)/)) {
+      if (type === 'AIRCRAFT') {
           matchedLocations.push({ lat: GENERIC_SPAWN.AIRCRAFT.lat, lng: GENERIC_SPAWN.AIRCRAFT.lng, conf: 50 });
       } else if (type === 'CRUISE_MISSILE' && lowerText.match(/(морі|море|ракетонос)/)) {
           matchedLocations.push({ lat: GENERIC_SPAWN.BLACK_SEA.lat, lng: GENERIC_SPAWN.BLACK_SEA.lng, conf: 80 });
