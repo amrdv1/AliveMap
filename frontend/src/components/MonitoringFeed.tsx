@@ -7,18 +7,16 @@ export default function MonitoringFeed() {
 
   useEffect(() => {
     // Fetch initial messages
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/messages`)
+    fetch('/api/messages')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setMessages(data);
       })
       .catch(console.error);
-      
-    // Socket listener logic should be in a global place or here
   }, [setMessages]);
 
   return (
-    <div className="absolute top-24 left-4 w-80 max-h-[calc(100vh-8rem)] bg-[#070b14]/80 backdrop-blur-lg border border-gray-700/50 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col z-20 overflow-hidden font-sans">
+    <div className="absolute top-24 left-4 w-72 max-h-[calc(100vh-8rem)] bg-[#070b14]/70 backdrop-blur-md border border-gray-700/30 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.6)] flex flex-col z-20 overflow-hidden font-sans">
       {/* Header */}
       <div className="p-4 border-b border-gray-800/50 flex items-center justify-between">
         <h2 className="text-lg font-bold text-white flex items-center gap-2">

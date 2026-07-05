@@ -127,10 +127,10 @@ const AnimatedMarker = ({ threat, getIcon }: any) => {
   const pathPositions: [number, number][] = threat.locations.map((l: any) => [l.lat, l.lng]);
   let predictedPath: [number, number][] = [];
   
-  if (threat.speed && threat.course) {
+  if (threat.course !== null && threat.course !== undefined) {
     const lat1 = currentLoc.lat;
     const lon1 = currentLoc.lng;
-    const d = (threat.speed / 60) * 10; 
+    const d = 50; // Fixed 50km visual vector
     const R = 6371; 
     const brng = threat.course * Math.PI / 180;
     const lat1Rad = lat1 * Math.PI / 180;
@@ -207,6 +207,10 @@ export default function Map() {
       updateThreat(threat);
     });
 
+    socket.on('monitoring:new_message', (message: any) => {
+      useStore.getState().addMessage(message);
+    });
+
     const fetchAlerts = async () => {
       try {
         const res = await fetch('/api/alerts');
@@ -225,6 +229,7 @@ export default function Map() {
     return () => {
       socket.disconnect();
       socket.off('threat:update');
+      socket.off('monitoring:new_message');
       clearInterval(alertInterval);
     };
   }, [setThreats, updateThreat]);

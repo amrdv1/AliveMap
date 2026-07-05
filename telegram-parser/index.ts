@@ -8,12 +8,32 @@ import { parseTelegramText } from './parser';
 dotenv.config();
 
 const CHANNELS = [
-  'vanek_nikolaev', 'monitor', 'kievreal1', 'operativnoZSU',
-  'insiderUKR', 'ukraine_pyxx', 'kpszsu', 'war_monitor',
-  'kyivske_nebo', 'radar_v', 'air_alert_ua', 'truxaukraine',
-  'svoyi_ua', 'real_kiev', 'ukraine_now', 'kharkivlife',
-  'odesa_typical', 'dnepr_operativ', 'sumy_now', 'trukha_dnipro',
-  'trukha_kharkiv', 'trukha_odesa'
+  'vanek_nikolaev',
+  'kievreal1',
+  'war_monitor',
+  'monitor_ukraine',
+  'radar_ua_top',
+  'radartruhakharkiv',
+  'radar_odesa',
+  'radar_dnipro',
+  'radartruhazaporizhzhya',
+  'radar_kyiv',
+  'radar_lviv',
+  'mykolaiv_radar',
+  'poltava_radar',
+  'sumy_radar',
+  'chernihiv_radar',
+  'cherkasy_radar',
+  'vinnytsia_radar',
+  'zhytomyr_radar',
+  'kropyvnytskyi_radar',
+  'rivne_radar',
+  'volyn_radar',
+  'ternopil_radar',
+  'khmelnytskyi_radar',
+  'chernivtsi_radar',
+  'ivanofrankivsk_radar',
+  'zakarpattia_radar'
 ];
 
 const PRIVATE_CHANNEL_TITLES = [
@@ -42,27 +62,21 @@ const client = new TelegramClient(stringSession, apiId, apiHash, {
 
 async function start() {
   console.log("Starting Telegram Parser Microservice...");
-  
-  await client.start({
-    phoneNumber: async () => {
-      console.error("FATAL: Session invalid or expired. Cannot prompt for phone number on Railway!");
-      process.exit(1);
-      return '';
-    },
-    password: async () => '',
-    phoneCode: async () => '',
-    onError: (err) => {
-      console.log(err);
-      process.exit(1);
-    },
-  });
-  console.log("Connected to Telegram successfully.");
-
-    if (!sessionStr) {
-      console.log('SAVE THIS SESSION STRING TO YOUR .env AS TELEGRAM_SESSION:');
-      console.log(client.session.save());
-      console.log('------------------------------------------------------------');
-    }
+  try {
+    await client.start({
+      phoneNumber: async () => {
+        console.error("FATAL: Session invalid or expired. Cannot prompt for phone number on Railway!");
+        process.exit(1);
+        return '';
+      },
+      password: async () => '',
+      phoneCode: async () => '',
+      onError: (err) => {
+        console.log(err);
+        process.exit(1);
+      },
+    });
+    console.log("Connected to Telegram successfully.");
 
     client.addEventHandler(async (event: NewMessageEvent) => {
       const message = event.message;
@@ -79,21 +93,18 @@ async function start() {
 
       if (isPublicMatch || isPrivateMatch) {
         const text = message.message;
-        const channelName = title || username || 'Unknown';
+        const channelName = isPublicMatch ? username : title;
         
-        // 1. Tags Logic
-        let tags: string[] = [];
-        const lowerText = text.toLowerCase();
-        if (lowerText.includes('увага') || lowerText.includes('загроза') || lowerText.includes('небезпека')) {
-          tags.push('Загроза');
-        } else if (lowerText.includes('тривога')) {
-          tags.push('Тривога');
-        } else {
-          tags.push('Інфо');
-        }
-
-        // 2. Parse coordinates if it's a threat
+        // 1. Analyze with regex
         const parsed = parseTelegramText(text);
+        
+        // 2. Extract tags
+        const tags = [];
+        if (text.toLowerCase().includes('шахед') || text.toLowerCase().includes('бпла')) tags.push('Shahed');
+        if (text.toLowerCase().includes('ракет') || text.toLowerCase().includes('х-')) tags.push('Missile');
+        if (text.toLowerCase().includes('вибух')) tags.push('Вибух');
+        if (text.toLowerCase().includes('тривог')) tags.push('Тривога');
+        if (parsed.lat !== null) tags.push('Локація');
 
         const payload = {
           text,
