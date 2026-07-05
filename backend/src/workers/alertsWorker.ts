@@ -19,7 +19,8 @@ export async function startAlertsWorker(io: Server) {
 
     const fetchAlerts = async () => {
         try {
-            const { data } = await axios.get('https://ubilling.net.ua/aerialalerts/', { timeout: 10000 });
+            const ALERTS_API_URL = 'https://api.allorigins.win/raw?url=https://ubilling.net.ua/aerialalerts/';
+            const { data } = await axios.get(ALERTS_API_URL, { timeout: 10000 });
             if (data && data.states) {
                 // data.states is an object: { "Київська область": "2023-11-20T...", ... }
                 // We broadcast this directly to all clients for real-time region painting
