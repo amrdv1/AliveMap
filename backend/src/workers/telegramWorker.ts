@@ -201,8 +201,10 @@ export async function startTelegramWorker(io: Server) {
         try {
             console.log("Fetching recent Telegram history (polling 50 channels)...");
             
-            // Fetch directly from known channels to avoid getDialogs() flood wait
-            for (const channel of CHANNELS) {
+            // Fetch directly from top 3 channels to avoid ResolveUsername FloodWait
+            // Live events will still capture messages from all 50+ channels.
+            const pollChannels = ['monitor_ukraine', 'eRadarrua', 'war_monitor'];
+            for (const channel of pollChannels) {
                 try {
                     const messages = await client.getMessages(channel, { limit: 10 });
                     
@@ -263,9 +265,7 @@ export async function startTelegramWorker(io: Server) {
                         }
                     }
                 } catch (err: any) {
-                    if (err.message && err.message.includes('FLOOD_WAIT')) {
-                        console.warn(`[PollHistory] Flood wait on ${channel}`);
-                    }
+                    console.error(`[PollHistory] Error on ${channel}:`, err.message || err);
                 }
             }
             console.log("History fetch complete.");
