@@ -142,12 +142,12 @@ export async function startTelegramWorker(io: Server) {
     try {
         console.log("Fetching recent Telegram history...");
         
-        // Archive stale threats instead of deleting everything
-        const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
-        await prisma.threatObject.updateMany({
-            where: { status: 'ACTIVE', updatedAt: { lt: twoHoursAgo } },
+        // Clean slate: archive ALL active threats on startup
+        const archived = await prisma.threatObject.updateMany({
+            where: { status: 'ACTIVE' },
             data: { status: 'ARCHIVED' }
         });
+        console.log(`[Startup] Archived ${archived.count} old threats. Clean slate.`);
         
         const dialogs = await client.getDialogs();
         
@@ -199,8 +199,8 @@ export async function startTelegramWorker(io: Server) {
                         }
                     }
 
-                    // Spawn threats on the map if the message is fresh (< 2 hours old)
-                    const isFresh = (Date.now() - msgTime) < 2 * 60 * 60 * 1000;
+                    // Spawn threats on the map ONLY if the message is very fresh (< 30 minutes)
+                    const isFresh = (Date.now() - msgTime) < 30 * 60 * 1000;
                     
                     if (isFresh) {
                         for (const parsed of parsedThreats) {
