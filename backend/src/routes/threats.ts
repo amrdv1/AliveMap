@@ -5,11 +5,11 @@ const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
     const threats = await prisma.threatObject.findMany({
       where: { 
         status: 'ACTIVE',
-        updatedAt: { gte: thirtyMinsAgo }
+        updatedAt: { gte: twoHoursAgo }
       },
       include: {
         locations: {

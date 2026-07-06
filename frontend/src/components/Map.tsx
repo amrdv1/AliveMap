@@ -328,12 +328,12 @@ export default function Map() {
 
   if (!mounted) return <div className="w-full h-full bg-[#05070A] animate-pulse" />;
 
-  const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
+  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
   const filteredThreats = threats.filter((t) => 
     filters.types.includes(t.type) &&
     t.confidence >= filters.minConfidence &&
     (filters.showArchived ? true : t.status === 'ACTIVE') &&
-    new Date(t.updatedAt) >= thirtyMinsAgo &&
+    new Date(t.updatedAt) >= twoHoursAgo &&
     t.locations && t.locations.length > 0
   );
 

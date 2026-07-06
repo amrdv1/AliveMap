@@ -219,8 +219,8 @@ export async function startTelegramWorker(io: Server) {
                             }
                         }
 
-                        // Spawn threats on the map ONLY if the message is very fresh (<30 minutes)
-                        const isFresh = (Date.now() - msgTime) < 30 * 60 * 1000;
+                        // Spawn threats on the map if the message is recent (<2 hours)
+                        const isFresh = (Date.now() - msgTime) < 2 * 60 * 60 * 1000;
                         
                         if (isFresh) {
                             for (const parsed of parsedThreats) {
@@ -247,10 +247,10 @@ export async function startTelegramWorker(io: Server) {
     // ─── CLEANUP: Delete old messages every minute ────────────────────────
     const cleanupOldMessages = async () => {
         try {
-            // Delete messages older than 1 hour
-            const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+            // Delete messages older than 6 hours
+            const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
             const deleted = await prisma.monitoringMessage.deleteMany({
-                where: { timestamp: { lt: oneHourAgo } }
+                where: { timestamp: { lt: sixHoursAgo } }
             });
             if (deleted.count > 0) {
                 console.log(`[Cleanup] Deleted ${deleted.count} old monitoring messages.`);
@@ -288,13 +288,14 @@ export async function startTelegramWorker(io: Server) {
         }
     };
 
-    // Initial clean slate for threats
+    // Archive only threats older than 2 hours (keep recent ones alive across restarts)
     try {
+        const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
         const archived = await prisma.threatObject.updateMany({
-            where: { status: 'ACTIVE' },
+            where: { status: 'ACTIVE', updatedAt: { lt: twoHoursAgo } },
             data: { status: 'ARCHIVED' }
         });
-        console.log(`[Startup] Archived ${archived.count} old threats. Clean slate.`);
+        console.log(`[Startup] Archived ${archived.count} old threats (>2h).`);
     } catch(e) {}
 
     // Run initial cleanup
