@@ -70,19 +70,36 @@ server.listen(PORT, async () => {
   startAlertsWorker(io);
   startTelegramWorker(io); // Integrated telegram parser
   
-  // Auto-archive stale targets (no updates in 15 mins)
+  // Auto-archive stale targets based on type
   setInterval(async () => {
     try {
-      const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
-      const updated = await prisma.threatObject.updateMany({
+      const now = Date.now();
+      const fortyFiveMinsAgo = new Date(now - 45 * 60 * 1000);
+      const fifteenMinsAgo = new Date(now - 15 * 60 * 1000);
+
+      // Missiles: 15 mins
+      const updatedMissiles = await prisma.threatObject.updateMany({
         where: {
           status: 'ACTIVE',
+          type: { in: ['MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON'] },
           updatedAt: { lt: fifteenMinsAgo }
         },
         data: { status: 'ARCHIVED' }
       });
-      if (updated.count > 0) {
-        console.log(`[Archiver] Archived ${updated.count} stale targets.`);
+
+      // Drones, Aircraft, KAB, Others: 45 mins
+      const updatedOthers = await prisma.threatObject.updateMany({
+        where: {
+          status: 'ACTIVE',
+          type: { notIn: ['MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON'] },
+          updatedAt: { lt: fortyFiveMinsAgo }
+        },
+        data: { status: 'ARCHIVED' }
+      });
+
+      const totalArchived = updatedMissiles.count + updatedOthers.count;
+      if (totalArchived > 0) {
+        console.log(`[Archiver] Archived ${totalArchived} stale targets.`);
         io.emit('threats:refresh');
       }
     } catch (e) {

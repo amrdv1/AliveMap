@@ -19,7 +19,7 @@ import { THREAT_SVGS, THREAT_COLORS } from './ThreatIcon';
 
 const getIcon = (type: string, direction: number | null | undefined, confidence: number = 1.0, quantity: number = 1) => {
   const isThreat = Object.keys(THREAT_SVGS).includes(type);
-  const opacity = confidence < 0.5 ? 0.3 : 1.0;
+  const opacity = 1.0; // User requested not to hide low confidence targets
   
   if (isThreat) {
     const rot = direction || 0;
@@ -34,10 +34,16 @@ const getIcon = (type: string, direction: number | null | undefined, confidence:
       ? `<div style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; font-size: 10px; font-weight: bold; border-radius: 4px; padding: 1px 4px; z-index: 20; border: 1px solid #7f1d1d; box-shadow: 0 0 5px #ef4444;">x${quantity}</div>` 
       : '';
 
+    const confPercent = Math.round(confidence * 100);
+    const confBadge = confPercent < 100 
+      ? `<div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); background: #1f2937; color: #9ca3af; font-size: 9px; font-weight: bold; border-radius: 4px; padding: 1px 3px; z-index: 20; border: 1px solid #374151;">${confPercent}%</div>`
+      : '';
+
     return L.divIcon({
       className: 'custom-div-icon',
       html: `<div style="position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; opacity: ${opacity};">
                ${quantityBadge}
+               ${confBadge}
                <div class="radar-pulse" style="--ring-color: ${ringColor}"></div>
                <div style="transform: rotate(${rot}deg); z-index: 10; width: 24px; height: 24px; color: #ffffff; filter: drop-shadow(0 0 6px ${THREAT_COLORS[type as keyof typeof THREAT_COLORS]}) drop-shadow(0 0 12px ${THREAT_COLORS[type as keyof typeof THREAT_COLORS]}) drop-shadow(0 0 2px #000);">
                  ${svgIcon}
@@ -112,7 +118,7 @@ function AnimatedMarker({ threat, getIcon }: { threat: any, getIcon: any }) {
       lastTime = now;
 
       const timeSinceUpdate = (now - new Date(currentLoc.time).getTime()) / 1000;
-      if (threat.speed && threat.course && timeSinceUpdate < 300 && markerRef.current) {
+      if (threat.speed && threat.course && timeSinceUpdate < 3600 && markerRef.current) {
         const currentPos = markerRef.current.getLatLng();
         const R = 6371; // Earth radius in km
         const d = (threat.speed / 3600) * dt; // Distance traveled in km during dt

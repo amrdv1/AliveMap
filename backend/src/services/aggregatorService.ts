@@ -98,29 +98,35 @@ export async function processExternalThreat(
 
   // 3. Create new threat
   
-  // Assign default realistic speeds for animation if none provided
   let defaultSpeed = speed;
   if (defaultSpeed == null) {
       switch (threatType as ReportType) {
           case 'DRONE': defaultSpeed = 150; break;
           case 'MISSILE': 
-          case 'CRUISE_MISSILE': defaultSpeed = 1000; break;
+          case 'CRUISE_MISSILE': defaultSpeed = 800; break;
           case 'BALLISTIC_MISSILE': defaultSpeed = 8000; break;
           case 'ZIRCON': defaultSpeed = 10000; break;
-          case 'KAB': defaultSpeed = 600; break;
-          case 'AIRCRAFT': defaultSpeed = 800; break;
+          case 'KAB': defaultSpeed = 900; break;
+          case 'AIRCRAFT': defaultSpeed = 900; break;
           case 'RECON': defaultSpeed = 100; break;
       }
   }
+
+  let finalCourse = course;
+  if (finalCourse == null && targetLat != null && targetLng != null) {
+      finalCourse = calculateBearing(lat, lng, targetLat, targetLng);
+  }
+
+  const initialConfidence = 0.4;
 
   const newThreat = await prisma.threatObject.create({
     data: {
       externalId,
       type: threatType as ReportType,
-      confidence,
+      confidence: Math.max(confidence, initialConfidence),
       status: ReportStatus.ACTIVE,
       speed: defaultSpeed,
-      course,
+      course: finalCourse,
       quantity,
       targetName,
       targetLat,
@@ -151,7 +157,7 @@ async function updateThreat(
   speed?: number | null, 
   course?: number | null,
   trailLocations?: Array<{lat: number, lng: number, time: Date, sourceId: string | null}>,
-  newConfidence: number = 1.0,
+  newConfidence: number = 0.4,
   quantity?: number,
   targetName?: string | null,
   targetLat?: number | null,
@@ -165,20 +171,37 @@ async function updateThreat(
 
   // Filter out locations we already have (by timestamp)
   const lastSavedTime = existingThreat.locations[0]?.time.getTime() || 0;
-  const pointsToSave = newLocations.filter(t => t.time.getTime() > lastSavedTime);
+  const pointsToSave = newLocations.filter((t: any) => t.time.getTime() > lastSavedTime);
 
-  // Preserve highest confidence (e.g., if Telegram AI sets 1.0, don't downgrade it to 0.3 from Mapa)
-  const finalConfidence = Math.max(existingThreat.confidence || 0, newConfidence);
+  // Get unique sourceIds
+  const allLocations = await prisma.threatLocation.findMany({ where: { threatObjectId: existingThreat.id }, select: { sourceId: true } });
+  const uniqueSources = new Set(allLocations.map((l: any) => l.sourceId).filter(Boolean));
+  pointsToSave.forEach((p: any) => { if (p.sourceId) uniqueSources.add(p.sourceId); });
+  
+  let dynamicConfidence = 0.4;
+  if (uniqueSources.size === 2) dynamicConfidence = 0.6;
+  else if (uniqueSources.size === 3) dynamicConfidence = 0.8;
+  else if (uniqueSources.size >= 4) dynamicConfidence = 1.0;
+
+  let finalCourse = course ?? existingThreat.course;
+  let finalTargetLat = targetLat ?? existingThreat.targetLat;
+  let finalTargetLng = targetLng ?? existingThreat.targetLng;
+  if (finalCourse == null && finalTargetLat != null && finalTargetLng != null) {
+      finalCourse = calculateBearing(lat, lng, finalTargetLat, finalTargetLng);
+  }
+
+  // Preserve highest confidence
+  const finalConfidence = Math.max(existingThreat.confidence || 0, dynamicConfidence, newConfidence);
 
   return await prisma.threatObject.update({
     where: { id: existingThreat.id },
     data: {
       speed: speed ?? existingThreat.speed,
-      course: course ?? existingThreat.course,
+      course: finalCourse,
       quantity: quantity ?? existingThreat.quantity,
       targetName: targetName ?? existingThreat.targetName,
-      targetLat: targetLat ?? existingThreat.targetLat,
-      targetLng: targetLng ?? existingThreat.targetLng,
+      targetLat: finalTargetLat,
+      targetLng: finalTargetLng,
       confidence: finalConfidence,
       updatedAt: new Date(),
       locations: pointsToSave.length > 0 ? { createMany: { data: pointsToSave } } : undefined
