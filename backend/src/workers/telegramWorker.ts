@@ -41,7 +41,23 @@ const CHANNELS = [
   'suspilne_news',
   'ukraine_online',
   'ukraine_radar',
-  'pivden_radar'
+  'pivden_radar',
+  // --- New Channels from NEPTUN ---
+  'shahedradar',
+  'radarraketppo',
+  'radar_raketaa',
+  'radar_top_ua',
+  'poltavaradar',
+  'radar_dnipra',
+  'eyes_everywhere_ua',
+  'pivden_varta',
+  'sumyregion',
+  'sumygo',
+  'kharkov_media',
+  'odessaveter',
+  'dnepr_nagladach',
+  'info_zp',
+  'my_safety_chernigiv'
 ];
 
 const PRIVATE_TITLES = [
@@ -304,11 +320,11 @@ export async function startTelegramWorker(io: Server) {
     // Fetch history (will create fresh threats on the map)
     await pollHistory();
 
-    // Poll every minute + cleanup
+    // Poll every 15 seconds + cleanup
     setInterval(async () => {
         await cleanupOldMessages();
         await pollHistory();
-    }, 60 * 1000);
+    }, 15 * 1000);
 
   } catch (error) {
     console.error("Error starting Telegram worker:", error);

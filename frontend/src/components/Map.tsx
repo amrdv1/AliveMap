@@ -111,43 +111,75 @@ const REGION_NAME_MAP: Record<string, string> = {
 const AnimatedMarker = React.memo(({ threat, getIcon }: { threat: any, getIcon: any }) => {
   const markerRef = useRef<any>(null);
   const currentLoc = threat.locations[0];
+  
+  // Keep track of the current visually rendered position for smooth interpolation
+  const visualPosRef = useRef<{lat: number, lng: number}>({lat: currentLoc.lat, lng: currentLoc.lng});
 
   useEffect(() => {
     let animationFrameId: number;
     let lastTime = Date.now();
-
+    
+    // Extrapolate forward based on speed and course if available, or just glide smoothly to currentLoc
     const animate = () => {
       const now = Date.now();
-      const dt = (now - lastTime) / 1000; // seconds elapsed
+      const dt = (now - lastTime) / 1000;
       lastTime = now;
 
-      const timeSinceUpdate = (now - new Date(currentLoc.time).getTime()) / 1000;
-      if (threat.speed != null && threat.course != null && timeSinceUpdate < 3600 && markerRef.current) {
-        const currentPos = markerRef.current.getLatLng();
-        const R = 6371; // Earth radius in km
-        const d = (threat.speed / 3600) * dt; // Distance traveled in km during dt
-        const brng = threat.course * Math.PI / 180;
-        const lat1 = currentPos.lat * Math.PI / 180;
-        const lon1 = currentPos.lng * Math.PI / 180;
+      if (!markerRef.current) return;
 
-        const lat2 = Math.asin(Math.sin(lat1)*Math.cos(d/R) + Math.cos(lat1)*Math.sin(d/R)*Math.cos(brng));
-        const lon2 = lon1 + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(lat1), Math.cos(d/R)-Math.sin(lat1)*Math.sin(lat2));
+      const targetLat = currentLoc.lat;
+      const targetLng = currentLoc.lng;
+      const visLat = visualPosRef.current.lat;
+      const visLng = visualPosRef.current.lng;
 
-        markerRef.current.setLatLng([lat2 * 180 / Math.PI, lon2 * 180 / Math.PI]);
+      // Distance to target
+      const R = 6371;
+      const dLat = (targetLat - visLat) * Math.PI / 180;
+      const dLng = (targetLng - visLng) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(visLat * Math.PI / 180) * Math.cos(targetLat * Math.PI / 180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const distKm = R * c;
+
+      // If we are far from the target (e.g. just received a new point), move towards it smoothly
+      // We assume polling is ~15 seconds, so we try to close the distance over 15 seconds
+      if (distKm > 0.05) {
+        const speedKmS = distKm / 15.0; // km per second needed to catch up
+        const moveKm = speedKmS * dt;
+        
+        // Don't overshoot
+        const actualMoveKm = Math.min(moveKm, distKm);
+        const fraction = actualMoveKm / distKm;
+        
+        visualPosRef.current.lat = visLat + (targetLat - visLat) * fraction;
+        visualPosRef.current.lng = visLng + (targetLng - visLng) * fraction;
+        
+        markerRef.current.setLatLng([visualPosRef.current.lat, visualPosRef.current.lng]);
+      } else if (threat.speed != null && threat.course != null) {
+        // If we reached the target point but time is passing, extrapolate forward slowly
+        const timeSinceUpdate = (now - new Date(currentLoc.time).getTime()) / 1000;
+        if (timeSinceUpdate < 3600) {
+           const d = (threat.speed / 3600) * dt; 
+           const brng = threat.course * Math.PI / 180;
+           const lat1 = visLat * Math.PI / 180;
+           const lon1 = visLng * Math.PI / 180;
+
+           const lat2 = Math.asin(Math.sin(lat1)*Math.cos(d/R) + Math.cos(lat1)*Math.sin(d/R)*Math.cos(brng));
+           const lon2 = lon1 + Math.atan2(Math.sin(brng)*Math.sin(d/R)*Math.cos(lat1), Math.cos(d/R)-Math.sin(lat1)*Math.sin(lat2));
+
+           visualPosRef.current.lat = lat2 * 180 / Math.PI;
+           visualPosRef.current.lng = lon2 * 180 / Math.PI;
+           markerRef.current.setLatLng([visualPosRef.current.lat, visualPosRef.current.lng]);
+        }
       }
+
       animationFrameId = requestAnimationFrame(animate);
     };
 
     animationFrameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [threat.speed, threat.course]);
-
-  // Sync position with server when a new location arrives
-  useEffect(() => {
-    if (markerRef.current) {
-      markerRef.current.setLatLng([currentLoc.lat, currentLoc.lng]);
-    }
-  }, [currentLoc.lat, currentLoc.lng, currentLoc.time]);
+  }, [currentLoc.lat, currentLoc.lng, currentLoc.time, threat.speed, threat.course]);
 
   const pathPositions: [number, number][] = threat.locations.map((l: any) => [l.lat, l.lng]);
   let predictedPath: [number, number][] = [];
@@ -193,11 +225,11 @@ const translateType = (type: string) => {
   return (
     <>
       {pathPositions.length > 1 && (
-        <Polyline positions={pathPositions} pathOptions={{ color: '#ef4444', weight: 1, opacity: 0.3, dashArray: '4' }} />
+        <Polyline positions={pathPositions} pathOptions={{ color: '#ef4444', weight: 2, opacity: 0.4, dashArray: '5, 8' }} />
       )}
 
       {predictedPath.length > 0 && (
-        <Polyline positions={predictedPath} pathOptions={{ color: '#ef4444', weight: 1.5, opacity: 0.6, dashArray: '6, 6' }} />
+        <Polyline positions={predictedPath} pathOptions={{ color: '#ef4444', weight: 1.5, opacity: 0.3, dashArray: '4, 10' }} />
       )}
 
       {hasTarget && (
