@@ -81,10 +81,12 @@ export default function Sidebar() {
 
   return (
     <div className="hidden lg:flex w-full h-full bg-transparent flex-col z-20 text-white overflow-y-auto custom-scrollbar p-5">
-      <h3 className="text-white/50 text-[10px] font-bold tracking-widest mb-4 uppercase flex items-center gap-2">
-        АКТИВНІ ЦІЛІ
-        <div className="w-1.5 h-1.5 rounded-full bg-red-500/80 animate-pulse"></div>
-      </h3>
+      <div className="flex items-center gap-3 mb-6 px-1">
+        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div>
+        <h3 className="text-white/80 text-xs font-bold tracking-[0.2em] uppercase">
+          Активні Цілі
+        </h3>
+      </div>
 
       <div className="flex-grow flex flex-col gap-2">
         {activeThreats.map(threat => {
