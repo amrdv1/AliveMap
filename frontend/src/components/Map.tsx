@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, ZoomControl, GeoJSON, Polyline, LayersControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -104,7 +104,7 @@ const REGION_NAME_MAP: Record<string, string> = {
   "м. Севастополь": "Sevastopol"
 };
 
-function AnimatedMarker({ threat, getIcon }: { threat: any, getIcon: any }) {
+const AnimatedMarker = React.memo(({ threat, getIcon }: { threat: any, getIcon: any }) => {
   const markerRef = useRef<any>(null);
   const currentLoc = threat.locations[0];
 
@@ -221,10 +221,28 @@ const translateType = (type: string) => {
       </Marker>
     </>
   );
-};
+}, (prevProps, nextProps) => {
+  const p = prevProps.threat;
+  const n = nextProps.threat;
+  return p.id === n.id &&
+         p.locations[0]?.time === n.locations[0]?.time &&
+         p.speed === n.speed &&
+         p.course === n.course &&
+         p.targetLat === n.targetLat &&
+         p.targetLng === n.targetLng &&
+         p.confidence === n.confidence &&
+         p.quantity === n.quantity &&
+         p.status === n.status;
+});
 
 export default function Map() {
-  const { threats, filters, updateThreat, setThreats, alerts, setAlerts } = useStore();
+  const threats = useStore(state => state.threats);
+  const filters = useStore(state => state.filters);
+  const alerts = useStore(state => state.alerts);
+  const updateThreat = useStore(state => state.updateThreat);
+  const setThreats = useStore(state => state.setThreats);
+  const setAlerts = useStore(state => state.setAlerts);
+
   const [mounted, setMounted] = useState(false);
   const [geoData, setGeoData] = useState<any>(null);
   const [geoDataDistricts, setGeoDataDistricts] = useState<any>(null);
