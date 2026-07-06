@@ -237,7 +237,7 @@ export default function Map() {
       .then(data => setGeoData(data))
       .catch(console.error);
 
-    fetch('/ukraine-districts.geojson?v=3')
+    fetch('/ukraine-districts.geojson?v=4')
       .then(res => res.json())
       .then(data => setGeoDataDistricts(data))
       .catch(console.error);
