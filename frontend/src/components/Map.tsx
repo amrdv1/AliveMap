@@ -7,6 +7,7 @@ import { useStore, ThreatObject } from '../store/useStore';
 import { socket } from '../lib/socket';
 import { THREAT_SVGS, THREAT_COLORS } from './ThreatIcon';
 import { Flame } from 'lucide-react';
+import * as turf from '@turf/turf';
 
 // Maptiler / Carto Dark Matter style for free
 const DARK_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
@@ -82,8 +83,48 @@ const heatmapLayer = {
 } as any;
 
 const ThreatMarker = ({ threat, onClick }: { threat: ThreatObject, onClick: (t: ThreatObject) => void }) => {
-  const loc = threat.locations[0];
-  if (!loc) return null;
+  const [currentLoc, setCurrentLoc] = useState<{lng: number, lat: number} | null>(null);
+
+  useEffect(() => {
+    const loc = threat.locations[0];
+    if (!loc) {
+      setCurrentLoc(null);
+      return;
+    }
+
+    if (!threat.speed || threat.course === null || threat.course === undefined) {
+       setCurrentLoc({ lng: loc.lng, lat: loc.lat });
+       return;
+    }
+
+    const startPt = turf.point([loc.lng, loc.lat]);
+    const startTime = new Date(loc.time).getTime();
+    const speedKmh = threat.speed;
+    const bearing = threat.course;
+
+    const updatePosition = () => {
+       const now = Date.now();
+       const elapsedHours = (now - startTime) / (1000 * 60 * 60);
+       
+       // Stop extrapolating if more than 1 hour passed without updates (might be dead/archived/stale)
+       if (elapsedHours > 1) {
+           setCurrentLoc({ lng: loc.lng, lat: loc.lat });
+           return;
+       }
+
+       const distance = speedKmh * Math.max(0, elapsedHours);
+       const dest = turf.destination(startPt, distance, bearing, { units: 'kilometers' });
+       setCurrentLoc({ lng: dest.geometry.coordinates[0], lat: dest.geometry.coordinates[1] });
+    };
+
+    updatePosition();
+    const interval = setInterval(updatePosition, 1000); // update every 1 second
+
+    return () => clearInterval(interval);
+  }, [threat]);
+
+  if (!currentLoc) return null;
+  const loc = currentLoc;
 
   const isThreat = Object.keys(THREAT_SVGS).includes(threat.type);
   const rot = threat.course || 0;

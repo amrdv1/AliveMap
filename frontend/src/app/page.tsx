@@ -15,7 +15,6 @@ import MonitoringFeed from '@/components/MonitoringFeed';
 import StatsBottomPanel from '@/components/StatsBottomPanel';
 import ThreatFilters from '@/components/ThreatFilters';
 import SummaryView from '@/components/SummaryView';
-import TimelineScrubber from '@/components/TimelineScrubber';
 import { socket } from '@/lib/socket';
 
 const Map = dynamic(() => import('@/components/Map'), { 
@@ -103,7 +102,6 @@ export default function Home() {
 
       {/* Global Overlays */}
       {activeTab === 'SUMMARY' && <SummaryView />}
-      {activeTab === 'MAP' && <TimelineScrubber />}
 
       {/* Floating Desktop UI */}
       <div className="hidden md:block">
