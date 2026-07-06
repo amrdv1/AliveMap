@@ -256,7 +256,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
   const type = detectThreatType(text);
   if (!type) return [];
 
-  const hasAction = lowerText.match(/(летить|летят|рух|зліт|пуск|запуск|напрямок|курс|фіксує|повітрі|пускові|вибух|атак|йде|небезпека|відмічено|збито|знищено|мінус|перехоплено|відбито|тривога|загроза|увага|старт|виявлен|входить|маршрут|виліт|наближ|обережно|слідкуйте|попереджен|ціль|fpv|фпв)/);
+  const hasAction = lowerText.match(/(летить|летят|рух|зліт|пуск|запуск|напрямок|курс|фіксує|повітрі|пускові|вибух|атак|йде|небезпека|відмічено|збито|знищено|мінус|перехоплено|відбито|тривога|загроза|увага|старт|виявлен|входить|маршрут|виліт|наближ|обережно|слідкуйте|попереджен|ціль|fpv|фпв|шахед|бпла|дрон|мопед|ракет|каб|фаб|бомб|балістик|циркон|іскандер|кинджал)/);
   if (!hasAction && type !== 'PPO') {
     return [{ type: 'INFO', lat: null, lng: null, confidence: 100, direction: null }];
   }
@@ -319,7 +319,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
     }
 
     if (lineLat !== null && lineLng !== null) {
-      const hasLineMention = lineLower.match(/(бпла|шахед|ракет|балістик|калібр|дрон|крилат|каб|фаб|х-101|х-55|циркон|курс|напрямок|збито|мінус|летить|рух|пуск|ціль|fpv|фпв)/);
+      const hasLineMention = lineLower.match(/(бпла|шахед|ракет|балістик|калібр|дрон|крилат|каб|фаб|бомб|авіабомб|х-101|х-55|циркон|курс|напрямок|збито|мінус|летить|рух|пуск|ціль|fpv|фпв)/);
       if (hasLineMention) {
         results.push({
           type: lineType,
@@ -374,7 +374,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
     } else if (type === 'PPO') {
       return [{ type: 'PPO', lat: null, lng: null, confidence: 100, direction: null }];
     } else {
-      return [{ type: 'INFO', lat: null, lng: null, confidence: 100, direction: null }];
+      return [{ type: type, lat: null, lng: null, confidence: 50, direction: direction }];
     }
   }
 
