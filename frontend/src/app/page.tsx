@@ -16,6 +16,7 @@ import StatsBottomPanel from '@/components/StatsBottomPanel';
 import ThreatFilters from '@/components/ThreatFilters';
 import SummaryView from '@/components/SummaryView';
 import TimelineScrubber from '@/components/TimelineScrubber';
+import { socket } from '@/lib/socket';
 
 const Map = dynamic(() => import('@/components/Map'), { 
   ssr: false,
@@ -46,14 +47,50 @@ export default function Home() {
         .catch(console.error);
     };
 
+    const fetchThreats = () => {
+      fetch('/api/threats')
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) useStore.getState().setThreats(data);
+        })
+        .catch(console.error);
+    };
+
     fetchMessages();
     fetchAlerts();
+    fetchThreats();
+    
     const intervalMessages = setInterval(fetchMessages, 60000); // Refresh every 60 seconds
     const intervalAlerts = setInterval(fetchAlerts, 15000); // Refresh alerts every 15s
+
+    // Connect socket for real-time updates
+    socket.connect();
+
+    socket.on('monitoring:new_message', (msg) => {
+      useStore.getState().addMessage(msg);
+    });
+
+    socket.on('threat:update', (threat) => {
+      const state = useStore.getState();
+      const exists = state.threats.find(t => t.id === threat.id);
+      if (exists) {
+        state.setThreats(state.threats.map(t => t.id === threat.id ? threat : t));
+      } else {
+        state.setThreats([...state.threats, threat]);
+      }
+    });
+
+    socket.on('threats:refresh', () => {
+      fetchThreats();
+    });
 
     return () => {
         clearInterval(intervalMessages);
         clearInterval(intervalAlerts);
+        socket.disconnect();
+        socket.off('monitoring:new_message');
+        socket.off('threat:update');
+        socket.off('threats:refresh');
     };
   }, [setMessages]);
 
