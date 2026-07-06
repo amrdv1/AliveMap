@@ -47,16 +47,27 @@ export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
             
             {msg.tags && msg.tags.length > 0 && (
               <div className="flex gap-1.5 mb-3 flex-wrap">
-                {msg.tags.map(tag => (
-                  <span key={tag} className={`text-[10px] font-bold px-2 py-1 rounded-md tracking-wider uppercase ${
-                    tag === 'Загроза' || tag === 'УВАГА' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
-                    tag === 'Тривога' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 
-                    tag === 'ВІДБІЙ' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                    'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-                  }`}>
-                    {tag}
-                  </span>
-                ))}
+                {msg.tags.map((tag: string) => {
+                  const tagMap: Record<string, {label: string, cls: string}> = {
+                    'DRONE': { label: 'Шахед', cls: 'bg-red-500/20 text-red-400 border-red-500/30' },
+                    'CRUISE_MISSILE': { label: 'Кр. Ракета', cls: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
+                    'BALLISTIC_MISSILE': { label: 'Балістика', cls: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
+                    'MISSILE': { label: 'Ракета', cls: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
+                    'ZIRCON': { label: 'Циркон', cls: 'bg-pink-500/20 text-pink-400 border-pink-500/30' },
+                    'AIRCRAFT': { label: 'Авіація', cls: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
+                    'KAB': { label: 'КАБ', cls: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
+                    'PPO': { label: 'ППО Збиття', cls: 'bg-green-500/20 text-green-400 border-green-500/30' },
+                    'RECON': { label: 'Розвідка', cls: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
+                    'SUMMARY': { label: 'Зведення', cls: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' },
+                    'INFO': { label: 'Інфо', cls: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
+                  };
+                  const mapped = tagMap[tag] || { label: tag, cls: 'bg-gray-500/20 text-gray-400 border-gray-500/30' };
+                  return (
+                    <span key={tag} className={`text-[10px] font-bold px-2 py-1 rounded-md tracking-wider uppercase border ${mapped.cls}`}>
+                      {mapped.label}
+                    </span>
+                  );
+                })}
               </div>
             )}
             
