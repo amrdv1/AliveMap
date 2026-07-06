@@ -34,7 +34,16 @@ const CHANNELS = [
   'truexanewsua',
   'ukraine_alarm_bot',
   'kpszsu',
-  'veselyy_pivden'
+  'veselyy_pivden',
+  'mykolaivska_oda',
+  'kharkivoda',
+  'odessa_typical',
+  'realwar_ukraine',
+  'ukraine_now',
+  'suspilne_news',
+  'ukraine_online',
+  'ukraine_radar',
+  'pivden_radar'
 ];
 
 const PRIVATE_TITLES = [
