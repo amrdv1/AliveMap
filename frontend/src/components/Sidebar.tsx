@@ -92,11 +92,12 @@ export default function Sidebar() {
           const locationName = latestLoc ? getNearestLocation(latestLoc.lat, latestLoc.lng) : '';
           
           return (
-            <div key={threat.id} className="flex items-center gap-4 bg-white/5 rounded-xl p-3 text-sm border border-transparent hover:border-white/10 hover:bg-white/10 transition-all cursor-pointer">
-              <div className={`w-8 h-8 rounded-full flex justify-center items-center shrink-0 ${
-                threat.type === 'DRONE' || threat.type.includes('MISSILE') ? 'bg-red-500/10' : 'bg-blue-500/10'
+            <div key={threat.id} className="relative group flex items-center gap-4 bg-white/[0.03] backdrop-blur-md rounded-2xl p-3 text-sm border border-white/5 hover:border-white/10 hover:bg-white/10 transition-all duration-300 cursor-pointer overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-transparent to-transparent group-hover:from-red-500/5 transition-colors duration-300"></div>
+              <div className={`w-9 h-9 rounded-full flex justify-center items-center shrink-0 shadow-inner border border-white/5 z-10 ${
+                threat.type === 'DRONE' || threat.type.includes('MISSILE') || threat.type === 'ZIRCON' || threat.type === 'KH101' || threat.type === 'KALIBR' || threat.type === 'ISKANDER' || threat.type === 'KINZHAL' ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'
               }`}>
-                <ThreatIcon type={threat.type} className="w-5 h-5" />
+                <ThreatIcon type={threat.type} className="w-5 h-5 drop-shadow-[0_0_8px_rgba(currentColor,0.5)]" />
               </div>
               
               <div className="flex-1 min-w-0">

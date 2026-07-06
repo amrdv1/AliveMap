@@ -62,7 +62,7 @@ export default function Home() {
         {/* Right Side Panels */}
         {activeTab === 'MAP' && (
           <div className="absolute top-28 right-6 bottom-24 z-20 flex flex-col gap-4 w-80">
-            <div className="bg-[#010a1b] rounded-2xl border border-white/5 flex-1 min-h-[150px] overflow-hidden shadow-xl">
+            <div className="bg-black/40 backdrop-blur-xl rounded-3xl border border-white/10 flex-1 min-h-[150px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
               <Sidebar />
             </div>
           </div>
@@ -78,7 +78,7 @@ export default function Home() {
         {activeTab === 'MAP' && <ThreatFilters />}
         
         {activeTab === 'MONITORING' && (
-          <div className="absolute inset-0 pt-16 pb-20 z-30 bg-[#05070A]">
+          <div className="absolute inset-0 pt-20 pb-24 z-30 bg-black/80 backdrop-blur-2xl">
             <MonitoringFeed isMobile />
           </div>
         )}

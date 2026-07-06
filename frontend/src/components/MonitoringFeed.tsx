@@ -6,8 +6,8 @@ export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
   const { messages } = useStore();
 
   return (
-    <div className={`flex flex-col bg-[#010a1b] border border-white/5 font-sans overflow-hidden shadow-2xl ${
-      isMobile ? 'w-full h-full rounded-none' : 'w-full h-full rounded-2xl'
+    <div className={`flex flex-col bg-black/40 backdrop-blur-2xl border border-white/10 font-sans overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.5)] ${
+      isMobile ? 'w-full h-full rounded-none' : 'w-full h-full rounded-3xl'
     }`}>
       {/* Header */}
       <div className="p-5 border-b border-white/5 flex items-center justify-between bg-black/20">

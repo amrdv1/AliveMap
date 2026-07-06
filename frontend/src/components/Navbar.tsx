@@ -15,7 +15,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <div className="absolute top-4 left-4 right-4 h-16 bg-[#010a1b] rounded-2xl flex items-center justify-between px-6 z-30 border border-white/10 shadow-lg">
+    <div className="absolute top-4 left-4 right-4 h-16 bg-black/30 backdrop-blur-2xl rounded-3xl flex items-center justify-between px-6 z-30 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
       {/* Logo */}
       <div className="flex items-center gap-3">
         <div className="relative flex items-center justify-center w-8 h-8">
@@ -27,31 +27,31 @@ export default function Navbar() {
       </div>
 
       {/* Tabs */}
-      <div className="hidden md:flex items-center gap-2">
+      <div className="hidden md:flex items-center gap-1 bg-black/20 p-1 rounded-2xl border border-white/5">
         <button 
           onClick={() => setActiveTab('MAP')}
-          className={`px-5 py-2 rounded-xl text-sm font-bold tracking-widest uppercase transition-all ${
-            activeTab === 'MAP' ? 'bg-white/10 text-white shadow-inner' : 'text-white/40 hover:text-white/80 hover:bg-white/5'
+          className={`px-5 py-2 rounded-xl text-sm font-semibold tracking-widest uppercase transition-all duration-300 ${
+            activeTab === 'MAP' ? 'bg-white/15 text-white shadow-sm' : 'text-white/40 hover:text-white/80 hover:bg-white/5'
           }`}>
           Мапа
         </button>
         <button 
           onClick={() => setActiveTab('SUMMARY')}
-          className={`px-5 py-2 rounded-xl text-sm font-bold tracking-widest uppercase transition-all ${
-            activeTab === 'SUMMARY' ? 'bg-white/10 text-white shadow-inner' : 'text-white/40 hover:text-white/80 hover:bg-white/5'
+          className={`px-5 py-2 rounded-xl text-sm font-semibold tracking-widest uppercase transition-all duration-300 ${
+            activeTab === 'SUMMARY' ? 'bg-white/15 text-white shadow-sm' : 'text-white/40 hover:text-white/80 hover:bg-white/5'
           }`}>
           Зведення
         </button>
         <button 
           onClick={() => setActiveTab('MONITORING')}
-          className={`px-5 py-2 rounded-xl text-sm font-bold tracking-widest uppercase transition-all ${
-            activeTab === 'MONITORING' ? 'bg-white/10 text-white shadow-inner' : 'text-white/40 hover:text-white/80 hover:bg-white/5'
+          className={`px-5 py-2 rounded-xl text-sm font-semibold tracking-widest uppercase transition-all duration-300 ${
+            activeTab === 'MONITORING' ? 'bg-white/15 text-white shadow-sm' : 'text-white/40 hover:text-white/80 hover:bg-white/5'
           }`}>
           Моніторинг
         </button>
         <button 
           onClick={() => setAboutOpen(true)}
-          className="px-5 py-2 rounded-xl text-sm font-bold tracking-widest uppercase text-white/40 hover:text-white/80 hover:bg-white/5 transition-all">
+          className="px-5 py-2 rounded-xl text-sm font-semibold tracking-widest uppercase text-white/40 hover:text-white/80 hover:bg-white/5 transition-all duration-300">
           Інфо
         </button>
       </div>

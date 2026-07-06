@@ -28,7 +28,7 @@ export default function SummaryView() {
       <div className="w-full max-w-4xl flex flex-col gap-6">
         
         {/* Header */}
-        <div className="bg-[#010a1b] border border-white/10 rounded-3xl p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-2xl">
+        <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-3xl p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-2xl">
           <div>
             <h1 className="text-3xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
               <ShieldAlert className="text-red-500 w-8 h-8" />
@@ -56,7 +56,7 @@ export default function SummaryView() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Alerts List */}
-          <div className="bg-[#070b14]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-xl">
+          <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-xl">
             <h2 className="text-xl font-bold text-white uppercase tracking-wider mb-6 flex items-center gap-2">
               <AlertTriangle className="text-orange-500 w-6 h-6" />
               Тривоги ({alertRegions.length})
@@ -88,7 +88,7 @@ export default function SummaryView() {
         </div>
 
         {/* Textual Summaries */}
-        <div className="bg-[#070b14]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-xl">
+        <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-xl">
           <h2 className="text-xl font-bold text-white uppercase tracking-wider mb-6 flex items-center gap-2">
             <Info className="text-purple-500 w-6 h-6" />
             Останні зведення та статистика
@@ -116,7 +116,7 @@ export default function SummaryView() {
 
 function StatCard({ title, count, color, icon }: { title: string, count: number, color: string, icon: string }) {
   return (
-    <div className="bg-[#070b14]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-xl flex items-center gap-4">
+    <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-xl flex items-center gap-4">
       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl ${color.replace('bg-', 'bg-').replace('500', '500/20')} border ${color.replace('bg-', 'border-').replace('500', '500/30')}`}>
         {icon}
       </div>

@@ -15,9 +15,9 @@ export default function StatsBottomPanel() {
   const aircraftCount = activeThreats.filter(t => t.type === 'AIRCRAFT').length;
 
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-30 pointer-events-none">
-      {/* Stats Pill - Premium Dark Edition */}
-      <div className="pointer-events-auto bg-[#010a1b] border border-white/10 rounded-2xl px-6 py-3 flex flex-wrap justify-center md:flex-nowrap items-center gap-6 shadow-[0_10px_40px_rgba(0,0,0,0.8)]">
+    <div className="hidden md:flex absolute bottom-6 left-1/2 -translate-x-1/2 flex-col items-center gap-3 z-30 pointer-events-none">
+      {/* Stats Pill - Premium Glass Edition */}
+      <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-8 py-3 flex items-center gap-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         <div className="hidden md:flex items-center gap-2 pr-2 border-r border-gray-700/50">
           <img src="/logo.png" alt="Logo" className="w-5 h-5 object-contain" />
           <span className="text-white text-xs font-black tracking-widest drop-shadow-[0_0_8px_rgba(239,68,68,0.3)]">ALIVEMAP</span>
