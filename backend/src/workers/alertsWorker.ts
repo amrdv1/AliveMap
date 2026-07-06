@@ -21,7 +21,11 @@ export async function startAlertsWorker(io: Server) {
     let previousStates: Record<string, boolean> = {};
     let isFirstRun = true;
 
+    let isFetching = false;
+
     const fetchAlerts = async () => {
+        if (isFetching) return;
+        isFetching = true;
         try {
             const ALERTS_API_URL = 'https://siren.pp.ua/api/v3/alerts';
             const { data } = await axios.get(ALERTS_API_URL, { timeout: 10000 });
@@ -96,6 +100,8 @@ export async function startAlertsWorker(io: Server) {
             }
         } catch (error) {
             console.error("Error polling official alerts API (can be ignored if network is down)");
+        } finally {
+            isFetching = false;
         }
     };
 
