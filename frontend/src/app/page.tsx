@@ -35,9 +35,26 @@ export default function Home() {
         .catch(console.error);
     };
 
+    const fetchAlerts = () => {
+      fetch('/api/alerts')
+        .then(res => res.json())
+        .then(data => {
+          if (data.states) {
+            useStore.getState().setAlerts(data.states);
+          }
+        })
+        .catch(console.error);
+    };
+
     fetchMessages();
-    const interval = setInterval(fetchMessages, 60000); // Refresh every 60 seconds
-    return () => clearInterval(interval);
+    fetchAlerts();
+    const intervalMessages = setInterval(fetchMessages, 60000); // Refresh every 60 seconds
+    const intervalAlerts = setInterval(fetchAlerts, 15000); // Refresh alerts every 15s
+
+    return () => {
+        clearInterval(intervalMessages);
+        clearInterval(intervalAlerts);
+    };
   }, [setMessages]);
 
   return (

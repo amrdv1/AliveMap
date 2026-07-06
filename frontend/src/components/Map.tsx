@@ -8,7 +8,52 @@ import { socket } from '../lib/socket';
 import { THREAT_SVGS, THREAT_COLORS } from './ThreatIcon';
 
 // Maptiler / Carto Dark Matter style for free
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+const DARK_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+const SATELLITE_STYLE = {
+  version: 8,
+  sources: {
+    satellite: {
+      type: 'raster',
+      tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+      tileSize: 256
+    }
+  },
+  layers: [{
+    id: 'satellite',
+    type: 'raster',
+    source: 'satellite'
+  }]
+};
+
+const REGION_NAME_MAP: Record<string, string> = {
+  "Київська область": "Kiev",
+  "м. Київ": "Kiev City",
+  "Одеська область": "Odessa",
+  "Дніпропетровська область": "Dnipropetrovs'k",
+  "Харківська область": "Kharkiv",
+  "Львівська область": "L'viv",
+  "Миколаївська область": "Mykolayiv",
+  "Запорізька область": "Zaporizhzhya",
+  "Херсонська область": "Kherson",
+  "Чернігівська область": "Chernihiv",
+  "Сумська область": "Sumy",
+  "Полтавська область": "Poltava",
+  "Черкаська область": "Cherkasy",
+  "Вінницька область": "Vinnytsya",
+  "Житомирська область": "Zhytomyr",
+  "Кіровоградська область": "Kirovohrad",
+  "Хмельницька область": "Khmel'nyts'kyy",
+  "Чернівецька область": "Chernivtsi",
+  "Івано-Франківська область": "Ivano-Frankivs'k",
+  "Закарпатська область": "Transcarpathia",
+  "Волинська область": "Volyn",
+  "Рівненська область": "Rivne",
+  "Тернопільська область": "Ternopil'",
+  "Донецька область": "Donets'k",
+  "Луганська область": "Luhans'k",
+  "Автономна Республіка Крим": "Crimea",
+  "м. Севастополь": "Sevastopol"
+};
 
 // --- Heatmap Layer Style ---
 const heatmapLayer = {
@@ -65,16 +110,44 @@ const ThreatMarker = ({ threat }: { threat: ThreatObject }) => {
 };
 
 export default function UkraineMap() {
-  const { setAlerts, threats, setThreats } = useStore();
+  const { alerts, threats, setThreats } = useStore();
   const [geoData, setGeoData] = useState<any>(null);
   const [showHeatmap, setShowHeatmap] = useState(false);
+  const [mapMode, setMapMode] = useState<'dark'|'satellite'>('dark');
+  const [is3D, setIs3D] = useState(true);
 
   useEffect(() => {
-    fetch('/ukraine_regions.geojson')
+    fetch('/ukraine.geojson')
       .then((res) => res.json())
       .then((data) => setGeoData(data))
       .catch((e) => console.error("Failed to load regions", e));
   }, []);
+
+  // Compute active alert region names
+  const activeAlertRegionNames = useMemo(() => {
+    const active = new Set<string>();
+    for (const [uaName, alertObj] of Object.entries(alerts || {})) {
+      if (alertObj && alertObj.alertnow) {
+        const enName = REGION_NAME_MAP[uaName];
+        if (enName) active.add(enName);
+      }
+    }
+    return active;
+  }, [alerts]);
+
+  const mapGeoData = useMemo(() => {
+      if (!geoData) return null;
+      return {
+          ...geoData,
+          features: geoData.features.map((f: any) => ({
+              ...f,
+              properties: {
+                  ...f.properties,
+                  hasAlert: activeAlertRegionNames.has(f.properties.name) ? 1 : 0
+              }
+          }))
+      };
+  }, [geoData, activeAlertRegionNames]);
 
   const heatmapData = useMemo(() => {
     return {
@@ -94,20 +167,32 @@ export default function UkraineMap() {
             longitude: 31.1656,
             latitude: 48.3794,
             zoom: 5.5,
-            pitch: 45 // 3D pitch!
+            pitch: is3D ? 45 : 0
           }}
-          mapStyle={MAP_STYLE}
+          mapStyle={mapMode === 'dark' ? DARK_STYLE : SATELLITE_STYLE as any}
           style={{ width: '100%', height: '100%' }}
         >
           <NavigationControl position="bottom-right" />
           
           {/* GeoJSON Regions */}
-          {geoData && (
-            <Source id="regions" type="geojson" data={geoData}>
+          {mapGeoData && (
+            <Source id="regions" type="geojson" data={mapGeoData}>
+              <Layer 
+                id="regions-fill" 
+                type="fill" 
+                paint={{ 
+                    'fill-color': [
+                        'case',
+                        ['==', ['get', 'hasAlert'], 1],
+                        'rgba(239, 68, 68, 0.3)', // Red with opacity
+                        'rgba(0, 0, 0, 0)'
+                    ],
+                }} 
+              />
               <Layer 
                 id="regions-line" 
                 type="line" 
-                paint={{ 'line-color': '#4b5563', 'line-width': 1, 'line-opacity': 0.5 }} 
+                paint={{ 'line-color': '#ef4444', 'line-width': ['case', ['==', ['get', 'hasAlert'], 1], 2, 1], 'line-opacity': 0.5 }} 
               />
             </Source>
           )}
@@ -126,8 +211,20 @@ export default function UkraineMap() {
 
         </Map>
 
-        {/* Heatmap Control Button */}
-        <div className="absolute top-4 right-4 z-10">
+        {/* Heatmap & View Controls */}
+        <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+          <button 
+            onClick={() => setMapMode(mapMode === 'dark' ? 'satellite' : 'dark')}
+            className="px-4 py-2 rounded font-bold shadow-lg transition-colors bg-gray-800 text-gray-300 border border-gray-700"
+          >
+            {mapMode === 'dark' ? '🛰️ Satellite' : '🌑 Dark Map'}
+          </button>
+          <button 
+            onClick={() => setIs3D(!is3D)}
+            className="px-4 py-2 rounded font-bold shadow-lg transition-colors bg-gray-800 text-gray-300 border border-gray-700"
+          >
+            {is3D ? '🧊 2D View' : '🧊 3D View'}
+          </button>
           <button 
             onClick={() => setShowHeatmap(!showHeatmap)}
             className={`px-4 py-2 rounded font-bold shadow-lg transition-colors ${showHeatmap ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-300 border border-gray-700'}`}
