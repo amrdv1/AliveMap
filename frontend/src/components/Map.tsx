@@ -234,12 +234,31 @@ export default function UkraineMap() {
         let startStr = '';
         if (alertObj.lastUpdate) {
           const start = new Date(alertObj.lastUpdate);
-          startStr = start.toLocaleTimeString('uk-UA');
+          
+          // Format start time with date
+          const formatter = new Intl.DateTimeFormat('uk-UA', { 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric',
+            hour: '2-digit', 
+            minute: '2-digit' 
+          });
+          startStr = formatter.format(start);
+          
           const diffMs = Date.now() - start.getTime();
           const diffMins = Math.floor(diffMs / 60000);
-          const hours = Math.floor(diffMins / 60);
+          
+          const days = Math.floor(diffMins / (24 * 60));
+          const hours = Math.floor((diffMins % (24 * 60)) / 60);
           const mins = diffMins % 60;
-          durationStr = hours > 0 ? `${hours} год ${mins} хв` : `${mins} хв`;
+          
+          if (days > 0) {
+            durationStr = `${days} д. ${hours} год ${mins} хв`;
+          } else if (hours > 0) {
+            durationStr = `${hours} год ${mins} хв`;
+          } else {
+            durationStr = `${mins} хв`;
+          }
         }
         return { active: true, name: matchedAlertKey, durationStr, startStr };
       }
