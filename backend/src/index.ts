@@ -55,6 +55,18 @@ app.get('/api/alerts', async (req, res) => {
                 };
             }
         });
+        
+        // Inject permanent alerts based on official data
+        formattedStates['Автономна Республіка Крим'] = {
+            alertnow: true,
+            regionType: 'State',
+            lastUpdate: '2022-12-11T00:22:00.000Z'
+        };
+        formattedStates['Луганська область'] = {
+            alertnow: true,
+            regionType: 'State',
+            lastUpdate: '2022-04-04T19:45:00.000Z'
+        };
     }
     res.json(formattedStates);
   } catch (error) {
