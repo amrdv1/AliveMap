@@ -24,6 +24,10 @@ enum ReportType {
   ALERT
   RECON
   ZIRCON
+  KH101
+  ISKANDER
+  KINZHAL
+  KALIBR
   UNKNOWN
   PPO
 }

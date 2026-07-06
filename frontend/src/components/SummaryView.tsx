@@ -14,6 +14,10 @@ export default function SummaryView() {
   const cruise = activeThreats.filter(t => t.type === 'CRUISE_MISSILE').length;
   const ballistic = activeThreats.filter(t => t.type === 'BALLISTIC_MISSILE').length;
   const zircon = activeThreats.filter(t => t.type === 'ZIRCON').length;
+  const kh101 = activeThreats.filter(t => t.type === 'KH101').length;
+  const iskander = activeThreats.filter(t => t.type === 'ISKANDER').length;
+  const kinzhal = activeThreats.filter(t => t.type === 'KINZHAL').length;
+  const kalibr = activeThreats.filter(t => t.type === 'KALIBR').length;
   const aircraft = activeThreats.filter(t => t.type === 'AIRCRAFT').length;
   const kabs = activeThreats.filter(t => t.type === 'KAB').length;
   const recons = activeThreats.filter(t => t.type === 'RECON').length;
@@ -43,7 +47,7 @@ export default function SummaryView() {
         {/* Detailed Stats */}
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-6 gap-4">
           <StatCard title="Шахеди" count={drones + fpvs} color="bg-red-500" icon="🛸" />
-          <StatCard title="Ракети" count={missiles + cruise + ballistic + zircon} color="bg-orange-500" icon="🚀" />
+          <StatCard title="Ракети" count={missiles + cruise + ballistic + zircon + kh101 + iskander + kinzhal + kalibr} color="bg-orange-500" icon="🚀" />
           <StatCard title="Авіація" count={aircraft} color="bg-blue-500" icon="✈️" />
           <StatCard title="КАБи" count={kabs} color="bg-yellow-500" icon="🎯" />
           <StatCard title="Розвідка" count={recons} color="bg-gray-500" icon="👁️" />

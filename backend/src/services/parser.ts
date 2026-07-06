@@ -1,5 +1,5 @@
 export interface ParsedThreat {
-  type: 'DRONE' | 'MISSILE' | 'AIRCRAFT' | 'ALERT' | 'BALLISTIC_MISSILE' | 'CRUISE_MISSILE' | 'KAB' | 'SUMMARY' | 'INFO' | 'ZIRCON' | 'PPO' | 'FPV' | 'UNKNOWN' | 'RECON';
+  type: 'DRONE' | 'MISSILE' | 'AIRCRAFT' | 'ALERT' | 'BALLISTIC_MISSILE' | 'CRUISE_MISSILE' | 'KAB' | 'SUMMARY' | 'INFO' | 'ZIRCON' | 'KH101' | 'ISKANDER' | 'KINZHAL' | 'KALIBR' | 'PPO' | 'FPV' | 'UNKNOWN' | 'RECON';
   lat: number | null;
   lng: number | null;
   confidence: number;
@@ -222,10 +222,14 @@ function detectThreatType(text: string): ParsedThreat['type'] | null {
     if (!t.match(/(за добу|за ніч|за тиждень|підсумки|загалом|втрати)/)) return 'PPO';
   }
   if (t.match(/(циркон|3м22)/)) return 'ZIRCON';
+  if (t.match(/(х-101|х-555|х-55|х-69)/)) return 'KH101';
+  if (t.match(/(калібр|3м14)/)) return 'KALIBR';
+  if (t.match(/(кинджал|х-47)/)) return 'KINZHAL';
+  if (t.match(/(іскандер|искандер|кн-23|кн-24)/)) return 'ISKANDER';
   if (t.match(/(fpv|фпв|ланцет|молнія|зала|zala|суперкам|supercam)/)) return 'FPV';
   if (t.match(/(шахед|шахід|shahed|бпла|мопед|безпілотник|геран|гербер|дрон|ударний\s*безпілотн)/)) return 'DRONE';
-  if (t.match(/(балістик|кинджал|іскандер|с-300|с-400|кн-23|кн-24|точка-у)/)) return 'BALLISTIC_MISSILE';
-  if (t.match(/(х-101|х-555|х-55|х-59|х-69|х-35|калібр|кх-|3м14|крилат[аіи]\s*ракет|ракетоносц|ракетонос)/)) return 'CRUISE_MISSILE';
+  if (t.match(/(балістик|с-300|с-400|точка-у)/)) return 'BALLISTIC_MISSILE';
+  if (t.match(/(х-59|х-35|кх-|крилат[аіи]\s*ракет|ракетоносц|ракетонос)/)) return 'CRUISE_MISSILE';
   if (t.match(/(ракет[аиоу]|пуск\s*ракет|ракетн)/)) {
     if (t.match(/(повітрі|летить|рух|курс|напрямок)/)) return 'CRUISE_MISSILE';
     return 'MISSILE';
@@ -367,13 +371,13 @@ export function parseTelegramText(text: string): ParsedThreat[] {
   if (matchedLocations.length === 0) {
     if (type === 'AIRCRAFT') {
       matchedLocations.push({ ...GENERIC_SPAWN.AIRCRAFT, conf: 50 });
-    } else if (type === 'CRUISE_MISSILE' && lowerText.match(/(морі|море|ракетонос|каспій|чорн)/)) {
+    } else if ((type === 'CRUISE_MISSILE' || type === 'KALIBR' || type === 'KH101') && lowerText.match(/(морі|море|ракетонос|каспій|чорн)/)) {
       if (lowerText.match(/каспій/)) matchedLocations.push({ ...GENERIC_SPAWN.CASPIAN_SEA, conf: 70 });
       else matchedLocations.push({ ...GENERIC_SPAWN.BLACK_SEA, conf: 80 });
     } else if (type === 'DRONE') {
       if (lowerText.match(/(північ|курськ|брянськ|сум|чернігів)/)) matchedLocations.push({ ...GENERIC_SPAWN.DRONE_NORTH, conf: 50 });
       else matchedLocations.push({ ...GENERIC_SPAWN.DRONE_SOUTH, conf: 50 });
-    } else if (type === 'MISSILE' || type === 'BALLISTIC_MISSILE' || type === 'CRUISE_MISSILE' || type === 'ZIRCON') {
+    } else if (['MISSILE', 'BALLISTIC_MISSILE', 'CRUISE_MISSILE', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR'].includes(type)) {
       matchedLocations.push({ ...GENERIC_SPAWN.MISSILE, conf: 50 });
     } else if (type === 'PPO') {
       return [{ type: 'PPO', lat: null, lng: null, confidence: 100, direction: null }];

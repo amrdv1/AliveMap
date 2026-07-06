@@ -75,7 +75,7 @@ export async function processExternalThreat(
       
       // Merge radius depends on speed/type
       let mergeRadius = 30;
-      if (['MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON', 'AIRCRAFT'].includes(t.type)) {
+      if (['MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON', 'AIRCRAFT', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR'].includes(t.type)) {
          mergeRadius = 150;
       } else if (t.type === 'KAB') {
          mergeRadius = 80;
@@ -113,9 +113,13 @@ export async function processExternalThreat(
       switch (threatType as ReportType) {
           case 'DRONE': defaultSpeed = 150; break;
           case 'MISSILE': 
-          case 'CRUISE_MISSILE': defaultSpeed = 800; break;
-          case 'BALLISTIC_MISSILE': defaultSpeed = 8000; break;
-          case 'ZIRCON': defaultSpeed = 10000; break;
+          case 'CRUISE_MISSILE':
+          case 'KH101':
+          case 'KALIBR': defaultSpeed = 800; break;
+          case 'BALLISTIC_MISSILE':
+          case 'ISKANDER': defaultSpeed = 8000; break;
+          case 'ZIRCON': 
+          case 'KINZHAL': defaultSpeed = 10000; break;
           case 'KAB': defaultSpeed = 900; break;
           case 'AIRCRAFT': defaultSpeed = 900; break;
           case 'RECON': defaultSpeed = 100; break;

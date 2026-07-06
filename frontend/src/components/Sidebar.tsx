@@ -104,7 +104,11 @@ export default function Sidebar() {
                   {threat.type === 'DRONE' ? 'Шахед / БПЛА' : 
                    threat.type === 'FPV' ? 'FPV / Ланцет' :
                    threat.type === 'CRUISE_MISSILE' ? 'Крилата Ракета' : 
+                   threat.type === 'KH101' ? 'Крилата Ракета (Х-101/555)' :
+                   threat.type === 'KALIBR' ? 'Крилата Ракета (Калібр)' :
                    threat.type === 'BALLISTIC_MISSILE' ? 'Балістика' :
+                   threat.type === 'ISKANDER' ? 'Балістика (Іскандер)' :
+                   threat.type === 'KINZHAL' ? 'Аеробалістична (Кинджал)' :
                    threat.type === 'MISSILE' ? 'Ракета' :
                    threat.type === 'KAB' ? 'КАБ / ФАБ' :
                    threat.type === 'AIRCRAFT' ? 'Тактична Авіація' :

@@ -5,7 +5,11 @@ export const THREAT_COLORS = {
   'FPV': '#fb923c', // Orange
   'MISSILE': '#ef4444', // Flat strong red
   'CRUISE_MISSILE': '#dc2626', // Deep red
+  'KH101': '#ea580c', // Orange-red
+  'KALIBR': '#f43f5e', // Rose
   'BALLISTIC_MISSILE': '#f97316', // Flat orange
+  'ISKANDER': '#d946ef', // Fuchsia
+  'KINZHAL': '#dc2626', // Red
   'AIRCRAFT': '#60a5fa', // Soft blue
   'PPO': '#4ade80', // Soft green
   'KAB': '#c084fc', // Soft purple
@@ -19,7 +23,11 @@ export const THREAT_SVGS = {
   'FPV': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 7 17 17M17 7 7 17"/><circle cx="5.4" cy="5.4" r="2.9"/><circle cx="18.6" cy="5.4" r="2.9"/><circle cx="5.4" cy="18.6" r="2.9"/><circle cx="18.6" cy="18.6" r="2.9"/><rect x="9.2" y="9.2" width="5.6" height="5.6" rx="1.3" fill="currentColor"/></svg>`,
   'MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C11.5 1 11 1.5 11 2.5V8L6 11V13L11 12V17.5L8 20V22L12 21L16 22V20L13 17.5V12L18 13V11L13 8V2.5C13 1.5 12.5 1 12 1Z"/><path d="M12 3V8L14 11V12L12 11.5V17L14 19V20L12 19.5V3Z" fill="black" fill-opacity="0.25"/></svg>`,
   'CRUISE_MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C11.5 1 11 1.5 11 2.5V8L6 11V13L11 12V17.5L8 20V22L12 21L16 22V20L13 17.5V12L18 13V11L13 8V2.5C13 1.5 12.5 1 12 1Z"/><path d="M12 3V8L14 11V12L12 11.5V17L14 19V20L12 19.5V3Z" fill="black" fill-opacity="0.25"/></svg>`,
+  'KH101': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C11.5 1 11 1.5 11 2.5V8L6 11V13L11 12V17.5L8 20V22L12 21L16 22V20L13 17.5V12L18 13V11L13 8V2.5C13 1.5 12.5 1 12 1Z"/><path d="M12 3V8L14 11V12L12 11.5V17L14 19V20L12 19.5V3Z" fill="black" fill-opacity="0.25"/></svg>`,
+  'KALIBR': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C11.5 1 11 1.5 11 2.5V8L6 11V13L11 12V17.5L8 20V22L12 21L16 22V20L13 17.5V12L18 13V11L13 8V2.5C13 1.5 12.5 1 12 1Z"/><path d="M12 3V8L14 11V12L12 11.5V17L14 19V20L12 19.5V3Z" fill="black" fill-opacity="0.25"/></svg>`,
   'BALLISTIC_MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C11 0 10 2 10 4V16L7 22H17L14 16V4C14 2 13 0 12 0Z"/><path d="M12 2V16L14 20H12V2Z" fill="black" fill-opacity="0.25"/><path d="M10 22L10 24H14L14 22H10Z" fill="#fbbf24" /></svg>`,
+  'ISKANDER': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C11 0 10 2 10 4V16L7 22H17L14 16V4C14 2 13 0 12 0Z"/><path d="M12 2V16L14 20H12V2Z" fill="black" fill-opacity="0.25"/><path d="M10 22L10 24H14L14 22H10Z" fill="#fbbf24" /></svg>`,
+  'KINZHAL': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 0L13.5 2V6L18 8V10L13.5 9V14L17 17V19L12 17.5L7 19V17L10.5 14V9L6 10V8L10.5 6V2L12 0Z"/><path d="M10 19L10 22L12 24L14 22V19L12 20L10 19Z" fill="#ff4444"/><path d="M12 2V14L14 17V18L12 17V2Z" fill="white" fill-opacity="0.15"/></svg>`,
   'ZIRCON': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 0L13.5 2V6L18 8V10L13.5 9V14L17 17V19L12 17.5L7 19V17L10.5 14V9L6 10V8L10.5 6V2L12 0Z"/><path d="M10 19L10 22L12 24L14 22V19L12 20L10 19Z" fill="#ff4444"/><path d="M9 21L7 23H17L15 21H9Z" fill="#ff6600" fill-opacity="0.8"/><path d="M12 2V14L14 17V18L12 17V2Z" fill="white" fill-opacity="0.15"/></svg>`,
   'AIRCRAFT': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L13 3V7L22 14V16L13 13V19L16 21V22L12 21L8 22V21L11 19V13L2 16V14L11 7V3L12 1Z"/><path d="M12 3V7L16 12V14L12 12V19L14 20V21L12 20.5V3Z" fill="black" fill-opacity="0.25"/></svg>`,
   'PPO': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M4 2L2 4L19 21L21 19L4 2Z"/><path d="M21 4L19 2L2 19L4 21L21 4Z"/></svg>`,

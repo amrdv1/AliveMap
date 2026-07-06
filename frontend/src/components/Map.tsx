@@ -58,7 +58,11 @@ const getIcon = (type: string, direction: number | null | undefined, confidence:
     DRONE: '#f97316',
     MISSILE: '#ef4444',
     CRUISE_MISSILE: '#dc2626',
+    KH101: '#ea580c',
+    KALIBR: '#f43f5e',
     BALLISTIC_MISSILE: '#991b1b',
+    ISKANDER: '#d946ef',
+    KINZHAL: '#dc2626',
     ZIRCON: '#ff0000',
     KAB: '#f59e0b',
     AIRCRAFT: '#eab308',
@@ -171,7 +175,11 @@ const translateType = (type: string) => {
   switch(type) {
     case 'DRONE': return 'Шахед / БПЛА';
     case 'CRUISE_MISSILE': return 'Крилата Ракета';
+    case 'KH101': return 'Крилата Ракета (Х-101/555)';
+    case 'KALIBR': return 'Крилата Ракета (Калібр)';
     case 'BALLISTIC_MISSILE': return 'Балістика';
+    case 'ISKANDER': return 'Балістика (Іскандер)';
+    case 'KINZHAL': return 'Аеробалістична (Кинджал)';
     case 'MISSILE': return 'Ракета';
     case 'AIRCRAFT': return 'Тактична Авіація';
     case 'KAB': return 'КАБ / ФАБ';

@@ -26,8 +26,13 @@ export default function MobileBottomSheet() {
         <div className="flex-1">
           <h2 className="text-xl font-bold text-white tracking-wide">
             {selectedThreat.type === 'DRONE' ? 'Шахед / БПЛА' : 
+             selectedThreat.type === 'FPV' ? 'FPV / Ланцет' :
              selectedThreat.type === 'CRUISE_MISSILE' ? 'Крилата Ракета' : 
+             selectedThreat.type === 'KH101' ? 'Крилата Ракета (Х-101/555)' :
+             selectedThreat.type === 'KALIBR' ? 'Крилата Ракета (Калібр)' :
              selectedThreat.type === 'BALLISTIC_MISSILE' ? 'Балістика' :
+             selectedThreat.type === 'ISKANDER' ? 'Балістика (Іскандер)' :
+             selectedThreat.type === 'KINZHAL' ? 'Аеробалістична (Кинджал)' :
              selectedThreat.type === 'MISSILE' ? 'Ракета' :
              selectedThreat.type === 'KAB' ? 'КАБ / ФАБ' :
              selectedThreat.type === 'AIRCRAFT' ? 'Тактична Авіація' :

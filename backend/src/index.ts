@@ -97,7 +97,7 @@ server.listen(PORT, async () => {
       const updatedMissiles = await prisma.threatObject.updateMany({
         where: {
           status: 'ACTIVE',
-          type: { in: ['MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON'] },
+          type: { in: ['MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR'] },
           updatedAt: { lt: fifteenMinsAgo }
         },
         data: { status: 'ARCHIVED' }
@@ -107,7 +107,7 @@ server.listen(PORT, async () => {
       const updatedOthers = await prisma.threatObject.updateMany({
         where: {
           status: 'ACTIVE',
-          type: { notIn: ['MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON'] },
+          type: { notIn: ['MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR'] },
           updatedAt: { lt: fortyFiveMinsAgo }
         },
         data: { status: 'ARCHIVED' }
