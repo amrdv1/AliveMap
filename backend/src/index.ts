@@ -83,11 +83,33 @@ server.listen(PORT, async () => {
       });
       if (updated.count > 0) {
         console.log(`[Archiver] Archived ${updated.count} stale targets.`);
-        // Ask all clients to refetch to clear their states
         io.emit('threats:refresh');
       }
     } catch (e) {
       console.error('[Archiver] Error:', e);
     }
-  }, 60000); // Check every 1 minute
+  }, 60000); // Every 1 minute
+
+  // Cleanup old monitoring messages (>24h) and archived threats (>6h)
+  setInterval(async () => {
+    try {
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const deletedMsgs = await prisma.monitoringMessage.deleteMany({
+        where: { timestamp: { lt: twentyFourHoursAgo } }
+      });
+      if (deletedMsgs.count > 0) {
+        console.log(`[Cleanup] Deleted ${deletedMsgs.count} old monitoring messages.`);
+      }
+
+      const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
+      const deletedThreats = await prisma.threatObject.deleteMany({
+        where: { status: 'ARCHIVED', updatedAt: { lt: sixHoursAgo } }
+      });
+      if (deletedThreats.count > 0) {
+        console.log(`[Cleanup] Deleted ${deletedThreats.count} old archived threats.`);
+      }
+    } catch (e) {
+      console.error('[Cleanup] Error:', e);
+    }
+  }, 5 * 60 * 1000); // Every 5 minutes
 });

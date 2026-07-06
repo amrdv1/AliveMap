@@ -5,9 +5,11 @@ const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
   try {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const messages = await prisma.monitoringMessage.findMany({
+      where: { timestamp: { gte: twentyFourHoursAgo } },
       orderBy: { timestamp: 'desc' },
-      take: 200
+      take: 500
     });
     res.json(messages);
   } catch (error) {

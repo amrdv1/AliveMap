@@ -160,7 +160,7 @@ export async function startTelegramWorker(io: Server) {
             const isPrivateMatch = title && PRIVATE_TITLES.some(t => title.includes(t));
             
             if (isPublicMatch || isPrivateMatch) {
-                const messages = await client.getMessages(dialog.entity, { limit: 50 });
+                const messages = await client.getMessages(dialog.entity, { limit: 100 });
                 for (const message of messages.reverse()) {
                     if (!message || !message.message) continue;
                     const msgTime = message.date * 1000;

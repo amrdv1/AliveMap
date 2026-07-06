@@ -84,7 +84,7 @@ export const useStore = create<AppState>((set) => ({
   }),
   setAlerts: (alerts) => set({ alerts }),
   setMessages: (messages) => set({ messages }),
-  addMessage: (message) => set((state) => ({ messages: [message, ...state.messages].slice(0, 200) })),
+  addMessage: (message) => set((state) => ({ messages: [message, ...state.messages].slice(0, 500) })),
   setFilter: (key, value) => set((state) => ({
     filters: { ...state.filters, [key]: value }
   })),
