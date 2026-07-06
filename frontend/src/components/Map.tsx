@@ -81,7 +81,7 @@ const heatmapLayer = {
   }
 } as any;
 
-const ThreatMarker = ({ threat }: { threat: ThreatObject }) => {
+const ThreatMarker = ({ threat, onClick }: { threat: ThreatObject, onClick: (t: ThreatObject) => void }) => {
   const loc = threat.locations[0];
   if (!loc) return null;
 
@@ -101,8 +101,9 @@ const ThreatMarker = ({ threat }: { threat: ThreatObject }) => {
         )}
         <div className="radar-pulse" style={{ '--ring-color': ringColor + '40' } as any}></div>
         <div 
+          onClick={() => onClick(threat)}
           style={{ transform: `rotate(${rot}deg)`, filter: `drop-shadow(0 0 4px ${ringColor})` }} 
-          className="z-10 w-6 h-6 text-white"
+          className="z-10 w-6 h-6 text-white cursor-pointer hover:scale-110 transition-transform"
           dangerouslySetInnerHTML={{ __html: svgIcon }}
         />
       </div>
@@ -111,18 +112,25 @@ const ThreatMarker = ({ threat }: { threat: ThreatObject }) => {
 };
 
 export default function UkraineMap() {
-  const { alerts, threats, setThreats } = useStore();
-  const [geoData, setGeoData] = useState<any>(null);
+  const { alerts, threats } = useStore();
+  const [geoData, setGeoData] = useState<any>(null); // Districts
+  const [geoDataStates, setGeoDataStates] = useState<any>(null); // States
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [mapMode, setMapMode] = useState<'dark'|'satellite'>('dark');
-  const [is3D, setIs3D] = useState(true);
+  const [is3D, setIs3D] = useState(false); // Default to 2D
   const [showSettings, setShowSettings] = useState(false);
+  const mapRef = React.useRef<any>(null);
 
   useEffect(() => {
-    fetch('/ukraine.geojson')
+    fetch('/ukraine-districts.geojson')
       .then((res) => res.json())
       .then((data) => setGeoData(data))
-      .catch((e) => console.error("Failed to load regions", e));
+      .catch((e) => console.error("Failed to load district regions", e));
+      
+    fetch('/ukraine_regions.geojson')
+      .then((res) => res.json())
+      .then((data) => setGeoDataStates(data))
+      .catch((e) => console.error("Failed to load state regions", e));
   }, []);
 
   // Compute active alert region names
@@ -130,8 +138,8 @@ export default function UkraineMap() {
     const active = new Set<string>();
     for (const [uaName, alertObj] of Object.entries(alerts || {})) {
       if (alertObj && alertObj.alertnow) {
-        const enName = REGION_NAME_MAP[uaName];
-        if (enName) active.add(enName);
+        // District names matching geojson "rayon" property (or region if it's an oblast)
+        active.add(uaName);
       }
     }
     return active;
@@ -141,15 +149,33 @@ export default function UkraineMap() {
       if (!geoData) return null;
       return {
           ...geoData,
-          features: geoData.features.map((f: any) => ({
-              ...f,
-              properties: {
-                  ...f.properties,
-                  hasAlert: activeAlertRegionNames.has(f.properties.name) ? 1 : 0
-              }
-          }))
+          features: geoData.features.map((f: any) => {
+              const rayon = f.properties.rayon;
+              const hasAlert = activeAlertRegionNames.has(rayon) ? 1 : 0;
+              return { ...f, properties: { ...f.properties, hasAlert } };
+          })
       };
   }, [geoData, activeAlertRegionNames]);
+
+  const mapGeoDataStates = useMemo(() => {
+      if (!geoDataStates) return null;
+      return {
+          ...geoDataStates,
+          features: geoDataStates.features.map((f: any) => {
+              const region = f.properties.region; // e.g. "Київська"
+              // Match "Київська область" or "м. Київ" or exactly
+              let hasAlert = 0;
+              for (const a of activeAlertRegionNames) {
+                 if (a.includes(region)) {
+                    hasAlert = 1;
+                    break;
+                 }
+                 if (region === 'Київ' && a === 'м. Київ') hasAlert = 1;
+              }
+              return { ...f, properties: { ...f.properties, hasAlert } };
+          })
+      };
+  }, [geoDataStates, activeAlertRegionNames]);
 
   const heatmapData = useMemo(() => {
     return {
@@ -162,9 +188,20 @@ export default function UkraineMap() {
     };
   }, [threats]);
 
+  const handleThreatClick = (t: ThreatObject) => {
+    setIs3D(true);
+    mapRef.current?.flyTo({
+      center: [t.locations[0].lng, t.locations[0].lat],
+      zoom: 8,
+      pitch: 45,
+      duration: 1500
+    });
+  };
+
   return (
     <div className="w-full h-full relative">
         <Map
+          ref={mapRef}
           initialViewState={{
             longitude: 31.1656,
             latitude: 48.3794,
@@ -176,25 +213,40 @@ export default function UkraineMap() {
         >
           <NavigationControl position="bottom-right" />
           
-          {/* GeoJSON Regions */}
-          {mapGeoData && (
-            <Source id="regions" type="geojson" data={mapGeoData}>
+          {/* State level alarms */}
+          {mapGeoDataStates && (
+            <Source id="regions-states" type="geojson" data={mapGeoDataStates}>
               <Layer 
-                id="regions-fill" 
+                id="regions-states-fill" 
                 type="fill" 
                 paint={{ 
                     'fill-color': [
                         'case',
                         ['==', ['get', 'hasAlert'], 1],
-                        'rgba(239, 68, 68, 0.3)', // Red with opacity
+                        'rgba(239, 68, 68, 0.4)', // Red with opacity
                         'rgba(0, 0, 0, 0)'
                     ],
+                    'fill-outline-color': 'rgba(239, 68, 68, 0.8)'
                 }} 
               />
+            </Source>
+          )}
+
+          {/* District level alarms */}
+          {mapGeoData && (
+            <Source id="regions-districts" type="geojson" data={mapGeoData}>
               <Layer 
-                id="regions-line" 
-                type="line" 
-                paint={{ 'line-color': '#ef4444', 'line-width': ['case', ['==', ['get', 'hasAlert'], 1], 2, 1], 'line-opacity': 0.5 }} 
+                id="regions-districts-fill" 
+                type="fill" 
+                paint={{ 
+                    'fill-color': [
+                        'case',
+                        ['==', ['get', 'hasAlert'], 1],
+                        'rgba(239, 68, 68, 0.4)', // Red with opacity
+                        'rgba(0, 0, 0, 0)'
+                    ],
+                    'fill-outline-color': 'rgba(239, 68, 68, 0.8)'
+                }} 
               />
             </Source>
           )}
@@ -208,13 +260,13 @@ export default function UkraineMap() {
 
           {/* Threats */}
           {threats.map(t => (
-            <ThreatMarker key={t.id} threat={t} />
+            <ThreatMarker key={t.id} threat={t} onClick={handleThreatClick} />
           ))}
 
         </Map>
 
         {/* Settings Dropdown */}
-        <div className="absolute top-24 right-6 z-[60] flex flex-col items-end">
+        <div className="absolute bottom-24 left-6 z-[60] flex flex-col items-start">
           <button 
             onClick={() => setShowSettings(!showSettings)}
             className="p-3 rounded-xl bg-black/60 backdrop-blur-xl border border-white/10 text-white hover:bg-white/10 transition-colors shadow-lg"
@@ -223,7 +275,7 @@ export default function UkraineMap() {
           </button>
           
           {showSettings && (
-            <div className="mt-2 flex flex-col gap-2 bg-black/80 backdrop-blur-xl border border-white/10 p-3 rounded-xl shadow-2xl animate-in fade-in slide-in-from-top-2">
+            <div className="mb-2 flex flex-col gap-2 bg-black/80 backdrop-blur-xl border border-white/10 p-3 rounded-xl shadow-2xl animate-in fade-in slide-in-from-bottom-2">
               <button 
                 onClick={() => { setMapMode(mapMode === 'dark' ? 'satellite' : 'dark'); setShowSettings(false); }}
                 className="flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition-colors bg-white/5 hover:bg-white/10 text-gray-200"
