@@ -140,90 +140,96 @@ export async function startTelegramWorker(io: Server) {
       }
     }, new NewMessage({}));
 
-    // Fetch initial history
-    try {
-        console.log("Fetching recent Telegram history...");
-        
-        // Clean slate: archive ALL active threats on startup
-        const archived = await prisma.threatObject.updateMany({
-            where: { status: 'ACTIVE' },
-            data: { status: 'ARCHIVED' }
-        });
-        console.log(`[Startup] Archived ${archived.count} old threats. Clean slate.`);
-        
-        const dialogs = await client.getDialogs();
-        
-        for (const dialog of dialogs) {
-            if (!dialog.entity) continue;
-            const username = 'username' in dialog.entity && dialog.entity.username ? dialog.entity.username.toLowerCase() : null;
-            const title = 'title' in dialog.entity && dialog.entity.title ? dialog.entity.title : null;
+    const pollHistory = async () => {
+        try {
+            console.log("Fetching recent Telegram history (polling)...");
             
-            const isPublicMatch = username && CHANNELS.some(c => c.toLowerCase() === username);
-            const isPrivateMatch = title && PRIVATE_TITLES.some(t => title.includes(t));
+            const dialogs = await client.getDialogs();
             
-            if (isPublicMatch || isPrivateMatch) {
-                const messages = await client.getMessages(dialog.entity, { limit: 100 });
-                for (const message of messages.reverse()) {
-                    if (!message || !message.message) continue;
-                    const msgTime = message.date * 1000;
-                    
-                    const parsedThreats = parseTelegramText(message.message);
-                    if (!parsedThreats || parsedThreats.length === 0) continue;
-                    
-                    const channelDisplay = username || title || 'Monitoring';
-                    const tags = [parsedThreats[0].type];
+            for (const dialog of dialogs) {
+                if (!dialog.entity) continue;
+                const username = 'username' in dialog.entity && dialog.entity.username ? dialog.entity.username.toLowerCase() : null;
+                const title = 'title' in dialog.entity && dialog.entity.title ? dialog.entity.title : null;
+                
+                const isPublicMatch = username && CHANNELS.some(c => c.toLowerCase() === username);
+                const isPrivateMatch = title && PRIVATE_TITLES.some(t => title.includes(t));
+                
+                if (isPublicMatch || isPrivateMatch) {
+                    const messages = await client.getMessages(dialog.entity, { limit: 15 }); // 15 is enough for 1 min polling
+                    for (const message of messages.reverse()) {
+                        if (!message || !message.message) continue;
+                        const msgTime = message.date * 1000;
+                        
+                        const parsedThreats = parseTelegramText(message.message);
+                        if (!parsedThreats || parsedThreats.length === 0) continue;
+                        
+                        const channelDisplay = username || title || 'Monitoring';
+                        const tags = [parsedThreats[0].type];
 
-                    // Check if message is fresh enough for monitoring panel (< 12 hours old)
-                    const isFreshMonitoring = (Date.now() - msgTime) < 12 * 60 * 60 * 1000;
+                        // Check if message is fresh enough for monitoring panel (< 12 hours old)
+                        const isFreshMonitoring = (Date.now() - msgTime) < 12 * 60 * 60 * 1000;
 
-                    if (isFreshMonitoring) {
-                        try {
-                            const existing = await prisma.monitoringMessage.findFirst({
-                                where: { 
-                                    text: message.message,
-                                    timestamp: new Date(message.date * 1000)
-                                }
-                            });
-
-                            if (!existing) {
-                                const savedMsg = await prisma.monitoringMessage.create({
-                                    data: {
+                        if (isFreshMonitoring) {
+                            try {
+                                const existing = await prisma.monitoringMessage.findFirst({
+                                    where: { 
                                         text: message.message,
-                                        channelName: channelDisplay,
-                                        timestamp: new Date(message.date * 1000),
-                                        tags
+                                        timestamp: new Date(message.date * 1000)
                                     }
                                 });
-                                io.emit('monitoring:new_message', savedMsg);
-                            }
-                        } catch (e) {
-                            console.error('Failed to save monitoring message:', e);
-                        }
-                    }
 
-                    // Spawn threats on the map ONLY if the message is very fresh (< 30 minutes)
-                    const isFresh = (Date.now() - msgTime) < 30 * 60 * 1000;
-                    
-                    if (isFresh) {
-                        for (const parsed of parsedThreats) {
-                            if (parsed.lat !== null && parsed.lng !== null) {
-                                const savedThreat = await processExternalThreat(
-                                    null, parsed.type as any, parsed.lat, parsed.lng,
-                                    new Date(msgTime),
-                                    sourceId, null, parsed.direction, parsed.confidence / 100,
-                                    parsed.quantity, parsed.targetName ?? null, parsed.targetLat ?? null, parsed.targetLng ?? null
-                                );
-                                if (savedThreat) io.emit('threat:update', savedThreat);
+                                if (!existing) {
+                                    const savedMsg = await prisma.monitoringMessage.create({
+                                        data: {
+                                            text: message.message,
+                                            channelName: channelDisplay,
+                                            timestamp: new Date(message.date * 1000),
+                                            tags
+                                        }
+                                    });
+                                    io.emit('monitoring:new_message', savedMsg);
+                                }
+                            } catch (e) {
+                                console.error('Failed to save monitoring message:', e);
+                            }
+                        }
+
+                        // Spawn threats on the map ONLY if the message is very fresh (< 30 minutes)
+                        const isFresh = (Date.now() - msgTime) < 30 * 60 * 1000;
+                        
+                        if (isFresh) {
+                            for (const parsed of parsedThreats) {
+                                if (parsed.lat !== null && parsed.lng !== null) {
+                                    const savedThreat = await processExternalThreat(
+                                        null, parsed.type as any, parsed.lat, parsed.lng,
+                                        new Date(msgTime),
+                                        sourceId, null, parsed.direction, parsed.confidence / 100,
+                                        parsed.quantity, parsed.targetName ?? null, parsed.targetLat ?? null, parsed.targetLng ?? null
+                                    );
+                                    if (savedThreat) io.emit('threat:update', savedThreat);
+                                }
                             }
                         }
                     }
                 }
             }
+            console.log("History fetch complete.");
+        } catch (e) {
+            console.error("History fetch error:", e);
         }
-        console.log("History fetch complete.");
-    } catch (e) {
-        console.error("History fetch error:", e);
-    }
+    };
+
+    // Initial clean slate
+    try {
+        const archived = await prisma.threatObject.updateMany({
+            where: { status: 'ACTIVE' },
+            data: { status: 'ARCHIVED' }
+        });
+        console.log(`[Startup] Archived ${archived.count} old threats. Clean slate.`);
+    } catch(e) {}
+
+    await pollHistory();
+    setInterval(pollHistory, 60 * 1000); // Poll every minute
 
   } catch (error) {
     console.error("Error starting Telegram worker:", error);
