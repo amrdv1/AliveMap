@@ -48,23 +48,40 @@ export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
             {msg.tags && msg.tags.length > 0 && (
               <div className="flex gap-1.5 mb-3 flex-wrap">
                 {msg.tags.map((tag: string) => {
-                  const tagMap: Record<string, {label: string, cls: string}> = {
-                    'DRONE': { label: 'Шахед', cls: 'bg-red-500/20 text-red-400 border-red-500/30' },
-                    'CRUISE_MISSILE': { label: 'Кр. Ракета', cls: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
-                    'BALLISTIC_MISSILE': { label: 'Балістика', cls: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
-                    'MISSILE': { label: 'Ракета', cls: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
-                    'ZIRCON': { label: 'Циркон', cls: 'bg-pink-500/20 text-pink-400 border-pink-500/30' },
-                    'AIRCRAFT': { label: 'Авіація', cls: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
-                    'KAB': { label: 'КАБ', cls: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
-                    'PPO': { label: 'ППО Збиття', cls: 'bg-green-500/20 text-green-400 border-green-500/30' },
-                    'RECON': { label: 'Розвідка', cls: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
-                    'SUMMARY': { label: 'Зведення', cls: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' },
-                    'INFO': { label: 'Інфо', cls: 'bg-gray-500/20 text-gray-400 border-gray-500/30' },
+                  const tagTranslations: Record<string, string> = {
+                    'DRONE': 'Шахед / БПЛА',
+                    'FPV': 'FPV / Ланцет',
+                    'CRUISE_MISSILE': 'Крилата Ракета',
+                    'BALLISTIC_MISSILE': 'Балістика',
+                    'MISSILE': 'Ракета',
+                    'AIRCRAFT': 'Авіація / МіГ',
+                    'KAB': 'КАБ / ФАБ',
+                    'RECON': 'Розвідник',
+                    'ZIRCON': 'Гіперзвукова (Циркон)',
+                    'UNKNOWN': 'Невідома Ціль',
+                    'PPO': 'ППО / Вибухи',
                   };
-                  const mapped = tagMap[tag] || { label: tag, cls: 'bg-gray-500/20 text-gray-400 border-gray-500/30' };
+
+                  const tagColors: Record<string, string> = {
+                    'DRONE': 'bg-red-500/20 text-red-400 border-red-500/30',
+                    'FPV': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+                    'CRUISE_MISSILE': 'bg-red-600/20 text-red-500 border-red-600/30',
+                    'BALLISTIC_MISSILE': 'bg-orange-500/20 text-orange-500 border-orange-500/30',
+                    'MISSILE': 'bg-red-500/20 text-red-500 border-red-500/30',
+                    'AIRCRAFT': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+                    'KAB': 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+                    'RECON': 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+                    'ZIRCON': 'bg-red-700/30 text-red-500 border-red-600/50 shadow-[0_0_10px_rgba(255,0,0,0.5)]',
+                    'UNKNOWN': 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30',
+                    'PPO': 'bg-green-500/20 text-green-400 border-green-500/30',
+                  };
+
+                  const label = tagTranslations[tag] || tag;
+                  const cls = tagColors[tag] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+                  
                   return (
-                    <span key={tag} className={`text-[10px] font-bold px-2 py-1 rounded-md tracking-wider uppercase border ${mapped.cls}`}>
-                      {mapped.label}
+                    <span key={tag} className={`text-[10px] font-bold px-2 py-1 rounded-md tracking-wider uppercase border ${cls}`}>
+                      {label}
                     </span>
                   );
                 })}

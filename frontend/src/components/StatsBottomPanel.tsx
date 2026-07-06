@@ -10,7 +10,7 @@ export default function StatsBottomPanel() {
   // Count active regions from siren.pp.ua
   const alertsCount = Object.values(alerts).filter(a => a?.alertnow === true).length;
   
-  const dronesCount = activeThreats.filter(t => t.type === 'DRONE').length;
+  const dronesCount = activeThreats.filter(t => t.type === 'DRONE' || t.type === 'FPV').length;
   const missilesCount = activeThreats.filter(t => t.type === 'CRUISE_MISSILE' || t.type === 'BALLISTIC_MISSILE' || t.type === 'MISSILE' || t.type === 'ZIRCON').length;
   const aircraftCount = activeThreats.filter(t => t.type === 'AIRCRAFT').length;
 
@@ -24,23 +24,26 @@ export default function StatsBottomPanel() {
         </div>
         
         <div className="flex gap-2 items-center">
-          <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Шахеди:</span>
-          <span className="text-red-500 font-black text-base drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]">{dronesCount}</span>
-        </div>
-        <div className="flex gap-2 items-center">
-          <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Ракети:</span>
-          <span className="text-orange-500 font-black text-base drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]">{missilesCount}</span>
-        </div>
-        <div className="flex gap-2 items-center">
-          <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Літаки:</span>
-          <span className="text-blue-500 font-black text-base drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]">{aircraftCount}</span>
+          <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Тривоги:</span>
+          <span className="text-white font-black text-base drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">{alertsCount}</span>
         </div>
         
         <div className="hidden md:block h-5 w-px bg-gray-700/50"></div>
         
         <div className="flex gap-2 items-center">
-          <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Тривоги:</span>
-          <span className="text-white font-black text-base drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">{alertsCount}</span>
+          <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Цілі:</span>
+          <span className="text-white font-black text-base drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">{activeThreats.length}</span>
+        </div>
+
+        <div className="hidden md:block h-5 w-px bg-gray-700/50"></div>
+
+        <div className="flex gap-2 items-center">
+          <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Шахеди/FPV:</span>
+          <span className="text-red-500 font-black text-base drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]">{dronesCount}</span>
+        </div>
+        <div className="flex gap-2 items-center">
+          <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Ракети:</span>
+          <span className="text-orange-500 font-black text-base drop-shadow-[0_0_8px_rgba(249,115,22,0.5)]">{missilesCount}</span>
         </div>
       </div>
     </div>

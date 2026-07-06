@@ -8,10 +8,16 @@ export default function SummaryView() {
   const activeThreats = threats.filter(t => t.status === 'ACTIVE');
   const alertRegions = Object.entries(alerts).filter(([_, data]) => data.alertnow).map(([region]) => region);
 
-  const drones = activeThreats.filter(t => t.type === 'DRONE');
-  const missiles = activeThreats.filter(t => t.type.includes('MISSILE') || t.type === 'ZIRCON');
-  const aircraft = activeThreats.filter(t => t.type === 'AIRCRAFT');
-  const kabs = activeThreats.filter(t => t.type === 'KAB');
+  const drones = activeThreats.filter(t => t.type === 'DRONE').length;
+  const fpvs = activeThreats.filter(t => t.type === 'FPV').length;
+  const missiles = activeThreats.filter(t => t.type === 'MISSILE').length;
+  const cruise = activeThreats.filter(t => t.type === 'CRUISE_MISSILE').length;
+  const ballistic = activeThreats.filter(t => t.type === 'BALLISTIC_MISSILE').length;
+  const zircon = activeThreats.filter(t => t.type === 'ZIRCON').length;
+  const aircraft = activeThreats.filter(t => t.type === 'AIRCRAFT').length;
+  const kabs = activeThreats.filter(t => t.type === 'KAB').length;
+  const recons = activeThreats.filter(t => t.type === 'RECON').length;
+  const unknowns = activeThreats.filter(t => t.type === 'UNKNOWN').length;
 
   return (
     <div className="absolute inset-0 z-20 bg-black/40 backdrop-blur-md pt-24 px-4 pb-24 overflow-y-auto custom-scrollbar flex justify-center">
@@ -35,12 +41,13 @@ export default function SummaryView() {
         </div>
 
         {/* Detailed Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <StatCard title="Шахеди" count={drones.length} color="bg-red-500" icon="🛸" />
-          <StatCard title="Ракети" count={missiles.length} color="bg-orange-500" icon="🚀" />
-          <StatCard title="Авіація" count={aircraft.length} color="bg-blue-500" icon="✈️" />
-          <StatCard title="КАБи" count={kabs.length} color="bg-yellow-500" icon="🎯" />
-          <StatCard title="Розвідка" count={activeThreats.filter(t=>t.type==='RECON').length} color="bg-gray-500" icon="👁️" />
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          <StatCard title="Шахеди" count={drones + fpvs} color="bg-red-500" icon="🛸" />
+          <StatCard title="Ракети" count={missiles + cruise + ballistic + zircon} color="bg-orange-500" icon="🚀" />
+          <StatCard title="Авіація" count={aircraft} color="bg-blue-500" icon="✈️" />
+          <StatCard title="КАБи" count={kabs} color="bg-yellow-500" icon="🎯" />
+          <StatCard title="Розвідка" count={recons} color="bg-gray-500" icon="👁️" />
+          <StatCard title="Невідомі" count={unknowns} color="bg-zinc-500" icon="❓" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

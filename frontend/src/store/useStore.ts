@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ReportType = 'DRONE' | 'MISSILE' | 'CRUISE_MISSILE' | 'BALLISTIC_MISSILE' | 'KAB' | 'AIRCRAFT' | 'ALERT' | 'RECON';
+export type ReportType = 'DRONE' | 'FPV' | 'MISSILE' | 'CRUISE_MISSILE' | 'BALLISTIC_MISSILE' | 'KAB' | 'AIRCRAFT' | 'ALERT' | 'RECON' | 'UNKNOWN';
 export type ReportStatus = 'ACTIVE' | 'ARCHIVED';
 
 export interface ThreatLocation {
@@ -68,7 +68,7 @@ export const useStore = create<AppState>((set) => ({
   isAboutOpen: false,
   activeTab: 'MAP',
   filters: {
-    types: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KAB', 'AIRCRAFT', 'ALERT', 'ZIRCON', 'PPO', 'RECON'],
+    types: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KAB', 'AIRCRAFT', 'ALERT', 'ZIRCON', 'PPO', 'RECON', 'FPV', 'UNKNOWN'],
     showArchived: false,
     minConfidence: 0.0,
   },

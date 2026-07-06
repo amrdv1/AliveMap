@@ -2,6 +2,7 @@ import React from 'react';
 
 export const THREAT_COLORS = {
   'DRONE': '#f87171', // Flat soft red
+  'FPV': '#fb923c', // Orange
   'MISSILE': '#ef4444', // Flat strong red
   'CRUISE_MISSILE': '#dc2626', // Deep red
   'BALLISTIC_MISSILE': '#f97316', // Flat orange
@@ -10,10 +11,12 @@ export const THREAT_COLORS = {
   'KAB': '#c084fc', // Soft purple
   'RECON': '#9ca3af', // Flat gray
   'ZIRCON': '#ff0000', // Neon glowing red
+  'UNKNOWN': '#a1a1aa', // Zinc
 };
 
 export const THREAT_SVGS = {
   'DRONE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L14.5 12L22 17L21.5 19L13 16V20L15 22H9L11 20V16L2.5 19L2 17L9.5 12L12 2Z"/><path d="M12 4L13 12L18 16L12 15L6 16L11 12L12 4Z" fill="black" fill-opacity="0.25"/></svg>`,
+  'FPV': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 7 17 17M17 7 7 17"/><circle cx="5.4" cy="5.4" r="2.9"/><circle cx="18.6" cy="5.4" r="2.9"/><circle cx="5.4" cy="18.6" r="2.9"/><circle cx="18.6" cy="18.6" r="2.9"/><rect x="9.2" y="9.2" width="5.6" height="5.6" rx="1.3" fill="currentColor"/></svg>`,
   'MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C11.5 1 11 1.5 11 2.5V8L6 11V13L11 12V17.5L8 20V22L12 21L16 22V20L13 17.5V12L18 13V11L13 8V2.5C13 1.5 12.5 1 12 1Z"/><path d="M12 3V8L14 11V12L12 11.5V17L14 19V20L12 19.5V3Z" fill="black" fill-opacity="0.25"/></svg>`,
   'CRUISE_MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C11.5 1 11 1.5 11 2.5V8L6 11V13L11 12V17.5L8 20V22L12 21L16 22V20L13 17.5V12L18 13V11L13 8V2.5C13 1.5 12.5 1 12 1Z"/><path d="M12 3V8L14 11V12L12 11.5V17L14 19V20L12 19.5V3Z" fill="black" fill-opacity="0.25"/></svg>`,
   'BALLISTIC_MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C11 0 10 2 10 4V16L7 22H17L14 16V4C14 2 13 0 12 0Z"/><path d="M12 2V16L14 20H12V2Z" fill="black" fill-opacity="0.25"/><path d="M10 22L10 24H14L14 22H10Z" fill="#fbbf24" /></svg>`,
@@ -22,6 +25,7 @@ export const THREAT_SVGS = {
   'PPO': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M4 2L2 4L19 21L21 19L4 2Z"/><path d="M21 4L19 2L2 19L4 21L21 4Z"/></svg>`,
   'KAB': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C9 2 8 5 8 10V15L6 18V20H18V18L16 15V10C16 5 15 2 12 2Z"/><path d="M10 20V22H14V20H10Z" fill="black" fill-opacity="0.3"/><path d="M12 4C10.5 4 10 6 10 10V15L12 17V4Z" fill="white" fill-opacity="0.2"/></svg>`,
   'RECON': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 3L13 6V9L22 10V12L13 11V16L15 19V20L12 19L9 20V19L11 16V11L2 12V10L11 9V6L12 3Z"/><circle cx="12" cy="14" r="1.5" fill="black" fill-opacity="0.4"/></svg>`,
+  'UNKNOWN': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 9a3 3 0 1 1 4.5 2.6c-1 .6-1.5 1.2-1.5 2.4"/><circle cx="12" cy="18" r="1.4" fill="currentColor"/></svg>`,
 };
 
 interface ThreatIconProps {

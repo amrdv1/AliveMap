@@ -1,5 +1,5 @@
 export interface ParsedThreat {
-  type: 'DRONE' | 'MISSILE' | 'AIRCRAFT' | 'ALERT' | 'BALLISTIC_MISSILE' | 'CRUISE_MISSILE' | 'KAB' | 'SUMMARY' | 'INFO' | 'ZIRCON' | 'PPO';
+  type: 'DRONE' | 'MISSILE' | 'AIRCRAFT' | 'ALERT' | 'BALLISTIC_MISSILE' | 'CRUISE_MISSILE' | 'KAB' | 'SUMMARY' | 'INFO' | 'ZIRCON' | 'PPO' | 'FPV' | 'UNKNOWN' | 'RECON';
   lat: number | null;
   lng: number | null;
   confidence: number;
@@ -200,6 +200,7 @@ function detectThreatType(text: string): ParsedThreat['type'] | null {
     if (!t.match(/(за добу|за ніч|за тиждень|підсумки|загалом|втрати)/)) return 'PPO';
   }
   if (t.match(/(циркон|3м22)/)) return 'ZIRCON';
+  if (t.match(/(fpv|фпв|ланцет|молнія|зала|zala|суперкам|supercam)/)) return 'FPV';
   if (t.match(/(шахед|шахід|shahed|бпла|мопед|безпілотник|геран|гербер|дрон|ударний\s*безпілотн)/)) return 'DRONE';
   if (t.match(/(балістик|кинджал|іскандер|с-300|с-400|кн-23|кн-24|точка-у)/)) return 'BALLISTIC_MISSILE';
   if (t.match(/(х-101|х-555|х-55|х-59|х-69|х-35|калібр|кх-|3м14|крилат[аіи]\s*ракет|ракетоносц|ракетонос)/)) return 'CRUISE_MISSILE';
@@ -209,6 +210,9 @@ function detectThreatType(text: string): ParsedThreat['type'] | null {
   }
   if (t.match(/(ту-95|ту-160|ту-22|ту22|міг-31|міг31|авіаці|су-34|су-35|су-27|су-24|су-25|бортів|стратегічн|тактичн\s*авіаці|бомбардувальник|винищувач)/)) return 'AIRCRAFT';
   if (t.match(/(каб|фаб|уаб|авіабомб|кероване?\s*бомб|планер)/)) return 'KAB';
+  if (t.match(/розвід/)) return 'RECON';
+  if (t.match(/(ціль|загроз)/)) return 'UNKNOWN';
+  
   return null;
 }
 
