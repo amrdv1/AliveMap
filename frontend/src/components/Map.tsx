@@ -376,14 +376,15 @@ export default function Map() {
     layer.on({
       mouseover: (e: any) => {
         const l = e.target;
-        l.setStyle({ fillOpacity: alertInfo ? 0.8 : 0.3, weight: alertInfo ? 3 : 2, color: alertInfo ? '#f87171' : '#9ca3af' });
+        l.setStyle({ fillOpacity: alertInfo ? 0.7 : 0.4, weight: alertInfo ? 2 : 1, color: alertInfo ? '#f87171' : 'rgba(255,255,255,0.3)' });
       },
       mouseout: (e: any) => {
         const l = e.target;
         l.setStyle({ 
-          color: alertInfo ? '#ef4444' : (isDistrict ? 'transparent' : '#4b5563'),
-          weight: alertInfo ? 2 : (isDistrict ? 0 : 1),
-          fillOpacity: alertInfo ? (isDistrict ? 0.6 : 0.45) : (isDistrict ? 0 : 0.05) 
+          color: alertInfo ? '#ff4d4f' : (isDistrict ? 'transparent' : 'rgba(255,255,255,0.1)'),
+          weight: alertInfo ? 1.5 : (isDistrict ? 0 : 1),
+          fillColor: alertInfo ? '#ef4444' : (isDistrict ? 'transparent' : '#1f2937'),
+          fillOpacity: alertInfo ? 0.5 : (isDistrict ? 0 : 0.2) 
         });
       }
     });
@@ -452,20 +453,6 @@ export default function Map() {
           return [<AnimatedMarker key={threat.id} threat={threat} getIcon={getIcon} />];
         })}
 
-      {/* Base Map State Outlines (subtle internal borders) */}
-      {geoData && (
-        <GeoJSON 
-          data={geoData}
-          style={() => ({
-            color: 'rgba(255, 255, 255, 0.15)',
-            weight: 1,
-            fillColor: 'transparent',
-            fillOpacity: 0,
-            interactive: false
-          })}
-        />
-      )}
-
       {/* Main Country Border Outline (Thick Green) */}
       {geoBorder && (
         <GeoJSON 
@@ -495,10 +482,10 @@ export default function Map() {
             );
             
             return {
-              color: isActive ? '#ff4d4f' : 'transparent',
-              weight: isActive ? 1.5 : 0,
-              fillColor: isActive ? '#ef4444' : 'transparent',
-              fillOpacity: isActive ? 0.2 : 0, // Lower opacity for comfortable viewing
+              color: isActive ? '#ff4d4f' : 'rgba(255,255,255,0.1)',
+              weight: isActive ? 1.5 : 1,
+              fillColor: isActive ? '#ef4444' : '#1f2937',
+              fillOpacity: isActive ? 0.5 : 0.2, 
             };
           }}
         />
@@ -520,10 +507,10 @@ export default function Map() {
             );
             
             return {
-              color: isActive ? '#ff6b6b' : 'transparent',
+              color: isActive ? '#ff4d4f' : 'transparent',
               weight: isActive ? 1.5 : 0,
               fillColor: isActive ? '#ef4444' : 'transparent',
-              fillOpacity: isActive ? 0.15 : 0,
+              fillOpacity: isActive ? 0.5 : 0,
             };
           }}
         />
