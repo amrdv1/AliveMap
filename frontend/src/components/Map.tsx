@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import Map, { Source, Layer, Marker, NavigationControl, Popup } from 'react-map-gl/maplibre';
+import Map, { Source, Layer, Marker, NavigationControl } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useStore, ThreatObject } from '../store/useStore';
 import { socket } from '../lib/socket';
@@ -196,7 +196,7 @@ export default function UkraineMap() {
   };
 
   const onHover = useCallback((event: any) => {
-    const { features, lngLat } = event;
+    const { features, point } = event;
     const hoveredFeature = features && features[0];
 
     if (hoveredFeature && hoveredFeature.properties) {
@@ -204,13 +204,17 @@ export default function UkraineMap() {
       if (regionName) {
         setHoverInfo({
           feature: hoveredFeature,
-          lngLat: [lngLat.lng, lngLat.lat]
+          x: point.x,
+          y: point.y
         });
         return;
       }
     }
     setHoverInfo(null);
   }, []);
+
+  const hoveredRegionName = hoverInfo ? (hoverInfo.feature.properties.region || '') : '';
+  const hoveredRayonName = hoverInfo ? (hoverInfo.feature.properties.rayon || '') : '';
 
   const getAlertInfo = (feature: any) => {
     if (!feature) return null;
@@ -272,10 +276,15 @@ export default function UkraineMap() {
                     'fill-color': [
                         'case',
                         ['==', ['get', 'hasAlert'], 1],
-                        'rgba(239, 68, 68, 0.4)', // Red with opacity
+                        ['case', ['==', ['get', 'region'], hoveredRegionName], 'rgba(239, 68, 68, 0.6)', 'rgba(239, 68, 68, 0.4)'],
+                        ['==', ['get', 'region'], hoveredRegionName], 'rgba(255, 255, 255, 0.1)',
                         'rgba(0, 0, 0, 0)'
                     ],
-                    'fill-outline-color': 'rgba(239, 68, 68, 0.8)'
+                    'fill-outline-color': [
+                        'case',
+                        ['==', ['get', 'region'], hoveredRegionName], 'rgba(255, 255, 255, 0.8)',
+                        'rgba(239, 68, 68, 0.4)'
+                    ]
                 }} 
               />
             </Source>
@@ -291,10 +300,15 @@ export default function UkraineMap() {
                     'fill-color': [
                         'case',
                         ['==', ['get', 'hasAlert'], 1],
-                        'rgba(239, 68, 68, 0.4)', // Red with opacity
+                        ['case', ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(239, 68, 68, 0.6)', 'rgba(239, 68, 68, 0.4)'],
+                        ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(255, 255, 255, 0.1)',
                         'rgba(0, 0, 0, 0)'
                     ],
-                    'fill-outline-color': 'rgba(239, 68, 68, 0.4)'
+                    'fill-outline-color': [
+                        'case',
+                        ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(255, 255, 255, 0.8)',
+                        'rgba(239, 68, 68, 0.4)'
+                    ]
                 }} 
               />
             </Source>
@@ -312,43 +326,39 @@ export default function UkraineMap() {
             <ThreatMarker key={t.id} threat={t} onClick={handleThreatClick} />
           ))}
 
-          {/* Hover Popup */}
-          {hoverInfo && (() => {
-            const alertInfo = getAlertInfo(hoverInfo.feature);
-            if (!alertInfo) return null;
-            
-            return (
-              <Popup
-                longitude={hoverInfo.lngLat[0]}
-                latitude={hoverInfo.lngLat[1]}
-                closeButton={false}
-                closeOnClick={false}
-                anchor="bottom"
-                offset={10}
-                className="custom-popup"
-              >
-                <div className="font-sans text-sm p-1 min-w-[150px]">
-                  <div className="font-bold text-lg mb-1">{alertInfo.name}</div>
-                  <div style={{ color: alertInfo.active ? '#ef4444' : '#9ca3af', fontWeight: alertInfo.active ? 'bold' : 'normal' }}>
-                    {alertInfo.active ? '🚨 ПОВІТРЯНА ТРИВОГА' : '✅ Немає тривоги'}
-                  </div>
-                  
-                  {alertInfo.active && alertInfo.durationStr && (
-                    <>
-                      <div style={{ marginTop: '8px', color: '#d1d5db' }}>
-                        Триває: <span style={{ color: 'white', fontFamily: 'monospace' }}>{alertInfo.durationStr}</span>
-                      </div>
-                      <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
-                        Початок: {alertInfo.startStr}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </Popup>
-            );
-          })()}
 
         </Map>
-    </div>
+
+        {/* Hover Custom Tooltip */}
+        {hoverInfo && (() => {
+          const alertInfo = getAlertInfo(hoverInfo.feature);
+          if (!alertInfo) return null;
+          
+          return (
+            <div 
+              className="absolute z-[100] pointer-events-none bg-black/80 backdrop-blur-xl border border-white/10 text-white rounded-2xl p-4 shadow-2xl transition-all duration-75 min-w-[200px]"
+              style={{ left: hoverInfo.x + 15, top: hoverInfo.y + 15 }}
+            >
+              <div className="font-bold text-lg mb-1 drop-shadow-md">{alertInfo.name}</div>
+              <div className={alertInfo.active ? 'text-red-500 font-bold' : 'text-gray-400 font-medium'}>
+                {alertInfo.active ? '🚨 ПОВІТРЯНА ТРИВОГА' : '✅ Немає тривоги'}
+              </div>
+              
+              {alertInfo.active && alertInfo.durationStr && (
+                <div className="mt-3 bg-red-500/10 p-2 rounded-lg border border-red-500/20">
+                  <div className="text-gray-300 text-sm flex items-center justify-between">
+                    <span>Триває:</span>
+                    <span className="text-white font-mono font-bold bg-black/40 px-2 py-0.5 rounded">{alertInfo.durationStr}</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2 flex justify-between">
+                    <span>Початок:</span>
+                    <span>{alertInfo.startStr}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+      </div>
   );
 }
