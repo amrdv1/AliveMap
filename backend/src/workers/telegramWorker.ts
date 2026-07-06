@@ -21,6 +21,8 @@ const CHANNELS = [
   'ukrainealarmsignal', 'eyes_everywhere_ua', 'vibuxaviasia', 'renihub', 'odessaveter', 
   'kharkov_media', 'pivden_fpv', 'tlknewsua', 'temporis_odesa', 'kherson_monitoring', 
   'shahedradar', 'operatyvnohlep', 'poltavaranger', 'raketa_trevoga',
+  // SCREENSHOT CHANNELS
+  'rynda_monitor', 'roman_romanchuk', 'kyivoda', 'povitr_prostir', 'vartovi_pivdnya',
   'suspilne_news',
   'ukraine_online',
   'ukraine_radar',
@@ -251,7 +253,8 @@ export async function startTelegramWorker(io: Server) {
             const pollChannels = [
                 'monitor_ukraine', 'eRadarrua', 'war_monitor', 'monitoring_ukraine', 
                 'sectorv666', 'monitor', 'radar_top_ua', 'povitryanatrivogaaaa', 
-                'monitor1654', 'ukrainealarmsignal', 'pivden_varta'
+                'monitor1654', 'ukrainealarmsignal', 'pivden_varta',
+                'rynda_monitor', 'roman_romanchuk', 'kyivoda', 'povitr_prostir', 'vartovi_pivdnya'
             ];
             for (const channel of pollChannels) {
                 try {
