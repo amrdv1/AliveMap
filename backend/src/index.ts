@@ -14,6 +14,7 @@ import webhookRoutes from './routes/webhooks';
 import { startAlertsWorker } from './workers/alertsWorker';
 import { startTelegramWorker } from './workers/telegramWorker';
 import { startMapaWorker } from './workers/mapaWorker';
+import { startBotWorker } from './workers/botWorker';
 
 dotenv.config();
 
@@ -71,6 +72,7 @@ server.listen(PORT, async () => {
   startAlertsWorker(io);
   startTelegramWorker(io); // Integrated telegram parser
   startMapaWorker(io); // Selective Mapa.ua integration
+  startBotWorker(); // Telegram Notification Bot
   
   // Auto-archive stale targets based on type
   setInterval(async () => {

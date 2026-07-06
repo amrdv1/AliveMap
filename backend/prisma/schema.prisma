@@ -170,3 +170,13 @@ model ChangeLog {
   newData   String?  @db.Text
   createdAt DateTime @default(now())
 }
+
+model TelegramSubscriber {
+  id        String   @id @default(uuid())
+  chatId    String
+  region    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([chatId, region])
+}
