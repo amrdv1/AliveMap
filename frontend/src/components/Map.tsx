@@ -82,7 +82,7 @@ const heatmapLayer = {
   }
 } as any;
 
-const ThreatMarker = ({ threat, onClick }: { threat: ThreatObject, onClick: (t: ThreatObject) => void }) => {
+const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: ThreatObject, onClick: (t: ThreatObject) => void, isSelected: boolean, onClosePopup: () => void }) => {
   const [currentLoc, setCurrentLoc] = useState<{lng: number, lat: number} | null>(null);
 
   useEffect(() => {
@@ -155,6 +155,56 @@ const ThreatMarker = ({ threat, onClick }: { threat: ThreatObject, onClick: (t: 
           dangerouslySetInnerHTML={{ __html: svgIcon }}
         />
       </div>
+
+      {isSelected && (
+        <Popup
+           longitude={currentLoc?.lng || loc.lng}
+           latitude={currentLoc?.lat || loc.lat}
+           anchor="bottom"
+           onClose={(e) => {
+             e.originalEvent?.stopPropagation();
+             onClosePopup();
+           }}
+           closeButton={false}
+           className="custom-threat-popup z-50"
+           maxWidth="350px"
+           offset={15}
+        >
+           <div className="bg-[#1a1a1a] text-white p-4 rounded-xl border border-white/10 shadow-2xl relative w-[320px]">
+              <button onClick={(e) => { e.stopPropagation(); onClosePopup(); }} className="absolute top-3 right-3 text-white/50 hover:text-white transition">
+                 <X size={18} />
+              </button>
+              <div className="flex items-center gap-3 mb-3">
+                 <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: THREAT_COLORS[threat.type as keyof typeof THREAT_COLORS] || '#4A90E2' }}>
+                    <div className="w-6 h-6 text-white" dangerouslySetInnerHTML={{ __html: THREAT_SVGS[threat.type as keyof typeof THREAT_SVGS] || THREAT_SVGS['DRONE'] }} />
+                 </div>
+                 <div>
+                    <div className="font-bold text-[15px]">{threat.type === 'DRONE' ? 'Ударний БпЛА' : threat.type === 'RECON' ? 'Розвідувальний БпЛА' : threat.type === 'MISSILE' ? 'Ракета' : 'Повітряна ціль'}</div>
+                    <div className="text-xs text-white/60 truncate w-[220px]">{threat.targetName || 'Курс невідомий'}</div>
+                 </div>
+              </div>
+              <div className="text-[13px] text-white/80 mb-4 leading-relaxed">
+                 {threat.type === 'DRONE' ? 'Ударний БпЛА' : threat.type === 'RECON' ? 'Розвідувальний БпЛА' : threat.type === 'MISSILE' ? 'Ракета' : 'Повітряна ціль'} 
+                 {threat.targetName ? ` курсом на ${threat.targetName}` : ''}.
+                 <br/>
+                 Підтверджень: {Math.max(1, Math.floor(threat.confidence / 10))}.
+                 {threat.speed ? ` Швидкість: ${threat.speed} км/год.` : ''}
+              </div>
+              <div className="text-[12px] text-orange-400/90 mb-4 flex items-center gap-2">
+                 ⚠️ Розташування приблизне
+              </div>
+              <div className="flex items-center gap-2">
+                 <div className={`px-3 py-1 rounded-full text-[11px] font-semibold ${
+                    threat.confidence > 80 ? 'bg-green-500/20 text-green-400' : 
+                    threat.confidence > 50 ? 'bg-orange-500/20 text-orange-400' : 
+                    'bg-red-500/20 text-red-400'
+                 }`}>
+                    Достовірність: {threat.confidence > 80 ? 'Висока' : threat.confidence > 50 ? 'Середня' : 'Низька'}
+                 </div>
+              </div>
+           </div>
+        </Popup>
+      )}
     </Marker>
   );
 };
@@ -412,56 +462,16 @@ export default function UkraineMap() {
 
           {/* Threats */}
           {threats.map(t => (
-            <ThreatMarker key={t.id} threat={t} onClick={handleThreatClick} />
+            <ThreatMarker 
+               key={t.id} 
+               threat={t} 
+               onClick={handleThreatClick} 
+               isSelected={selectedThreat?.id === t.id}
+               onClosePopup={closePopup}
+            />
           ))}
 
-          {/* Interactive Threat Popup */}
-          {selectedThreat && selectedThreat.locations[0] && (
-            <Popup
-               longitude={selectedThreat.locations[0].lng}
-               latitude={selectedThreat.locations[0].lat}
-               anchor="bottom"
-               onClose={closePopup}
-               closeButton={false}
-               className="custom-threat-popup z-50"
-               maxWidth="350px"
-               offset={15}
-            >
-               <div className="bg-[#1a1a1a] text-white p-4 rounded-xl border border-white/10 shadow-2xl relative w-[320px]">
-                  <button onClick={closePopup} className="absolute top-3 right-3 text-white/50 hover:text-white transition">
-                     <X size={18} />
-                  </button>
-                  <div className="flex items-center gap-3 mb-3">
-                     <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: THREAT_COLORS[selectedThreat.type as keyof typeof THREAT_COLORS] || '#4A90E2' }}>
-                        <div className="w-6 h-6 text-white" dangerouslySetInnerHTML={{ __html: THREAT_SVGS[selectedThreat.type as keyof typeof THREAT_SVGS] || THREAT_SVGS['DRONE'] }} />
-                     </div>
-                     <div>
-                        <div className="font-bold text-[15px]">{selectedThreat.type === 'DRONE' ? 'Ударний БпЛА' : selectedThreat.type === 'RECON' ? 'Розвідувальний БпЛА' : selectedThreat.type === 'MISSILE' ? 'Ракета' : 'Повітряна ціль'}</div>
-                        <div className="text-xs text-white/60 truncate w-[220px]">{selectedThreat.targetName || 'Курс невідомий'}</div>
-                     </div>
-                  </div>
-                  <div className="text-[13px] text-white/80 mb-4 leading-relaxed">
-                     {selectedThreat.type === 'DRONE' ? 'Ударний БпЛА' : selectedThreat.type === 'RECON' ? 'Розвідувальний БпЛА' : selectedThreat.type === 'MISSILE' ? 'Ракета' : 'Повітряна ціль'} 
-                     {selectedThreat.targetName ? ` курсом на ${selectedThreat.targetName}` : ''}.
-                     <br/>
-                     Підтверджень: {Math.max(1, Math.floor(selectedThreat.confidence / 10))}.
-                     {selectedThreat.speed ? ` Швидкість: ${selectedThreat.speed} км/год.` : ''}
-                  </div>
-                  <div className="text-[12px] text-orange-400/90 mb-4 flex items-center gap-2">
-                     ⚠️ Розташування приблизне
-                  </div>
-                  <div className="flex items-center gap-2">
-                     <div className={`px-3 py-1 rounded-full text-[11px] font-semibold ${
-                        selectedThreat.confidence > 80 ? 'bg-green-500/20 text-green-400' : 
-                        selectedThreat.confidence > 50 ? 'bg-orange-500/20 text-orange-400' : 
-                        'bg-red-500/20 text-red-400'
-                     }`}>
-                        Достовірність: {selectedThreat.confidence > 80 ? 'Висока' : selectedThreat.confidence > 50 ? 'Середня' : 'Низька'}
-                     </div>
-                  </div>
-               </div>
-            </Popup>
-          )}
+
 
         </Map>
         
