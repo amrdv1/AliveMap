@@ -1,5 +1,6 @@
 import TelegramBot from 'node-telegram-bot-api';
 import prisma from '../db';
+import { projectTrajectory, willIntersectLocation, TrajectoryProjection } from '../services/trajectoryEngine';
 
 let bot: TelegramBot | null = null;
 
@@ -38,11 +39,31 @@ export async function startBotWorker() {
       keyboard.push(row);
     }
 
-    bot!.sendMessage(chatId, "Привіт! Оберіть свій регіон для отримання сповіщень про тривоги та відбої:", {
+    bot!.sendMessage(chatId, "Привіт! Оберіть свій регіон для отримання загальних сповіщень. \n\nАБО надішліть боту свою геолокацію (скріпкою 📎 -> Розташування) для активації **Розумних Сповіщень** (бот попередить, якщо загроза летить саме до вас).", {
       reply_markup: {
         inline_keyboard: keyboard
       }
     });
+  });
+
+  // Handle location messages
+  bot.on('location', async (msg) => {
+    const chatId = msg.chat.id.toString();
+    const lat = msg.location?.latitude;
+    const lng = msg.location?.longitude;
+    
+    if (lat && lng) {
+        try {
+            await prisma.telegramSubscriber.upsert({
+                where: { chatId_region: { chatId, region: "SMART" } },
+                update: { lat, lng, smartPush: true },
+                create: { chatId, region: "SMART", lat, lng, smartPush: true }
+            });
+            bot!.sendMessage(chatId, `✅ **Розумні сповіщення активовано!**\nВаші координати збережено. Бот повідомить вас, якщо ракета чи дрон рухатиметься у вашому напрямку (радіус 20 км).`, { parse_mode: 'Markdown' });
+        } catch (e) {
+            bot!.sendMessage(chatId, `❌ Помилка збереження локації.`);
+        }
+    }
   });
 
   bot.on('callback_query', async (query) => {
@@ -119,3 +140,41 @@ export async function sendAlertNotification(region: string, isAlert: boolean) {
     console.error("Error in sendAlertNotification:", error);
   }
 }
+
+/**
+ * Sends a smart notification if a threat is heading towards a subscribed user.
+ */
+export async function sendSmartThreatNotification(
+    threatType: string,
+    lat: number,
+    lng: number,
+    speedKmh: number,
+    courseDegrees: number
+) {
+    if (!bot) return;
+    
+    try {
+        const smartSubs = await prisma.telegramSubscriber.findMany({
+            where: { smartPush: true, lat: { not: null }, lng: { not: null } }
+        });
+        
+        if (smartSubs.length === 0) return;
+        
+        const projection = projectTrajectory(lat, lng, speedKmh, courseDegrees, 30); // Project 30 mins
+        
+        for (const sub of smartSubs) {
+            if (willIntersectLocation(projection, sub.lat!, sub.lng!, 20)) {
+                // Threat passes within 20km!
+                const message = `⚠️ **УВАГА! РОЗУМНЕ СПОВІЩЕННЯ** ⚠️\n\nОб'єкт **${threatType}** рухається у вашому напрямку! \nРозрахунковий вектор проходить близько до вашої локації. Прямуйте в укриття!`;
+                try {
+                    await bot.sendMessage(sub.chatId, message, { parse_mode: "Markdown" });
+                } catch (e) {
+                    // Ignore send errors
+                }
+            }
+        }
+    } catch (e) {
+        console.error("Error in sendSmartThreatNotification:", e);
+    }
+}
+

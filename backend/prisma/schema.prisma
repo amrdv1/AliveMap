@@ -179,6 +179,10 @@ model TelegramSubscriber {
   id        String   @id @default(uuid())
   chatId    String
   region    String
+  city      String?
+  lat       Float?
+  lng       Float?
+  smartPush Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

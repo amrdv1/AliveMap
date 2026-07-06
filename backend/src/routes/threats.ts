@@ -26,4 +26,25 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/history', async (req: Request, res: Response) => {
+  try {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const threats = await prisma.threatObject.findMany({
+      where: { 
+        updatedAt: { gte: twentyFourHoursAgo }
+      },
+      include: {
+        locations: {
+          orderBy: { time: 'asc' }
+        }
+      },
+      orderBy: { updatedAt: 'asc' },
+      take: 1000 // Limit for safety
+    });
+    res.json(threats);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 export default router;

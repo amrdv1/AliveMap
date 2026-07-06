@@ -5,6 +5,7 @@ import { parseTelegramText } from '../services/parser';
 import prisma from '../db';
 import { Server } from 'socket.io';
 import { processExternalThreat } from '../services/aggregatorService';
+import { extractWithAI } from '../services/aiParser';
 
 const CHANNELS = [
   'vanek_nikolaev', 
@@ -42,22 +43,43 @@ const CHANNELS = [
   'ukraine_online',
   'ukraine_radar',
   'pivden_radar',
-  // --- New Channels from NEPTUN ---
-  'shahedradar',
-  'radarraketppo',
-  'radar_raketaa',
-  'radar_top_ua',
-  'poltavaradar',
-  'radar_dnipra',
-  'eyes_everywhere_ua',
-  'pivden_varta',
-  'sumyregion',
-  'sumygo',
-  'kharkov_media',
-  'odessaveter',
-  'dnepr_nagladach',
-  'info_zp',
-  'my_safety_chernigiv'
+  // --- Official / OVA Channels ---
+  'kpszsu', // Повітряні Сили ЗСУ
+  'kyivoda', // Київська ОВА
+  'maksymkozytskyy', // Львівська ОВА
+  'volynskaODA', // Волинська ОВА
+  'rivne_oda', // Рівненська ОВА
+  'zhytomyrskaODA', // Житомирська ОВА
+  'ternopilskaODA', // Тернопільська ОВА
+  'khmelnytskaODA', // Хмельницька ОВА
+  'vinnytskaODA', // Вінницька ОВА
+  'chernivetskaODA', // Чернівецька ОВА
+  'ifoda', // Івано-Франківська ОВА
+  'zakarpatskaODA', // Закарпатська ОВА
+  'cherkaskaODA', // Черкаська ОВА
+  'kirovohradskaODA', // Кіровоградська ОВА
+  'poltavskaODA', // Полтавська ОВА
+  'sumy_oda', // Сумська ОВА
+  'chernihivskaODA', // Чернігівська ОВА
+  'synegubov', // Харківська ОВА
+  'dnipropetrovskaODA', // Дніпропетровська ОВА
+  'zoda_gov_ua', // Запорізька ОВА
+  'mykolaivskaODA', // Миколаївська ОВА
+  'odeskaODA', // Одеська ОВА
+  'khersonskaODA', // Херсонська ОВА
+  'pavlokyrylenko_donoda', // Донецька ОВА
+  'luhanskaVTSA', // Луганська ОВА
+  'VA_Kyiv', // Київська МВА
+  
+  // --- Monitoring Channels (Requested) ---
+  'sectorv666',
+  'korabeli', // КОРАБЕЛІ
+  'monitor',
+  'monitorwar',
+  'monitor_ua',
+  'monitor_map',
+  'war_monitor',
+  'monitoring_ukraine'
 ];
 
 const PRIVATE_TITLES = [
@@ -172,7 +194,15 @@ export async function startTelegramWorker(io: Server) {
         for (const parsed of parsedThreats) {
           if (parsed.lat !== null && parsed.lng !== null) {
               const confidence = (parsed.confidence || 80) / 100;
-              console.log(`[Parser] Detected ${parsed.type} qty=${parsed.quantity || 1} at [${parsed.lat?.toFixed(2)}, ${parsed.lng?.toFixed(2)}] conf=${confidence} from ${channelDisplay}`);
+              
+              // Run AI extraction to get speed, course, and intended target
+              const aiData = await extractWithAI(text);
+              const finalSpeed = aiData?.speed || null;
+              const finalCourse = aiData?.course || parsed.direction || null;
+              const finalTarget = aiData?.predictedTarget || parsed.targetName || null;
+              
+              console.log(`[Parser] Detected ${parsed.type} at [${parsed.lat?.toFixed(2)}, ${parsed.lng?.toFixed(2)}] conf=${confidence} from ${channelDisplay} AI_Speed=${finalSpeed} AI_Course=${finalCourse}`);
+              
               const savedThreat = await processExternalThreat(
                   null,
                   parsed.type as any,
@@ -180,16 +210,23 @@ export async function startTelegramWorker(io: Server) {
                   parsed.lng,
                   new Date(),
                   sourceId,
-                  null,
-                  parsed.direction,
+                  finalSpeed,
+                  finalCourse,
                   confidence,
                   parsed.quantity ?? 1,
-                  parsed.targetName ?? null,
+                  finalTarget,
                   parsed.targetLat ?? null,
                   parsed.targetLng ?? null
               );
+              
             if (savedThreat) {
                 io.emit('threat:update', savedThreat);
+                
+                // Smart Notification
+                if (finalSpeed && finalCourse) {
+                    const { sendSmartThreatNotification } = require('./botWorker');
+                    sendSmartThreatNotification(parsed.type, parsed.lat, parsed.lng, finalSpeed, finalCourse);
+                }
             }
           }
         }
@@ -203,7 +240,7 @@ export async function startTelegramWorker(io: Server) {
             
             // Fetch directly from top 3 channels to avoid ResolveUsername FloodWait
             // Live events will still capture messages from all 50+ channels.
-            const pollChannels = ['monitor_ukraine', 'eRadarrua', 'war_monitor'];
+            const pollChannels = ['monitor_ukraine', 'eRadarrua', 'war_monitor', 'monitoring_ukraine', 'sectorv666', 'monitor'];
             for (const channel of pollChannels) {
                 try {
                     const messages = await client.getMessages(channel, { limit: 10 });
