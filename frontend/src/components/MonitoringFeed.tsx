@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { Search, X, Activity } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
   const { messages } = useStore();
@@ -36,8 +37,16 @@ export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
 
       {/* Message List */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
-        {messages.map(msg => (
-          <div key={msg.id} className="p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all cursor-pointer border border-white/5 hover:border-white/10 group">
+        <AnimatePresence>
+          {messages.map((msg, index) => (
+            <motion.div 
+              key={msg.id} 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ delay: index < 20 ? index * 0.03 : 0, duration: 0.3 }}
+              className="p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all cursor-pointer border border-white/5 hover:border-white/10 group"
+            >
             <div className="flex justify-between items-center mb-3">
               <span className="text-xs font-bold text-blue-400 tracking-wider">@{msg.channelName}</span>
               <span className="text-xs text-gray-500 font-medium">
@@ -99,8 +108,9 @@ export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
             <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line font-medium group-hover:text-white transition-colors">
               {msg.text}
             </p>
-          </div>
+          </motion.div>
         ))}
+        </AnimatePresence>
         {messages.length === 0 && (
           <div className="text-center py-10 text-gray-500 text-sm font-medium">
             Немає повідомлень

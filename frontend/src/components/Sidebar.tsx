@@ -2,6 +2,7 @@
 
 import { useStore } from '../store/useStore';
 import { ThreatIcon } from './ThreatIcon';
+import { motion } from 'framer-motion';
 
 // Format locations for display
 const LOCATIONS: Record<string, {lat: number, lng: number}> = {
@@ -89,12 +90,18 @@ export default function Sidebar() {
       </div>
 
       <div className="flex-grow flex flex-col gap-2">
-        {activeThreats.map(threat => {
+        {activeThreats.map((threat, index) => {
           const latestLoc = threat.locations?.[threat.locations.length - 1];
           const locationName = latestLoc ? getNearestLocation(latestLoc.lat, latestLoc.lng) : '';
           
           return (
-            <div key={threat.id} className="relative group flex items-center gap-4 bg-white/[0.03] backdrop-blur-md rounded-2xl p-3 text-sm border border-white/5 hover:border-white/10 hover:bg-white/10 transition-all duration-300 cursor-pointer overflow-hidden">
+            <motion.div 
+              key={threat.id} 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05, duration: 0.3 }}
+              className="relative group flex items-center gap-4 bg-white/[0.03] backdrop-blur-md rounded-2xl p-3 text-sm border border-white/5 hover:border-white/10 hover:bg-white/10 transition-all duration-300 cursor-pointer overflow-hidden"
+            >
               <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-transparent to-transparent group-hover:from-red-500/5 transition-colors duration-300"></div>
               <div className={`w-9 h-9 rounded-full flex justify-center items-center shrink-0 shadow-inner border border-white/5 z-10 ${
                 threat.type === 'DRONE' || threat.type.includes('MISSILE') || threat.type === 'ZIRCON' || threat.type === 'KH101' || threat.type === 'KALIBR' || threat.type === 'ISKANDER' || threat.type === 'KINZHAL' ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'
@@ -130,7 +137,7 @@ export default function Sidebar() {
               <div className="text-[10px] text-white/40 font-mono font-medium shrink-0">
                 {new Date(threat.updatedAt).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}
               </div>
-            </div>
+            </motion.div>
           );
         })}
         {activeThreats.length === 0 && (

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useStore, ReportType } from '../store/useStore';
 import { ThreatIcon } from './ThreatIcon';
+import { motion } from 'framer-motion';
 
 export default function ThreatFilters() {
   const { filters, setFilter } = useStore();
@@ -37,10 +38,12 @@ export default function ThreatFilters() {
         {filterOptions.map(opt => {
           const active = isSelected(opt.type);
           return (
-            <button
+            <motion.button
               key={opt.type}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => toggleType(opt.type)}
-              className={`flex items-center justify-start md:w-full gap-2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide uppercase transition-all duration-300 border backdrop-blur-md ${
+              className={`flex items-center justify-start md:w-full gap-2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide uppercase transition-colors duration-300 border backdrop-blur-md ${
                 active 
                   ? opt.color + ' shadow-[0_0_15px_rgba(currentColor,0.2)] bg-black/20'
                   : 'bg-black/20 text-white/40 border-white/5 hover:bg-white/10 hover:text-white/70 shadow-sm'
@@ -50,7 +53,7 @@ export default function ThreatFilters() {
                 <ThreatIcon type={opt.type} className="w-3.5 h-3.5" />
               </div>
               {opt.label}
-            </button>
+            </motion.button>
           );
         })}
       </div>

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import dynamic from 'next/dynamic';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '@/store/useStore';
 import { ShieldAlert, Cpu, Map as MapIcon } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
@@ -89,9 +90,20 @@ export default function Home() {
       </div>
 
       {/* Global About Modal */}
+      <AnimatePresence>
       {isAboutOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md" onClick={() => setAboutOpen(false)}>
-          <div className="bg-[#010a1b] border border-gray-800 rounded-3xl p-8 w-[90%] md:w-[550px] shadow-[0_0_50px_rgba(0,0,0,1)] relative overflow-hidden" onClick={e => e.stopPropagation()}>
+        <motion.div 
+          initial={{ opacity: 0 }} 
+          animate={{ opacity: 1 }} 
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md" onClick={() => setAboutOpen(false)}
+        >
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+            animate={{ opacity: 1, scale: 1, y: 0 }} 
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="bg-[#010a1b] border border-gray-800 rounded-3xl p-8 w-[90%] md:w-[550px] shadow-[0_0_50px_rgba(0,0,0,1)] relative overflow-hidden" onClick={e => e.stopPropagation()}
+          >
             {/* Background glowing effects */}
             <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-red-500/10 to-transparent pointer-events-none"></div>
             
@@ -128,9 +140,10 @@ export default function Home() {
               <span>ALIVEMAP v1.0.0</span>
               <span>Слава Україні</span>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </main>
   );
 }
