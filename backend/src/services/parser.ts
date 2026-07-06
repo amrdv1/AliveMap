@@ -304,6 +304,10 @@ export function parseTelegramText(text: string): ParsedThreat[] {
     if (lineLat === null && lineType !== 'AIRCRAFT') {
       for (const [cityKey, coords] of Object.entries(CITY_COORDS)) {
         if (lineLower.includes(cityKey)) {
+          // Do not use the city as current location if it was explicitly parsed as the target destination!
+          if (lineTarget.targetName && lineTarget.targetName.includes(cityKey)) {
+            continue;
+          }
           lineLat = coords.lat;
           lineLng = coords.lng;
           lineConf = 80;

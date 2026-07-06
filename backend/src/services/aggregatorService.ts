@@ -57,7 +57,7 @@ export async function processExternalThreat(
       include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
     });
     if (existing) {
-      return await updateThreat(existing, lat, lng, time, sourceId, speed, course, trailLocations, confidence);
+      return await updateThreat(existing, lat, lng, time, sourceId, speed, course, trailLocations, confidence, quantity, targetName, targetLat, targetLng);
     }
   }
 
@@ -103,7 +103,7 @@ export async function processExternalThreat(
       }
     }
 
-    return await updateThreat(matchedThreat, lat, lng, time, sourceId, finalSpeed, finalCourse, trailLocations, confidence);
+    return await updateThreat(matchedThreat, lat, lng, time, sourceId, finalSpeed, finalCourse, trailLocations, confidence, quantity, targetName, targetLat, targetLng);
   }
 
   // 3. Create new threat
@@ -193,11 +193,18 @@ async function updateThreat(
   else if (uniqueSources.size === 3) dynamicConfidence = 0.8;
   else if (uniqueSources.size >= 4) dynamicConfidence = 1.0;
 
-  let finalCourse = course ?? existingThreat.course;
   let finalTargetLat = targetLat ?? existingThreat.targetLat;
   let finalTargetLng = targetLng ?? existingThreat.targetLng;
-  if (finalCourse == null && finalTargetLat != null && finalTargetLng != null) {
-      finalCourse = calculateBearing(lat, lng, finalTargetLat, finalTargetLng);
+  let finalTargetName = targetName ?? existingThreat.targetName;
+  
+  let finalCourse = course;
+  if (finalCourse == null) {
+      if (targetLat != null && targetLng != null) {
+          // New explicit target destination parsed. Recalculate route!
+          finalCourse = calculateBearing(lat, lng, targetLat, targetLng);
+      } else {
+          finalCourse = existingThreat.course;
+      }
   }
 
   // Preserve highest confidence
