@@ -74,11 +74,11 @@ export async function processExternalThreat(
       const dist = getDistanceFromLatLonInKm(lat, lng, loc.lat, loc.lng);
       
       // Merge radius depends on speed/type
-      let mergeRadius = 30;
+      let mergeRadius = 80; // Increased for DRONEs to prevent duplicates
       if (['MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON', 'AIRCRAFT', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR'].includes(t.type)) {
-         mergeRadius = 150;
+         mergeRadius = 300;
       } else if (t.type === 'KAB') {
-         mergeRadius = 80;
+         mergeRadius = 100;
       }
 
       // Merge if within radius (duplicate removal)
