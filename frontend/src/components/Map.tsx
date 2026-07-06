@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import Map, { Source, Layer, Marker, NavigationControl } from 'react-map-gl/maplibre';
+import Map, { Source, Layer, Marker, NavigationControl, Popup } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useStore, ThreatObject } from '../store/useStore';
 import { socket } from '../lib/socket';
 import { THREAT_SVGS, THREAT_COLORS } from './ThreatIcon';
-import { Flame } from 'lucide-react';
+import { Flame, X } from 'lucide-react';
 import * as turf from '@turf/turf';
 
 // Maptiler / Carto Dark Matter style for free
@@ -226,13 +226,25 @@ export default function UkraineMap() {
     };
   }, [threats]);
 
+  const [selectedThreat, setSelectedThreat] = useState<ThreatObject | null>(null);
+
   const handleThreatClick = (t: ThreatObject) => {
+    setSelectedThreat(t);
     setIs3D(true);
     mapRef.current?.flyTo({
       center: [t.locations[0].lng, t.locations[0].lat],
       zoom: 8,
       pitch: 45,
-      duration: 1500
+      essential: true
+    });
+  };
+
+  const closePopup = () => {
+    setSelectedThreat(null);
+    setIs3D(false);
+    mapRef.current?.flyTo({
+      pitch: 0,
+      essential: true
     });
   };
 
@@ -396,8 +408,67 @@ export default function UkraineMap() {
             <ThreatMarker key={t.id} threat={t} onClick={handleThreatClick} />
           ))}
 
+          {/* Interactive Threat Popup */}
+          {selectedThreat && selectedThreat.locations[0] && (
+            <Popup
+               longitude={selectedThreat.locations[0].lng}
+               latitude={selectedThreat.locations[0].lat}
+               anchor="bottom"
+               onClose={closePopup}
+               closeButton={false}
+               className="custom-threat-popup z-50"
+               maxWidth="350px"
+               offset={15}
+            >
+               <div className="bg-[#1a1a1a] text-white p-4 rounded-xl border border-white/10 shadow-2xl relative w-[320px]">
+                  <button onClick={closePopup} className="absolute top-3 right-3 text-white/50 hover:text-white transition">
+                     <X size={18} />
+                  </button>
+                  <div className="flex items-center gap-3 mb-3">
+                     <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: THREAT_COLORS[selectedThreat.type as keyof typeof THREAT_COLORS] || '#4A90E2' }}>
+                        <div className="w-6 h-6 text-white" dangerouslySetInnerHTML={{ __html: THREAT_SVGS[selectedThreat.type as keyof typeof THREAT_SVGS] || THREAT_SVGS['DRONE'] }} />
+                     </div>
+                     <div>
+                        <div className="font-bold text-[15px]">{selectedThreat.type === 'DRONE' ? 'Ударний БпЛА' : selectedThreat.type === 'RECON' ? 'Розвідувальний БпЛА' : selectedThreat.type === 'MISSILE' ? 'Ракета' : 'Повітряна ціль'}</div>
+                        <div className="text-xs text-white/60 truncate w-[220px]">{selectedThreat.targetName || 'Курс невідомий'}</div>
+                     </div>
+                  </div>
+                  <div className="text-[13px] text-white/80 mb-4 leading-relaxed">
+                     {selectedThreat.type === 'DRONE' ? 'Ударний БпЛА' : selectedThreat.type === 'RECON' ? 'Розвідувальний БпЛА' : selectedThreat.type === 'MISSILE' ? 'Ракета' : 'Повітряна ціль'} 
+                     {selectedThreat.targetName ? ` курсом на ${selectedThreat.targetName}` : ''}.
+                     <br/>
+                     Підтверджень: {Math.max(1, Math.floor(selectedThreat.confidence / 10))}.
+                     {selectedThreat.speed ? ` Швидкість: ${selectedThreat.speed} км/год.` : ''}
+                  </div>
+                  <div className="text-[12px] text-orange-400/90 mb-4 flex items-center gap-2">
+                     ⚠️ Розташування приблизне
+                  </div>
+                  <div className="flex items-center gap-2">
+                     <div className={`px-3 py-1 rounded-full text-[11px] font-semibold ${
+                        selectedThreat.confidence > 80 ? 'bg-green-500/20 text-green-400' : 
+                        selectedThreat.confidence > 50 ? 'bg-orange-500/20 text-orange-400' : 
+                        'bg-red-500/20 text-red-400'
+                     }`}>
+                        Достовірність: {selectedThreat.confidence > 80 ? 'Висока' : selectedThreat.confidence > 50 ? 'Середня' : 'Низька'}
+                     </div>
+                  </div>
+               </div>
+            </Popup>
+          )}
 
         </Map>
+        
+        {/* CSS Override for Maplibre popup background */}
+        <style dangerouslySetInnerHTML={{__html: `
+          .custom-threat-popup .maplibregl-popup-content {
+            background: transparent !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+          }
+          .custom-threat-popup .maplibregl-popup-tip {
+            border-top-color: #1a1a1a !important;
+          }
+        `}} />
 
         {/* Hover Custom Tooltip */}
         {hoverInfo && (() => {
