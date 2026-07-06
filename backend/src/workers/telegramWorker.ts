@@ -317,14 +317,13 @@ export async function startTelegramWorker(io: Server) {
     // Run initial cleanup
     await cleanupOldMessages();
 
-    // Fetch history (will create fresh threats on the map)
+    // Poll history once on startup to catch up on missed messages
     await pollHistory();
 
-    // Poll every 15 seconds + cleanup
+    // Run cleanup every minute
     setInterval(async () => {
         await cleanupOldMessages();
-        await pollHistory();
-    }, 15 * 1000);
+    }, 60 * 1000);
 
   } catch (error) {
     console.error("Error starting Telegram worker:", error);
