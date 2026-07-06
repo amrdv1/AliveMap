@@ -113,7 +113,8 @@ export async function startTelegramWorker(io: Server) {
         // Add all matched targets to map
         for (const parsed of parsedThreats) {
           if (parsed.lat !== null && parsed.lng !== null) {
-              let confidence = parsed.confidence || 0.8;
+              const confidence = (parsed.confidence || 80) / 100;
+              console.log(`[Parser] Detected ${parsed.type} qty=${parsed.quantity || 1} at [${parsed.lat?.toFixed(2)}, ${parsed.lng?.toFixed(2)}] conf=${confidence} from ${channelDisplay}`);
               const savedThreat = await processExternalThreat(
                   null,
                   parsed.type as any,
@@ -123,11 +124,14 @@ export async function startTelegramWorker(io: Server) {
                   sourceId,
                   null,
                   parsed.direction,
-                  confidence
+                  confidence,
+                  parsed.quantity ?? 1,
+                  parsed.targetName ?? null,
+                  parsed.targetLat ?? null,
+                  parsed.targetLng ?? null
               );
             if (savedThreat) {
                 io.emit('threat:update', savedThreat);
-                console.log(`Telegram Threat Detected: ${parsed.type} at [${parsed.lat}, ${parsed.lng}] from ${channelDisplay}`);
             }
           }
         }
@@ -137,14 +141,14 @@ export async function startTelegramWorker(io: Server) {
     // Fetch initial history
     try {
         console.log("Fetching recent Telegram history...");
-        await prisma.threatObject.deleteMany({
-            where: {
-                locations: {
-                    some: { sourceId }
-                }
-            }
+        
+        // Archive stale threats instead of deleting everything
+        const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+        await prisma.threatObject.updateMany({
+            where: { status: 'ACTIVE', updatedAt: { lt: twoHoursAgo } },
+            data: { status: 'ARCHIVED' }
         });
-        await prisma.monitoringMessage.deleteMany({});
+        
         const dialogs = await client.getDialogs();
         
         for (const dialog of dialogs) {
@@ -172,7 +176,6 @@ export async function startTelegramWorker(io: Server) {
 
                     if (isFreshMonitoring) {
                         try {
-                            // Check if exact same message already exists
                             const existing = await prisma.monitoringMessage.findFirst({
                                 where: { 
                                     text: message.message,
@@ -196,8 +199,8 @@ export async function startTelegramWorker(io: Server) {
                         }
                     }
 
-                    // Only spawn threats on the map if the message is fresh (< 30 minutes old)
-                    const isFresh = (Date.now() - msgTime) < 30 * 60 * 1000;
+                    // Spawn threats on the map if the message is fresh (< 2 hours old)
+                    const isFresh = (Date.now() - msgTime) < 2 * 60 * 60 * 1000;
                     
                     if (isFresh) {
                         for (const parsed of parsedThreats) {
