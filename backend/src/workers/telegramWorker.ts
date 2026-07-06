@@ -248,7 +248,11 @@ export async function startTelegramWorker(io: Server) {
             
             // Fetch directly from top 3 channels to avoid ResolveUsername FloodWait
             // Live events will still capture messages from all 50+ channels.
-            const pollChannels = ['monitor_ukraine', 'eRadarrua', 'war_monitor', 'monitoring_ukraine', 'sectorv666', 'monitor'];
+            const pollChannels = [
+                'monitor_ukraine', 'eRadarrua', 'war_monitor', 'monitoring_ukraine', 
+                'sectorv666', 'monitor', 'radar_top_ua', 'povitryanatrivogaaaa', 
+                'monitor1654', 'ukrainealarmsignal', 'pivden_varta'
+            ];
             for (const channel of pollChannels) {
                 try {
                     const messages = await client.getMessages(channel, { limit: 10 });
