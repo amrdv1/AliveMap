@@ -51,15 +51,20 @@ export interface AppState {
   filters: FilterState;
   isAboutOpen: boolean;
   activeTab: 'MAP' | 'SUMMARY' | 'MONITORING';
+  mapMode: 'dark' | 'satellite';
+  is3D: boolean;
+  showHeatmap: boolean;
   setThreats: (threats: ThreatObject[]) => void;
   updateThreat: (threat: ThreatObject) => void;
   setAlerts: (alerts: AlertsData) => void;
   setMessages: (messages: MonitoringMessage[]) => void;
   addMessage: (message: MonitoringMessage) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setFilter: (key: keyof AppState['filters'], value: any) => void;
   setAboutOpen: (open: boolean) => void;
   setActiveTab: (tab: 'MAP' | 'SUMMARY' | 'MONITORING') => void;
+  setMapMode: (mode: 'dark' | 'satellite') => void;
+  setIs3D: (val: boolean) => void;
+  setShowHeatmap: (val: boolean) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -68,6 +73,9 @@ export const useStore = create<AppState>((set) => ({
   messages: [],
   isAboutOpen: false,
   activeTab: 'MAP',
+  mapMode: 'dark',
+  is3D: false,
+  showHeatmap: false,
   filters: {
     types: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KAB', 'AIRCRAFT', 'ALERT', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR', 'PPO', 'RECON', 'FPV', 'UNKNOWN'],
     showArchived: false,
@@ -89,6 +97,9 @@ export const useStore = create<AppState>((set) => ({
   setFilter: (key, value) => set((state) => ({
     filters: { ...state.filters, [key]: value }
   })),
-  setAboutOpen: (isAboutOpen) => set({ isAboutOpen }),
-  setActiveTab: (activeTab) => set({ activeTab })
+  setAboutOpen: (open) => set({ isAboutOpen: open }),
+  setActiveTab: (tab) => set({ activeTab: tab }),
+  setMapMode: (mode) => set({ mapMode: mode }),
+  setIs3D: (val) => set({ is3D: val }),
+  setShowHeatmap: (val) => set({ showHeatmap: val }),
 }));

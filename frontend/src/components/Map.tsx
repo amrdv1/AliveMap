@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from 'react';
-import Map, { Source, Layer, Marker, NavigationControl } from 'react-map-gl/maplibre';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import Map, { Source, Layer, Marker, NavigationControl, Popup } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useStore, ThreatObject } from '../store/useStore';
 import { socket } from '../lib/socket';
 import { THREAT_SVGS, THREAT_COLORS } from './ThreatIcon';
-import { Settings, Map as MapIcon, Layers, Flame, Box } from 'lucide-react';
+import { Flame } from 'lucide-react';
 
 // Maptiler / Carto Dark Matter style for free
 const DARK_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
@@ -112,14 +112,11 @@ const ThreatMarker = ({ threat, onClick }: { threat: ThreatObject, onClick: (t: 
 };
 
 export default function UkraineMap() {
-  const { alerts, threats } = useStore();
+  const { alerts, threats, mapMode, is3D, showHeatmap, setIs3D } = useStore();
   const [geoData, setGeoData] = useState<any>(null); // Districts
   const [geoDataStates, setGeoDataStates] = useState<any>(null); // States
-  const [showHeatmap, setShowHeatmap] = useState(false);
-  const [mapMode, setMapMode] = useState<'dark'|'satellite'>('dark');
-  const [is3D, setIs3D] = useState(false); // Default to 2D
-  const [showSettings, setShowSettings] = useState(false);
   const mapRef = React.useRef<any>(null);
+  const [hoverInfo, setHoverInfo] = useState<any>(null);
 
   useEffect(() => {
     fetch('/ukraine-districts.geojson')
@@ -198,10 +195,62 @@ export default function UkraineMap() {
     });
   };
 
+  const onHover = useCallback((event: any) => {
+    const { features, lngLat } = event;
+    const hoveredFeature = features && features[0];
+
+    if (hoveredFeature && hoveredFeature.properties) {
+      const regionName = hoveredFeature.properties.rayon || hoveredFeature.properties.region;
+      if (regionName) {
+        setHoverInfo({
+          feature: hoveredFeature,
+          lngLat: [lngLat.lng, lngLat.lat]
+        });
+        return;
+      }
+    }
+    setHoverInfo(null);
+  }, []);
+
+  const getAlertInfo = (feature: any) => {
+    if (!feature) return null;
+    const regionName = feature.properties.rayon || feature.properties.region;
+    if (!regionName) return null;
+    
+    const matchedAlertKey = Object.keys(alerts).find(k => {
+      return k.includes(regionName) || (regionName === 'Київ' && k === 'м. Київ');
+    });
+
+    if (matchedAlertKey && alerts[matchedAlertKey] && alerts[matchedAlertKey].alertnow) {
+      const alertObj = alerts[matchedAlertKey];
+      let durationStr = '';
+      let startStr = '';
+      if (alertObj.lastUpdate) {
+        const start = new Date(alertObj.lastUpdate);
+        startStr = start.toLocaleTimeString('uk-UA');
+        const diffMs = Date.now() - start.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const hours = Math.floor(diffMins / 60);
+        const mins = diffMins % 60;
+        durationStr = hours > 0 ? `${hours} год ${mins} хв` : `${mins} хв`;
+      }
+      return { active: true, name: matchedAlertKey, durationStr, startStr };
+    }
+    
+    let defaultName = regionName;
+    if (feature.properties.region) defaultName += " область";
+    if (defaultName === 'Київ область') defaultName = 'м. Київ';
+    
+    return { active: false, name: defaultName };
+  };
+
   return (
     <div className="w-full h-full relative">
         <Map
           ref={mapRef}
+          interactiveLayerIds={['regions-states-fill', 'regions-districts-fill']}
+          onMouseMove={onHover}
+          onMouseLeave={() => setHoverInfo(null)}
           initialViewState={{
             longitude: 31.1656,
             latitude: 48.3794,
@@ -245,7 +294,7 @@ export default function UkraineMap() {
                         'rgba(239, 68, 68, 0.4)', // Red with opacity
                         'rgba(0, 0, 0, 0)'
                     ],
-                    'fill-outline-color': 'rgba(239, 68, 68, 0.8)'
+                    'fill-outline-color': 'rgba(239, 68, 68, 0.4)'
                 }} 
               />
             </Source>
@@ -265,41 +314,41 @@ export default function UkraineMap() {
 
         </Map>
 
-        {/* Settings Dropdown */}
-        <div className="absolute bottom-24 left-6 z-[60] flex flex-col items-start">
-          <button 
-            onClick={() => setShowSettings(!showSettings)}
-            className="p-3 rounded-xl bg-black/60 backdrop-blur-xl border border-white/10 text-white hover:bg-white/10 transition-colors shadow-lg"
-          >
-            <Settings size={20} />
-          </button>
+        {/* Hover Popup */}
+        {hoverInfo && (() => {
+          const alertInfo = getAlertInfo(hoverInfo.feature);
+          if (!alertInfo) return null;
           
-          {showSettings && (
-            <div className="mb-2 flex flex-col gap-2 bg-black/80 backdrop-blur-xl border border-white/10 p-3 rounded-xl shadow-2xl animate-in fade-in slide-in-from-bottom-2">
-              <button 
-                onClick={() => { setMapMode(mapMode === 'dark' ? 'satellite' : 'dark'); setShowSettings(false); }}
-                className="flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition-colors bg-white/5 hover:bg-white/10 text-gray-200"
-              >
-                {mapMode === 'dark' ? <MapIcon size={16} className="text-blue-400" /> : <Layers size={16} className="text-gray-400" />}
-                <span>{mapMode === 'dark' ? 'Satellite' : 'Dark Map'}</span>
-              </button>
-              <button 
-                onClick={() => { setIs3D(!is3D); setShowSettings(false); }}
-                className="flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition-colors bg-white/5 hover:bg-white/10 text-gray-200"
-              >
-                <Box size={16} className={is3D ? "text-cyan-400" : "text-gray-400"} />
-                <span>{is3D ? '2D View' : '3D View'}</span>
-              </button>
-              <button 
-                onClick={() => { setShowHeatmap(!showHeatmap); setShowSettings(false); }}
-                className={`flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition-colors ${showHeatmap ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-white/5 hover:bg-white/10 text-gray-200'}`}
-              >
-                <Flame size={16} />
-                <span>Heatmap {showHeatmap ? 'On' : 'Off'}</span>
-              </button>
-            </div>
-          )}
-        </div>
-    </div>
+          return (
+            <Popup
+              longitude={hoverInfo.lngLat[0]}
+              latitude={hoverInfo.lngLat[1]}
+              closeButton={false}
+              closeOnClick={false}
+              anchor="bottom"
+              offset={10}
+              className="custom-popup"
+            >
+              <div className="font-sans text-sm p-1 min-w-[150px]">
+                <div className="font-bold text-lg mb-1">{alertInfo.name}</div>
+                <div style={{ color: alertInfo.active ? '#ef4444' : '#9ca3af', fontWeight: alertInfo.active ? 'bold' : 'normal' }}>
+                  {alertInfo.active ? '🚨 ПОВІТРЯНА ТРИВОГА' : '✅ Немає тривоги'}
+                </div>
+                
+                {alertInfo.active && alertInfo.durationStr && (
+                  <>
+                    <div style={{ marginTop: '8px', color: '#d1d5db' }}>
+                      Триває: <span style={{ color: 'white', fontFamily: 'monospace' }}>{alertInfo.durationStr}</span>
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
+                      Початок: {alertInfo.startStr}
+                    </div>
+                  </>
+                )}
+              </div>
+            </Popup>
+          );
+        })()}
+      </div>
   );
 }

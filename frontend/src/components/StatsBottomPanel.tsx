@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
-import { Radar } from 'lucide-react';
+import { Settings, Map as MapIcon, Layers, Flame, Box } from 'lucide-react';
 
 export default function StatsBottomPanel() {
-  const { threats, alerts } = useStore();
+  const { threats, alerts, mapMode, is3D, showHeatmap, setMapMode, setIs3D, setShowHeatmap } = useStore();
+  const [showSettings, setShowSettings] = useState(false);
   
   const activeThreats = threats.filter(t => t.status === 'ACTIVE');
   
@@ -17,10 +18,47 @@ export default function StatsBottomPanel() {
   return (
     <div className="hidden md:flex absolute bottom-6 left-1/2 -translate-x-1/2 flex-col items-center gap-3 z-30 pointer-events-none">
       {/* Stats Pill - Premium Glass Edition */}
-      <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full px-8 py-3 flex items-center gap-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
-        <div className="hidden md:flex items-center gap-2 pr-2 border-r border-gray-700/50">
-          <img src="/logo.png" alt="Logo" className="w-5 h-5 object-contain" />
-          <span className="text-white text-xs font-black tracking-widest drop-shadow-[0_0_8px_rgba(239,68,68,0.3)]">ALIVEMAP</span>
+      <div className="pointer-events-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-full pl-4 pr-8 py-3 flex items-center gap-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+        
+        {/* Gear Icon replacing logo */}
+        <div className="relative flex items-center gap-2 pr-4 border-r border-gray-700/50">
+          <button 
+            onClick={() => setShowSettings(!showSettings)}
+            className="p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors border border-white/10 flex items-center justify-center text-gray-300 hover:text-white"
+          >
+            <Settings size={18} />
+          </button>
+          
+          {showSettings && (
+            <div className="absolute bottom-[calc(100%+16px)] left-0 flex flex-col gap-2 bg-black/90 backdrop-blur-2xl border border-white/10 p-3 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-bottom-4 w-48">
+              <button 
+                onClick={() => { setMapMode(mapMode === 'dark' ? 'satellite' : 'dark'); setShowSettings(false); }}
+                className="flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors bg-white/5 hover:bg-white/10 text-gray-200"
+              >
+                {mapMode === 'dark' ? <MapIcon size={16} className="text-blue-400" /> : <Layers size={16} className="text-gray-400" />}
+                <span className="text-sm">{mapMode === 'dark' ? 'Супутник' : 'Темна Карта'}</span>
+              </button>
+              <button 
+                onClick={() => { setIs3D(!is3D); setShowSettings(false); }}
+                className="flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors bg-white/5 hover:bg-white/10 text-gray-200"
+              >
+                <Box size={16} className={is3D ? "text-cyan-400" : "text-gray-400"} />
+                <span className="text-sm">{is3D ? '2D Вигляд' : '3D Вигляд'}</span>
+              </button>
+              <button 
+                onClick={() => { setShowHeatmap(!showHeatmap); setShowSettings(false); }}
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors ${showHeatmap ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-white/5 hover:bg-white/10 text-gray-200'}`}
+              >
+                <Flame size={16} />
+                <span className="text-sm">Теплова Карта</span>
+              </button>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="Logo" className="w-5 h-5 object-contain" />
+            <span className="text-white text-xs font-black tracking-widest drop-shadow-[0_0_8px_rgba(239,68,68,0.3)]">ALIVEMAP</span>
+          </div>
         </div>
         
         <div className="flex gap-2 items-center">
