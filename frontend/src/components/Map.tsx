@@ -197,13 +197,13 @@ export default function UkraineMap() {
 
   const onHover = useCallback((event: any) => {
     const { features, point } = event;
-    const hoveredFeature = features && features[0];
+    const topFeature = features && features[0];
 
-    if (hoveredFeature && hoveredFeature.properties) {
-      const regionName = hoveredFeature.properties.rayon || hoveredFeature.properties.region;
+    if (topFeature && topFeature.properties) {
+      const regionName = topFeature.properties.rayon || topFeature.properties.region;
       if (regionName) {
         setHoverInfo({
-          feature: hoveredFeature,
+          features: features, // Store all intersected features
           x: point.x,
           y: point.y
         });
@@ -213,37 +213,45 @@ export default function UkraineMap() {
     setHoverInfo(null);
   }, []);
 
-  const hoveredRegionName = hoverInfo ? (hoverInfo.feature.properties.region || '') : '';
-  const hoveredRayonName = hoverInfo ? (hoverInfo.feature.properties.rayon || '') : '';
+  const hoveredRegionName = hoverInfo ? (hoverInfo.features.find((f:any) => f.properties.region)?.properties.region || '') : '';
+  const hoveredRayonName = hoverInfo ? (hoverInfo.features.find((f:any) => f.properties.rayon)?.properties.rayon || '') : '';
 
-  const getAlertInfo = (feature: any) => {
-    if (!feature) return null;
-    const regionName = feature.properties.rayon || feature.properties.region;
-    if (!regionName) return null;
+  const getAlertInfo = (featuresList: any[]) => {
+    if (!featuresList || featuresList.length === 0) return null;
     
-    const matchedAlertKey = Object.keys(alerts).find(k => {
-      return k.includes(regionName) || (regionName === 'Київ' && k === 'м. Київ');
-    });
+    // 1. Try to find if any of the overlapping features (district or state) has an active alert
+    for (const feature of featuresList) {
+      let regionName = feature.properties.rayon || feature.properties.region;
+      if (!regionName) continue;
+      
+      const matchedAlertKey = Object.keys(alerts).find(k => {
+        return k.includes(regionName) || (regionName === 'Київ' && k === 'м. Київ') || (regionName === 'Крим' && k.includes('Крим'));
+      });
 
-    if (matchedAlertKey && alerts[matchedAlertKey] && alerts[matchedAlertKey].alertnow) {
-      const alertObj = alerts[matchedAlertKey];
-      let durationStr = '';
-      let startStr = '';
-      if (alertObj.lastUpdate) {
-        const start = new Date(alertObj.lastUpdate);
-        startStr = start.toLocaleTimeString('uk-UA');
-        const diffMs = Date.now() - start.getTime();
-        const diffMins = Math.floor(diffMs / 60000);
-        const hours = Math.floor(diffMins / 60);
-        const mins = diffMins % 60;
-        durationStr = hours > 0 ? `${hours} год ${mins} хв` : `${mins} хв`;
+      if (matchedAlertKey && alerts[matchedAlertKey] && alerts[matchedAlertKey].alertnow) {
+        const alertObj = alerts[matchedAlertKey];
+        let durationStr = '';
+        let startStr = '';
+        if (alertObj.lastUpdate) {
+          const start = new Date(alertObj.lastUpdate);
+          startStr = start.toLocaleTimeString('uk-UA');
+          const diffMs = Date.now() - start.getTime();
+          const diffMins = Math.floor(diffMs / 60000);
+          const hours = Math.floor(diffMins / 60);
+          const mins = diffMins % 60;
+          durationStr = hours > 0 ? `${hours} год ${mins} хв` : `${mins} хв`;
+        }
+        return { active: true, name: matchedAlertKey, durationStr, startStr };
       }
-      return { active: true, name: matchedAlertKey, durationStr, startStr };
     }
     
-    let defaultName = regionName;
-    if (feature.properties.region) defaultName += " область";
+    // 2. If no active alert, return the name of the top-most feature
+    const topFeature = featuresList[0];
+    let defaultName = topFeature.properties.rayon || topFeature.properties.region;
+    if (topFeature.properties.region) defaultName += " область";
     if (defaultName === 'Київ область') defaultName = 'м. Київ';
+    if (defaultName === 'Крим область') defaultName = 'Автономна Республіка Крим';
+    if (defaultName === 'Севастополь область') defaultName = 'м. Севастополь';
     
     return { active: false, name: defaultName };
   };
@@ -331,7 +339,7 @@ export default function UkraineMap() {
 
         {/* Hover Custom Tooltip */}
         {hoverInfo && (() => {
-          const alertInfo = getAlertInfo(hoverInfo.feature);
+          const alertInfo = getAlertInfo(hoverInfo.features);
           if (!alertInfo) return null;
           
           return (
