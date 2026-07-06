@@ -45,7 +45,7 @@ const getIcon = (type: string, direction: number | null | undefined, confidence:
                ${quantityBadge}
                ${confBadge}
                <div class="radar-pulse" style="--ring-color: ${ringColor}"></div>
-               <div style="transform: rotate(${rot}deg); z-index: 10; width: 24px; height: 24px; color: #ffffff; filter: drop-shadow(0 0 6px ${THREAT_COLORS[type as keyof typeof THREAT_COLORS]}) drop-shadow(0 0 12px ${THREAT_COLORS[type as keyof typeof THREAT_COLORS]}) drop-shadow(0 0 2px #000);">
+               <div style="transform: rotate(${rot}deg); z-index: 10; width: 24px; height: 24px; color: #ffffff; filter: drop-shadow(0 0 4px ${THREAT_COLORS[type as keyof typeof THREAT_COLORS]});">
                  ${svgIcon}
                </div>
              </div>`,
@@ -387,15 +387,21 @@ export default function Map() {
         .leaflet-container { background: #000 !important; }
         .radar-pulse {
           position: absolute;
-          width: 100%;
-          height: 100%;
+          width: 20px;
+          height: 20px;
           border-radius: 50%;
-          box-shadow: 0 0 0 0 var(--ring-color);
-          animation: pulse-ring 2s infinite cubic-bezier(0.66, 0, 0, 1);
+          background-color: var(--ring-color);
+          animation: pulse-ring 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+          pointer-events: none;
         }
         @keyframes pulse-ring {
-          to {
-            box-shadow: 0 0 0 40px rgba(255, 0, 0, 0);
+          0% {
+            transform: scale(0.95);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(3.5);
+            opacity: 0;
           }
         }
         .custom-popup .leaflet-popup-content-wrapper {
@@ -414,6 +420,8 @@ export default function Map() {
         zoom={6} 
         style={{ height: '100%', width: '100%', zIndex: 0 }}
         zoomControl={false}
+        preferCanvas={true}
+        wheelPxPerZoomLevel={120}
       >
         <LayersControl position="bottomright">
           <LayersControl.BaseLayer checked name="ALIVEMAP Dark">
