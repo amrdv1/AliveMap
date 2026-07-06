@@ -70,32 +70,12 @@ export async function startAlertsWorker(io: Server) {
                     const isNowActive = currentActiveRegions[region];
 
                     if (!wasActive && isNowActive) {
-                      // Alert Started
+                      // Alert Started — send to Telegram bot only
                       await sendAlertNotification(region, true);
-                      
-                      const savedMsg = await prisma.monitoringMessage.create({
-                        data: {
-                          text: `🔴 **Повітряна тривога**: ${region}`,
-                          channelName: 'Офіційні Тривоги',
-                          timestamp: new Date(),
-                          tags: ['ALERT', region]
-                        }
-                      });
-                      io.emit('monitoring:new_message', savedMsg);
 
                     } else if (wasActive && !isNowActive) {
-                      // Alert Cleared (Відбій)
+                      // Alert Cleared — send to Telegram bot only
                       await sendAlertNotification(region, false);
-
-                      const savedMsg = await prisma.monitoringMessage.create({
-                        data: {
-                          text: `🟢 **Відбій тривоги**: ${region}`,
-                          channelName: 'Офіційні Тривоги',
-                          timestamp: new Date(),
-                          tags: ['CLEAR', region]
-                        }
-                      });
-                      io.emit('monitoring:new_message', savedMsg);
 
                       // Also archive threats in this region
                       const regionCoords = getRegionCenter(region);
