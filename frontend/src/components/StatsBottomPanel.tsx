@@ -38,20 +38,6 @@ export default function StatsBottomPanel() {
                 {mapMode === 'dark' ? <MapIcon size={16} className="text-blue-400" /> : <Layers size={16} className="text-gray-400" />}
                 <span className="text-sm">{mapMode === 'dark' ? 'Супутник' : 'Темна Карта'}</span>
               </button>
-              <button 
-                onClick={() => { setIs3D(!is3D); setShowSettings(false); }}
-                className="flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors bg-white/5 hover:bg-white/10 text-gray-200"
-              >
-                <Box size={16} className={is3D ? "text-cyan-400" : "text-gray-400"} />
-                <span className="text-sm">{is3D ? '2D Вигляд' : '3D Вигляд'}</span>
-              </button>
-              <button 
-                onClick={() => { setShowHeatmap(!showHeatmap); setShowSettings(false); }}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium transition-colors ${showHeatmap ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-white/5 hover:bg-white/10 text-gray-200'}`}
-              >
-                <Flame size={16} />
-                <span className="text-sm">Теплова Карта</span>
-              </button>
             </div>
           )}
 
