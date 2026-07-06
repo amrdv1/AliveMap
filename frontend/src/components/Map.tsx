@@ -312,43 +312,43 @@ export default function UkraineMap() {
             <ThreatMarker key={t.id} threat={t} onClick={handleThreatClick} />
           ))}
 
-        </Map>
-
-        {/* Hover Popup */}
-        {hoverInfo && (() => {
-          const alertInfo = getAlertInfo(hoverInfo.feature);
-          if (!alertInfo) return null;
-          
-          return (
-            <Popup
-              longitude={hoverInfo.lngLat[0]}
-              latitude={hoverInfo.lngLat[1]}
-              closeButton={false}
-              closeOnClick={false}
-              anchor="bottom"
-              offset={10}
-              className="custom-popup"
-            >
-              <div className="font-sans text-sm p-1 min-w-[150px]">
-                <div className="font-bold text-lg mb-1">{alertInfo.name}</div>
-                <div style={{ color: alertInfo.active ? '#ef4444' : '#9ca3af', fontWeight: alertInfo.active ? 'bold' : 'normal' }}>
-                  {alertInfo.active ? '🚨 ПОВІТРЯНА ТРИВОГА' : '✅ Немає тривоги'}
+          {/* Hover Popup */}
+          {hoverInfo && (() => {
+            const alertInfo = getAlertInfo(hoverInfo.feature);
+            if (!alertInfo) return null;
+            
+            return (
+              <Popup
+                longitude={hoverInfo.lngLat[0]}
+                latitude={hoverInfo.lngLat[1]}
+                closeButton={false}
+                closeOnClick={false}
+                anchor="bottom"
+                offset={10}
+                className="custom-popup"
+              >
+                <div className="font-sans text-sm p-1 min-w-[150px]">
+                  <div className="font-bold text-lg mb-1">{alertInfo.name}</div>
+                  <div style={{ color: alertInfo.active ? '#ef4444' : '#9ca3af', fontWeight: alertInfo.active ? 'bold' : 'normal' }}>
+                    {alertInfo.active ? '🚨 ПОВІТРЯНА ТРИВОГА' : '✅ Немає тривоги'}
+                  </div>
+                  
+                  {alertInfo.active && alertInfo.durationStr && (
+                    <>
+                      <div style={{ marginTop: '8px', color: '#d1d5db' }}>
+                        Триває: <span style={{ color: 'white', fontFamily: 'monospace' }}>{alertInfo.durationStr}</span>
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
+                        Початок: {alertInfo.startStr}
+                      </div>
+                    </>
+                  )}
                 </div>
-                
-                {alertInfo.active && alertInfo.durationStr && (
-                  <>
-                    <div style={{ marginTop: '8px', color: '#d1d5db' }}>
-                      Триває: <span style={{ color: 'white', fontFamily: 'monospace' }}>{alertInfo.durationStr}</span>
-                    </div>
-                    <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
-                      Початок: {alertInfo.startStr}
-                    </div>
-                  </>
-                )}
-              </div>
-            </Popup>
-          );
-        })()}
-      </div>
+              </Popup>
+            );
+          })()}
+
+        </Map>
+    </div>
   );
 }
