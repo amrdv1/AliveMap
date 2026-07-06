@@ -199,20 +199,13 @@ export async function startTelegramWorker(io: Server) {
     // ─── POLLING HISTORY ─────────────────────────────────────────────────
     const pollHistory = async () => {
         try {
-            console.log("Fetching recent Telegram history (polling)...");
+            console.log("Fetching recent Telegram history (polling 50 channels)...");
             
-            const dialogs = await client.getDialogs();
-            
-            for (const dialog of dialogs) {
-                if (!dialog.entity) continue;
-                const username = 'username' in dialog.entity && dialog.entity.username ? dialog.entity.username.toLowerCase() : null;
-                const title = 'title' in dialog.entity && dialog.entity.title ? dialog.entity.title : null;
-                
-                const isPublicMatch = username && CHANNELS.some(c => c.toLowerCase() === username);
-                const isPrivateMatch = title && PRIVATE_TITLES.some(t => title.includes(t));
-                
-                if (isPublicMatch || isPrivateMatch) {
-                    const messages = await client.getMessages(dialog.entity, { limit: 15 });
+            // Fetch directly from known channels to avoid getDialogs() flood wait
+            for (const channel of CHANNELS) {
+                try {
+                    const messages = await client.getMessages(channel, { limit: 10 });
+                    
                     for (const message of messages.reverse()) {
                         if (!message || !message.message) continue;
                         const msgTime = message.date * 1000;
@@ -220,7 +213,7 @@ export async function startTelegramWorker(io: Server) {
                         const parsedThreats = parseTelegramText(message.message);
                         if (!parsedThreats || parsedThreats.length === 0) continue;
                         
-                        const channelDisplay = username || title || 'Monitoring';
+                        const channelDisplay = channel;
                         const threatType = parsedThreats[0].type;
 
                         // Only save to monitoring if it's actual target movement and fresh (<12h)
@@ -268,6 +261,10 @@ export async function startTelegramWorker(io: Server) {
                                 }
                             }
                         }
+                    }
+                } catch (err: any) {
+                    if (err.message && err.message.includes('FLOOD_WAIT')) {
+                        console.warn(`[PollHistory] Flood wait on ${channel}`);
                     }
                 }
             }
@@ -337,9 +334,10 @@ export async function startTelegramWorker(io: Server) {
     // Poll history once on startup to catch up on missed messages
     await pollHistory();
 
-    // Run cleanup every minute
+    // Run cleanup and polling every minute as a reliable fallback
     setInterval(async () => {
         await cleanupOldMessages();
+        await pollHistory();
     }, 60 * 1000);
 
   } catch (error) {
