@@ -284,14 +284,15 @@ export default function UkraineMap() {
                     'fill-color': [
                         'case',
                         ['==', ['get', 'hasAlert'], 1],
-                        ['case', ['==', ['get', 'region'], hoveredRegionName], 'rgba(239, 68, 68, 0.6)', 'rgba(239, 68, 68, 0.4)'],
-                        ['==', ['get', 'region'], hoveredRegionName], 'rgba(255, 255, 255, 0.1)',
+                        ['case', ['==', ['get', 'region'], hoveredRegionName], 'rgba(239, 68, 68, 0.65)', 'rgba(239, 68, 68, 0.45)'],
+                        ['==', ['get', 'region'], hoveredRegionName], 'rgba(255, 255, 255, 0.08)',
                         'rgba(0, 0, 0, 0)'
                     ],
                     'fill-outline-color': [
                         'case',
-                        ['==', ['get', 'region'], hoveredRegionName], 'rgba(255, 255, 255, 0.8)',
-                        'rgba(239, 68, 68, 0.4)'
+                        ['==', ['get', 'hasAlert'], 1],
+                        ['case', ['==', ['get', 'region'], hoveredRegionName], 'rgba(255, 255, 255, 0.9)', 'rgba(239, 68, 68, 0.6)'],
+                        ['case', ['==', ['get', 'region'], hoveredRegionName], 'rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.15)']
                     ]
                 }} 
               />
@@ -308,14 +309,15 @@ export default function UkraineMap() {
                     'fill-color': [
                         'case',
                         ['==', ['get', 'hasAlert'], 1],
-                        ['case', ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(239, 68, 68, 0.6)', 'rgba(239, 68, 68, 0.4)'],
-                        ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(255, 255, 255, 0.1)',
+                        ['case', ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(239, 68, 68, 0.65)', 'rgba(239, 68, 68, 0.45)'],
+                        ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(255, 255, 255, 0.08)',
                         'rgba(0, 0, 0, 0)'
                     ],
                     'fill-outline-color': [
                         'case',
-                        ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(255, 255, 255, 0.8)',
-                        'rgba(239, 68, 68, 0.4)'
+                        ['==', ['get', 'hasAlert'], 1],
+                        ['case', ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(255, 255, 255, 0.9)', 'rgba(239, 68, 68, 0.6)'],
+                        ['case', ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.12)']
                     ]
                 }} 
               />
