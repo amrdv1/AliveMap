@@ -6,6 +6,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { useStore, ThreatObject } from '../store/useStore';
 import { socket } from '../lib/socket';
 import { THREAT_SVGS, THREAT_COLORS } from './ThreatIcon';
+import { Settings, Map as MapIcon, Layers, Flame, Box } from 'lucide-react';
 
 // Maptiler / Carto Dark Matter style for free
 const DARK_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
@@ -115,6 +116,7 @@ export default function UkraineMap() {
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [mapMode, setMapMode] = useState<'dark'|'satellite'>('dark');
   const [is3D, setIs3D] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     fetch('/ukraine.geojson')
@@ -211,26 +213,40 @@ export default function UkraineMap() {
 
         </Map>
 
-        {/* Heatmap & View Controls */}
-        <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+        {/* Settings Dropdown */}
+        <div className="absolute top-24 right-6 z-[60] flex flex-col items-end">
           <button 
-            onClick={() => setMapMode(mapMode === 'dark' ? 'satellite' : 'dark')}
-            className="px-4 py-2 rounded font-bold shadow-lg transition-colors bg-gray-800 text-gray-300 border border-gray-700"
+            onClick={() => setShowSettings(!showSettings)}
+            className="p-3 rounded-xl bg-black/60 backdrop-blur-xl border border-white/10 text-white hover:bg-white/10 transition-colors shadow-lg"
           >
-            {mapMode === 'dark' ? '🛰️ Satellite' : '🌑 Dark Map'}
+            <Settings size={20} />
           </button>
-          <button 
-            onClick={() => setIs3D(!is3D)}
-            className="px-4 py-2 rounded font-bold shadow-lg transition-colors bg-gray-800 text-gray-300 border border-gray-700"
-          >
-            {is3D ? '🧊 2D View' : '🧊 3D View'}
-          </button>
-          <button 
-            onClick={() => setShowHeatmap(!showHeatmap)}
-            className={`px-4 py-2 rounded font-bold shadow-lg transition-colors ${showHeatmap ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-300 border border-gray-700'}`}
-          >
-            {showHeatmap ? '🔥 Heatmap On' : '🔥 Heatmap Off'}
-          </button>
+          
+          {showSettings && (
+            <div className="mt-2 flex flex-col gap-2 bg-black/80 backdrop-blur-xl border border-white/10 p-3 rounded-xl shadow-2xl animate-in fade-in slide-in-from-top-2">
+              <button 
+                onClick={() => { setMapMode(mapMode === 'dark' ? 'satellite' : 'dark'); setShowSettings(false); }}
+                className="flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition-colors bg-white/5 hover:bg-white/10 text-gray-200"
+              >
+                {mapMode === 'dark' ? <MapIcon size={16} className="text-blue-400" /> : <Layers size={16} className="text-gray-400" />}
+                <span>{mapMode === 'dark' ? 'Satellite' : 'Dark Map'}</span>
+              </button>
+              <button 
+                onClick={() => { setIs3D(!is3D); setShowSettings(false); }}
+                className="flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition-colors bg-white/5 hover:bg-white/10 text-gray-200"
+              >
+                <Box size={16} className={is3D ? "text-cyan-400" : "text-gray-400"} />
+                <span>{is3D ? '2D View' : '3D View'}</span>
+              </button>
+              <button 
+                onClick={() => { setShowHeatmap(!showHeatmap); setShowSettings(false); }}
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition-colors ${showHeatmap ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-white/5 hover:bg-white/10 text-gray-200'}`}
+              >
+                <Flame size={16} />
+                <span>Heatmap {showHeatmap ? 'On' : 'Off'}</span>
+              </button>
+            </div>
+          )}
         </div>
     </div>
   );
