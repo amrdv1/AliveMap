@@ -183,14 +183,22 @@ function parseDirection(text: string): number | null {
 // ─── QUANTITY PARSING ───────────────────────────────────────────────────────
 
 function parseQuantity(text: string): number {
-  const numMatch = text.match(/(\d{1,3})\s*[xхXХ]?\s*(?:шахед|бпла|дрон|ракет|ціл|одиниц|штук|шт|мопед|безпілотник|геран|балістик|калібр|крилат|снаряд)/i);
+  const safeText = text.replace(/(х|x)[\-\s]*(59|101|555|55|47|22|69|35)/gi, '')
+                       .replace(/(су|міг|mig|su)[\-\s]*\d{2}/gi, '')
+                       .replace(/(с|s)[\-\s]*[34]00/gi, '')
+                       .replace(/3м(22|14)/gi, '')
+                       .replace(/кн[\-\s]*2[34]/gi, '');
+
+  const numMatch = safeText.match(/(?<![a-zа-яіїєґ])(\d{1,2})\s*[xхXХ]?\s*(?:шахед|бпла|дрон|ракет|ціл|одиниц|штук|шт|мопед|безпілотник|геран|балістик|калібр|крилат|снаряд)/i);
   if (numMatch) return Math.min(parseInt(numMatch[1], 10), 30);
-  const reverseMatch = text.match(/(?:ракет|бпла|шахед|калібр|дрон)[^\d]{0,15}(\d{1,3})/i);
+  
+  const reverseMatch = safeText.match(/(?:ракет|бпла|шахед|калібр|дрон)[^\d]{0,15}(\d{1,2})(?![a-zа-яіїєґ])/i);
   if (reverseMatch) return Math.min(parseInt(reverseMatch[1], 10), 30);
-  if (text.match(/\bпар[аи]\b/i)) return 2;
-  if (text.match(/\b(кільк|декільк)\b/i)) return 3;
-  if (text.match(/\b(груп[аи]|зграя)\b/i)) return 5;
-  if (text.match(/\b(масован|масштабн)\b/i)) return 8;
+  
+  if (safeText.match(/\bпар[аи]\b/i)) return 2;
+  if (safeText.match(/\b(кільк|декільк)\b/i)) return 3;
+  if (safeText.match(/\b(груп[аи]|зграя)\b/i)) return 5;
+  if (safeText.match(/\b(масован|масштабн)\b/i)) return 8;
   return 1;
 }
 
@@ -204,6 +212,8 @@ function parseTarget(text: string): { targetName: string | null, targetLat: numb
     const match = pattern.exec(text);
     if (match && match[1]) {
       const target = match[1].trim().toLowerCase().replace(/[\.\!\?\,]+$/, '');
+      if (target.match(/(північ|півден|захід|схід|вектор)/)) continue;
+      
       for (const [cityKey, coords] of Object.entries(CITY_COORDS)) {
         if (target.includes(cityKey) || cityKey.includes(target.substring(0, Math.min(target.length, 5)))) {
           return { targetName: target, targetLat: coords.lat, targetLng: coords.lng };
@@ -292,48 +302,35 @@ export function parseTelegramText(text: string): ParsedThreat[] {
     const lineDir = parseDirection(lineLower);
     const lineTarget = parseTarget(lineLower);
 
-    let lineLat: number | null = null;
-    let lineLng: number | null = null;
-    let lineConf = 80;
+    const matchedLineLocs: {lat: number, lng: number, conf: number}[] = [];
 
     for (const [base, coords] of Object.entries(AIRBASE_COORDS)) {
       if (lineLower.includes(base)) {
-        lineLat = coords.lat;
-        lineLng = coords.lng;
-        lineConf = 90;
-        break;
+        matchedLineLocs.push({ lat: coords.lat, lng: coords.lng, conf: 90 });
       }
     }
     
-    if (lineLat === null && lineType !== 'AIRCRAFT') {
+    if (lineType !== 'AIRCRAFT') {
       for (const [cityKey, coords] of Object.entries(CITY_COORDS)) {
         if (lineLower.includes(cityKey)) {
-          // Do not use the city as current location if it was explicitly parsed as the target destination!
-          if (lineTarget.targetName && lineTarget.targetName.includes(cityKey)) {
-            continue;
-          }
-          lineLat = coords.lat;
-          lineLng = coords.lng;
-          lineConf = 80;
-          break;
+          if (lineTarget.targetName && lineTarget.targetName.includes(cityKey)) continue;
+          matchedLineLocs.push({ lat: coords.lat, lng: coords.lng, conf: 80 });
         }
       }
     }
 
-    if (lineLat === null && currentRegionLat !== null) {
-      lineLat = currentRegionLat;
-      lineLng = currentRegionLng;
-      lineConf = 60;
+    if (matchedLineLocs.length === 0 && currentRegionLat !== null) {
+      matchedLineLocs.push({ lat: currentRegionLat, lng: currentRegionLng!, conf: 60 });
     }
 
-    if (lineLat !== null && lineLng !== null) {
-      const hasLineMention = lineLower.match(/(бпла|шахед|ракет|балістик|калібр|дрон|крилат|каб|фаб|бомб|авіабомб|х-101|х-55|циркон|курс|напрямок|збито|мінус|летить|рух|пуск|ціль|fpv|фпв)/);
-      if (hasLineMention) {
+    const hasLineMention = lineLower.match(/(бпла|шахед|ракет|балістик|калібр|дрон|крилат|каб|фаб|бомб|авіабомб|х-101|х-55|циркон|курс|напрямок|збито|мінус|летить|рух|пуск|ціль|fpv|фпв)/);
+    if (hasLineMention) {
+      for (const loc of matchedLineLocs) {
         results.push({
-          type: lineType,
-          lat: lineLat + jitter(),
-          lng: lineLng! + jitter(),
-          confidence: lineConf,
+          type: lineType!,
+          lat: loc.lat + jitter(),
+          lng: loc.lng + jitter(),
+          confidence: loc.conf,
           direction: lineDir ?? Math.floor(Math.random() * 360),
           quantity: lineQty,
           targetName: lineTarget.targetName,
@@ -362,8 +359,8 @@ export function parseTelegramText(text: string): ParsedThreat[] {
   if (matchedLocations.length === 0 && type !== 'AIRCRAFT') {
     for (const [cityKey, coords] of Object.entries(CITY_COORDS)) {
       if (lowerText.includes(cityKey)) {
+        if (targetName && targetName.includes(cityKey)) continue;
         matchedLocations.push({ lat: coords.lat, lng: coords.lng, conf: 80 });
-        break;
       }
     }
   }
