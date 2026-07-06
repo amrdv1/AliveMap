@@ -46,6 +46,21 @@ export async function startAlertsWorker(io: Server) {
                     }
                 });
                 
+                // Inject permanent alerts based on official data
+                formattedStates['Автономна Республіка Крим'] = {
+                    alertnow: true,
+                    regionType: 'State',
+                    lastUpdate: '2022-12-11T00:22:00.000Z'
+                };
+                currentActiveRegions['Автономна Республіка Крим'] = true;
+
+                formattedStates['Луганська область'] = {
+                    alertnow: true,
+                    regionType: 'State',
+                    lastUpdate: '2022-04-04T19:45:00.000Z'
+                };
+                currentActiveRegions['Луганська область'] = true;
+                
                 // Compare with previous states
                 if (!isFirstRun) {
                   const allRegions = new Set([...Object.keys(previousStates), ...Object.keys(currentActiveRegions)]);
