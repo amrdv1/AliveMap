@@ -32,7 +32,9 @@ const CHANNELS = [
   'air_alert_ua',
   'kievmap',
   'truexanewsua',
-  'ukraine_alarm_bot'
+  'ukraine_alarm_bot',
+  'kpszsu',
+  'veselyy_pivden'
 ];
 
 const PRIVATE_TITLES = [
