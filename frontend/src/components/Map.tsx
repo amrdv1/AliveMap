@@ -273,7 +273,6 @@ export default function Map() {
 
     const fetchAlerts = async () => {
       try {
-        // Fetch from our Next.js API route which uses allorigins
         const res = await fetch('/api/alerts');
         const data = await res.json();
         if (data && data.states) {
@@ -285,14 +284,13 @@ export default function Map() {
     };
     
     fetchAlerts();
-    const alertInterval = setInterval(fetchAlerts, 10000); // Polling every 10s
 
     return () => {
       socket.disconnect();
       socket.off('threat:update');
       socket.off('monitoring:new_message');
       socket.off('alerts:sync');
-      clearInterval(alertInterval);
+      socket.off('threats:refresh');
     };
   }, [setThreats, updateThreat]);
 
@@ -411,31 +409,7 @@ export default function Map() {
         <ZoomControl position="bottomright" />
 
         {filteredThreats.flatMap((threat) => {
-          const qty = threat.quantity || 1;
-          if (qty <= 1) {
-            return [<AnimatedMarker key={threat.id} threat={threat} getIcon={getIcon} />];
-          }
-          // Spread multiple markers in a small cluster around the main position
-          return Array.from({ length: qty }, (_, i) => {
-            if (i === 0) {
-              return <AnimatedMarker key={`${threat.id}-0`} threat={{...threat, quantity: 1}} getIcon={getIcon} />;
-            }
-            // Offset each clone ~3-8km in a circle around the main point
-            const angle = (2 * Math.PI * i) / qty;
-            const offsetKm = 3 + Math.random() * 5;
-            const latOffset = (offsetKm / 111) * Math.cos(angle);
-            const lngOffset = (offsetKm / (111 * Math.cos((threat.locations[0]?.lat || 48) * Math.PI / 180))) * Math.sin(angle);
-            const clonedLocations = threat.locations.map((loc: any) => ({
-              ...loc,
-              lat: loc.lat + latOffset,
-              lng: loc.lng + lngOffset
-            }));
-            return <AnimatedMarker 
-              key={`${threat.id}-${i}`} 
-              threat={{...threat, id: `${threat.id}-${i}`, locations: clonedLocations, quantity: 1}} 
-              getIcon={getIcon} 
-            />;
-          });
+          return [<AnimatedMarker key={threat.id} threat={threat} getIcon={getIcon} />];
         })}
 
       {/* Base Map State Outlines (subtle internal borders) */}
