@@ -6,6 +6,7 @@ import prisma from '../db';
 import { Server } from 'socket.io';
 import { processExternalThreat } from '../services/aggregatorService';
 import { extractWithAI } from '../services/aiParser';
+import { geocodeLocation } from '../services/geocoder';
 
 const CHANNELS = [
   'vanek_nikolaev', 
@@ -190,18 +191,44 @@ export async function startTelegramWorker(io: Server) {
           }
         }
 
+        // Run AI extraction ONCE per message
+        const aiData = await extractWithAI(text);
+        const finalSpeed = aiData?.speed || null;
+        const finalCourse = aiData?.course || null;
+        const finalTarget = aiData?.predictedTarget || null;
+
+        let overrideParsedThreats: any[] = [];
+        
+        // If AI found specific locations, geocode them!
+        if (aiData?.locationNames && aiData.locationNames.length > 0) {
+           for (const locName of aiData.locationNames) {
+              const coords = await geocodeLocation(locName);
+              if (coords) {
+                 overrideParsedThreats.push({
+                    type: parsedThreats[0].type,
+                    lat: coords.lat,
+                    lng: coords.lng,
+                    confidence: 95,
+                    direction: finalCourse ?? parsedThreats[0].direction,
+                    quantity: parsedThreats[0].quantity,
+                    targetName: finalTarget ?? parsedThreats[0].targetName,
+                    targetLat: null,
+                    targetLng: null
+                 });
+              }
+           }
+        }
+        
+        const threatsToProcess = overrideParsedThreats.length > 0 ? overrideParsedThreats : parsedThreats;
+
         // Add all matched targets to map (including PPO)
-        for (const parsed of parsedThreats) {
+        for (const parsed of threatsToProcess) {
           if (parsed.lat !== null && parsed.lng !== null) {
               const confidence = (parsed.confidence || 80) / 100;
+              const courseToUse = finalCourse ?? parsed.direction;
+              const targetToUse = finalTarget ?? parsed.targetName;
               
-              // Run AI extraction to get speed, course, and intended target
-              const aiData = await extractWithAI(text);
-              const finalSpeed = aiData?.speed || null;
-              const finalCourse = aiData?.course || parsed.direction || null;
-              const finalTarget = aiData?.predictedTarget || parsed.targetName || null;
-              
-              console.log(`[Parser] Detected ${parsed.type} at [${parsed.lat?.toFixed(2)}, ${parsed.lng?.toFixed(2)}] conf=${confidence} from ${channelDisplay} AI_Speed=${finalSpeed} AI_Course=${finalCourse}`);
+              console.log(`[Parser] Detected ${parsed.type} at [${parsed.lat?.toFixed(2)}, ${parsed.lng?.toFixed(2)}] conf=${confidence} from ${channelDisplay} AI_Speed=${finalSpeed} AI_Course=${courseToUse}`);
               
               const savedThreat = await processExternalThreat(
                   null,
@@ -211,10 +238,10 @@ export async function startTelegramWorker(io: Server) {
                   new Date(),
                   sourceId,
                   finalSpeed,
-                  finalCourse,
+                  courseToUse,
                   confidence,
                   parsed.quantity ?? 1,
-                  finalTarget,
+                  targetToUse,
                   parsed.targetLat ?? null,
                   parsed.targetLng ?? null
               );
@@ -223,9 +250,9 @@ export async function startTelegramWorker(io: Server) {
                 io.emit('threat:update', savedThreat);
                 
                 // Smart Notification
-                if (finalSpeed && finalCourse) {
+                if (finalSpeed && courseToUse) {
                     const { sendSmartThreatNotification } = require('./botWorker');
-                    sendSmartThreatNotification(parsed.type, parsed.lat, parsed.lng, finalSpeed, finalCourse);
+                    sendSmartThreatNotification(parsed.type, parsed.lat, parsed.lng, finalSpeed, courseToUse);
                 }
             }
           }

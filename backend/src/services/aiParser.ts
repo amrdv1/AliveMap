@@ -9,6 +9,7 @@ export interface AIExtraction {
   speed: number | null; // km/h
   course: number | null; // degrees 0-360
   predictedTarget: string | null;
+  locationNames: string[]; // array of exact location names mentioned where the threat is
   targetLat: number | null;
   targetLng: number | null;
 }
@@ -26,7 +27,8 @@ export async function extractWithAI(text: string): Promise<AIExtraction | null> 
 {
   "speed": number | null, // Швидкість у км/год, якщо вказана (напр. 600, 800)
   "course": number | null, // Курс/вектор у градусах (Північ = 0, Схід = 90, Південь = 180, Захід = 270, Пн-Зх = 315 і т.д.)
-  "predictedTarget": string | null // Ймовірна ціль (місто або об'єкт)
+  "predictedTarget": string | null, // Ймовірна ціль (місто або об'єкт)
+  "locationNames": string[] // Масив усіх населених пунктів (сіл, міст, районів), над якими ЗАРАЗ знаходиться загроза (наприклад ["Руська Лозова", "Південне", "Кам'яна Яруга"]). Якщо немає, поверніть []
 }
   `;
 
@@ -46,6 +48,7 @@ export async function extractWithAI(text: string): Promise<AIExtraction | null> 
             speed: parsed.speed || null,
             course: parsed.course || null,
             predictedTarget: parsed.predictedTarget || null,
+            locationNames: Array.isArray(parsed.locationNames) ? parsed.locationNames : [],
             targetLat: null,
             targetLng: null
         };
