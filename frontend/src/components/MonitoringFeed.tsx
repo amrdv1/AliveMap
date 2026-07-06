@@ -38,7 +38,7 @@ export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
       {/* Message List */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
         <AnimatePresence>
-          {messages.filter(m => m.channelName !== 'air_alert_ua' && m.channelName !== 'ukraine_alarm_bot' && m.channelName !== 'Офіційні Тривоги').map((msg, index) => (
+          {messages.map((msg, index) => (
             <motion.div 
               key={msg.id} 
               initial={{ opacity: 0, y: 15 }}
@@ -111,7 +111,7 @@ export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
           </motion.div>
         ))}
         </AnimatePresence>
-        {messages.filter(m => m.channelName !== 'air_alert_ua' && m.channelName !== 'ukraine_alarm_bot' && m.channelName !== 'Офіційні Тривоги').length === 0 && (
+        {messages.length === 0 && (
           <div className="text-center py-10 text-gray-500 text-sm font-medium">
             Немає повідомлень
           </div>

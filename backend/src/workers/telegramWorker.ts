@@ -49,6 +49,18 @@ const PRIVATE_TITLES = [
   'Труха ⚡️ Радар'
 ];
 
+// Types that represent actual target movement (shown in monitoring)
+const MOVEMENT_TYPES = new Set([
+  'DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 
+  'AIRCRAFT', 'KAB', 'ZIRCON', 'KH101', 'ISKANDER', 
+  'KINZHAL', 'KALIBR', 'FPV', 'RECON', 'UNKNOWN'
+]);
+
+// Types to exclude from monitoring feed (but still process for map)
+const EXCLUDED_FROM_MONITORING = new Set([
+  'SUMMARY', 'INFO', 'ALERT', 'PPO'
+]);
+
 export async function startTelegramWorker(io: Server) {
   const apiId = Number(process.env.TELEGRAM_API_ID);
   const apiHash = process.env.TELEGRAM_API_HASH;
@@ -83,6 +95,7 @@ export async function startTelegramWorker(io: Server) {
 
     const sourceId = source.id;
 
+    // ─── REALTIME HANDLER ────────────────────────────────────────────────
     client.addEventHandler(async (event: NewMessageEvent) => {
       const message = event.message;
       if (!message || !message.message) return;
@@ -99,27 +112,30 @@ export async function startTelegramWorker(io: Server) {
       if (isPublicMatch || isPrivateMatch) {
         const text = message.message;
         const parsedThreats = parseTelegramText(text);
-        if (!parsedThreats || parsedThreats.length === 0) return; // Ignore generic alerts
+        if (!parsedThreats || parsedThreats.length === 0) return;
         
         const channelDisplay = username || title || 'Monitoring';
-        const tags = [parsedThreats[0].type];
+        const threatType = parsedThreats[0].type;
 
-        try {
+        // Only save to monitoring feed if it's actual target movement
+        if (MOVEMENT_TYPES.has(threatType)) {
+          const tags = [threatType];
+          try {
             const savedMsg = await prisma.monitoringMessage.create({
-                data: {
-                    text,
-                    channelName: channelDisplay,
-                    timestamp: new Date(message.date * 1000),
-                    tags
-                }
+              data: {
+                text,
+                channelName: channelDisplay,
+                timestamp: new Date(message.date * 1000),
+                tags
+              }
             });
-            // Forward saved message to frontend chat panel
             io.emit('monitoring:new_message', savedMsg);
-        } catch (e) {
+          } catch (e) {
             console.error("Failed to save monitoring message", e);
+          }
         }
 
-        // Add all matched targets to map
+        // Add all matched targets to map (including PPO)
         for (const parsed of parsedThreats) {
           if (parsed.lat !== null && parsed.lng !== null) {
               const confidence = (parsed.confidence || 80) / 100;
@@ -147,6 +163,7 @@ export async function startTelegramWorker(io: Server) {
       }
     }, new NewMessage({}));
 
+    // ─── POLLING HISTORY ─────────────────────────────────────────────────
     const pollHistory = async () => {
         try {
             console.log("Fetching recent Telegram history (polling)...");
@@ -162,7 +179,7 @@ export async function startTelegramWorker(io: Server) {
                 const isPrivateMatch = title && PRIVATE_TITLES.some(t => title.includes(t));
                 
                 if (isPublicMatch || isPrivateMatch) {
-                    const messages = await client.getMessages(dialog.entity, { limit: 15 }); // 15 is enough for 1 min polling
+                    const messages = await client.getMessages(dialog.entity, { limit: 15 });
                     for (const message of messages.reverse()) {
                         if (!message || !message.message) continue;
                         const msgTime = message.date * 1000;
@@ -171,12 +188,13 @@ export async function startTelegramWorker(io: Server) {
                         if (!parsedThreats || parsedThreats.length === 0) continue;
                         
                         const channelDisplay = username || title || 'Monitoring';
-                        const tags = [parsedThreats[0].type];
+                        const threatType = parsedThreats[0].type;
 
-                        // Check if message is fresh enough for monitoring panel (< 12 hours old)
+                        // Only save to monitoring if it's actual target movement and fresh (<12h)
                         const isFreshMonitoring = (Date.now() - msgTime) < 12 * 60 * 60 * 1000;
 
-                        if (isFreshMonitoring) {
+                        if (isFreshMonitoring && MOVEMENT_TYPES.has(threatType)) {
+                            const tags = [threatType];
                             try {
                                 const existing = await prisma.monitoringMessage.findFirst({
                                     where: { 
@@ -201,7 +219,7 @@ export async function startTelegramWorker(io: Server) {
                             }
                         }
 
-                        // Spawn threats on the map ONLY if the message is very fresh (< 30 minutes)
+                        // Spawn threats on the map ONLY if the message is very fresh (<30 minutes)
                         const isFresh = (Date.now() - msgTime) < 30 * 60 * 1000;
                         
                         if (isFresh) {
@@ -226,7 +244,51 @@ export async function startTelegramWorker(io: Server) {
         }
     };
 
-    // Initial clean slate
+    // ─── CLEANUP: Delete old messages every minute ────────────────────────
+    const cleanupOldMessages = async () => {
+        try {
+            // Delete messages older than 1 hour
+            const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+            const deleted = await prisma.monitoringMessage.deleteMany({
+                where: { timestamp: { lt: oneHourAgo } }
+            });
+            if (deleted.count > 0) {
+                console.log(`[Cleanup] Deleted ${deleted.count} old monitoring messages.`);
+            }
+
+            // Also cap total messages to latest 500
+            const totalCount = await prisma.monitoringMessage.count();
+            if (totalCount > 500) {
+                const toDelete = totalCount - 500;
+                const oldest = await prisma.monitoringMessage.findMany({
+                    orderBy: { timestamp: 'asc' },
+                    take: toDelete,
+                    select: { id: true }
+                });
+                await prisma.monitoringMessage.deleteMany({
+                    where: { id: { in: oldest.map(m => m.id) } }
+                });
+                console.log(`[Cleanup] Capped messages, deleted ${toDelete} excess.`);
+            }
+
+            // Delete monitoring messages with non-movement types (cleanup legacy)
+            await prisma.monitoringMessage.deleteMany({
+                where: {
+                    OR: [
+                        { tags: { has: 'SUMMARY' } },
+                        { tags: { has: 'INFO' } },
+                        { tags: { has: 'ALERT' } },
+                        { tags: { has: 'PPO' } },
+                        { channelName: { in: ['air_alert_ua', 'ukraine_alarm_bot', 'Офіційні Тривоги'] } }
+                    ]
+                }
+            });
+        } catch (e) {
+            console.error("[Cleanup] Error:", e);
+        }
+    };
+
+    // Initial clean slate for threats
     try {
         const archived = await prisma.threatObject.updateMany({
             where: { status: 'ACTIVE' },
@@ -235,8 +297,17 @@ export async function startTelegramWorker(io: Server) {
         console.log(`[Startup] Archived ${archived.count} old threats. Clean slate.`);
     } catch(e) {}
 
+    // Run initial cleanup
+    await cleanupOldMessages();
+
+    // Fetch history (will create fresh threats on the map)
     await pollHistory();
-    setInterval(pollHistory, 60 * 1000); // Poll every minute
+
+    // Poll every minute + cleanup
+    setInterval(async () => {
+        await cleanupOldMessages();
+        await pollHistory();
+    }, 60 * 1000);
 
   } catch (error) {
     console.error("Error starting Telegram worker:", error);
