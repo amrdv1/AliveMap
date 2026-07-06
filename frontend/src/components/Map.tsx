@@ -161,8 +161,7 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
            longitude={currentLoc?.lng || loc.lng}
            latitude={currentLoc?.lat || loc.lat}
            anchor="bottom"
-           onClose={(e) => {
-             e.originalEvent?.stopPropagation();
+           onClose={() => {
              onClosePopup();
            }}
            closeButton={false}
