@@ -376,15 +376,19 @@ export default function Map() {
     layer.on({
       mouseover: (e: any) => {
         const l = e.target;
-        l.setStyle({ fillOpacity: alertInfo ? 0.7 : 0.4, weight: alertInfo ? 2 : 1, color: alertInfo ? '#f87171' : 'rgba(255,255,255,0.3)' });
+        l.setStyle({ 
+          fillOpacity: alertInfo ? 0.9 : 0.6, 
+          weight: 2, 
+          color: alertInfo ? '#f87171' : 'rgba(255,255,255,0.4)' 
+        });
       },
       mouseout: (e: any) => {
         const l = e.target;
         l.setStyle({ 
-          color: alertInfo ? '#ff4d4f' : (isDistrict ? 'transparent' : 'rgba(255,255,255,0.1)'),
-          weight: alertInfo ? 1.5 : (isDistrict ? 0 : 1),
+          color: alertInfo ? '#ef4444' : (isDistrict ? 'transparent' : 'rgba(255,255,255,0.15)'),
+          weight: alertInfo ? 1 : (isDistrict ? 0 : 1),
           fillColor: alertInfo ? '#ef4444' : (isDistrict ? 'transparent' : '#1f2937'),
-          fillOpacity: alertInfo ? 0.5 : (isDistrict ? 0 : 0.2) 
+          fillOpacity: alertInfo ? 0.7 : (isDistrict ? 0 : 0.3) 
         });
       }
     });
@@ -482,10 +486,10 @@ export default function Map() {
             );
             
             return {
-              color: isActive ? '#ff4d4f' : 'rgba(255,255,255,0.1)',
-              weight: isActive ? 1.5 : 1,
+              color: isActive ? '#ef4444' : 'rgba(255,255,255,0.15)',
+              weight: isActive ? 1 : 1,
               fillColor: isActive ? '#ef4444' : '#1f2937',
-              fillOpacity: isActive ? 0.5 : 0.2, 
+              fillOpacity: isActive ? 0.7 : 0.3,
             };
           }}
         />
@@ -507,10 +511,10 @@ export default function Map() {
             );
             
             return {
-              color: isActive ? '#ff4d4f' : 'transparent',
-              weight: isActive ? 1.5 : 0,
+              color: isActive ? '#ef4444' : 'transparent',
+              weight: isActive ? 1 : 0,
               fillColor: isActive ? '#ef4444' : 'transparent',
-              fillOpacity: isActive ? 0.5 : 0,
+              fillOpacity: isActive ? 0.7 : 0,
             };
           }}
         />
