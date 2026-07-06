@@ -92,8 +92,25 @@ export async function startTelegramWorker(io: Server) {
     connectionRetries: 5,
   });
 
+  let connected = false;
+  let retries = 0;
+  while (!connected && retries < 15) {
+    try {
+      await client.connect();
+      connected = true;
+    } catch (error: any) {
+      console.error(`Error connecting Telegram worker (Attempt ${retries + 1}/15):`, error.message);
+      retries++;
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    }
+  }
+
+  if (!connected) {
+    console.error("Failed to start Telegram worker after 15 attempts. Exiting worker.");
+    return;
+  }
+
   try {
-    await client.connect();
     console.log("Connected to Telegram using string session.");
 
     const me = await client.getMe();
