@@ -32,15 +32,15 @@ export default function ThreatFilters() {
   ];
 
   return (
-    <div className="absolute top-[88px] left-1/2 -translate-x-1/2 z-20 flex gap-2 overflow-x-auto w-full px-4 md:w-auto md:px-0 scrollbar-hide pointer-events-none">
-      <div className="pointer-events-auto flex gap-2 mx-auto bg-black/40 backdrop-blur-xl p-2 rounded-full border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] min-w-max">
+    <div className="absolute top-[88px] md:top-28 left-0 md:left-6 z-20 flex md:flex-col gap-2 overflow-x-auto md:overflow-visible w-full px-4 md:w-auto md:px-0 scrollbar-hide pointer-events-none">
+      <div className="pointer-events-auto flex md:flex-col gap-2 mx-auto md:mx-0 bg-black/40 backdrop-blur-xl p-2 rounded-full md:rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] min-w-max">
         {filterOptions.map(opt => {
           const active = isSelected(opt.type);
           return (
             <button
               key={opt.type}
               onClick={() => toggleType(opt.type)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide uppercase transition-all duration-300 border ${
+              className={`flex items-center justify-start md:w-full gap-2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide uppercase transition-all duration-300 border ${
                 active 
                   ? opt.color + ' shadow-[0_0_15px_rgba(currentColor,0.2)]'
                   : 'bg-white/[0.03] text-white/40 border-transparent hover:bg-white/10 hover:text-white/70'
