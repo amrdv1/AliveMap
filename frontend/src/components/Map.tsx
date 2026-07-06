@@ -118,7 +118,7 @@ function AnimatedMarker({ threat, getIcon }: { threat: any, getIcon: any }) {
       lastTime = now;
 
       const timeSinceUpdate = (now - new Date(currentLoc.time).getTime()) / 1000;
-      if (threat.speed && threat.course && timeSinceUpdate < 3600 && markerRef.current) {
+      if (threat.speed != null && threat.course != null && timeSinceUpdate < 3600 && markerRef.current) {
         const currentPos = markerRef.current.getLatLng();
         const R = 6371; // Earth radius in km
         const d = (threat.speed / 3600) * dt; // Distance traveled in km during dt

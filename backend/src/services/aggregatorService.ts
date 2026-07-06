@@ -1,5 +1,6 @@
 import prisma from '../db';
 import { ReportType, ReportStatus, ThreatObject } from '@prisma/client';
+import { Server } from 'socket.io';
 
 export async function processExternalThreat(
   externalId: string | null,
@@ -26,7 +27,7 @@ export async function processExternalThreat(
     });
     
     let closestThreat = null;
-    let minDistance = 50; // Max radius to consider (50km)
+    let minDistance = 150; // Max radius to consider (150km)
     
     for (const t of activeThreats) {
       if (t.locations.length > 0) {
@@ -240,5 +241,31 @@ function calculateBearing(lat1: number, lon1: number, lat2: number, lon2: number
   return (rad2deg(brng) + 360) % 360;
 }
 
-function deg2rad(deg: number) { return deg * (Math.PI/180); }
+function deg2rad(deg: number) {
+  return deg * (Math.PI/180);
+}
+
+export async function archiveThreatsNear(lat: number, lng: number, radiusKm: number, io: Server): Promise<void> {
+  const activeThreats = await prisma.threatObject.findMany({
+    where: { status: 'ACTIVE' },
+    include: { locations: { orderBy: { time: 'desc' }, take: 1, include: { source: true } } }
+  });
+
+  for (const t of activeThreats) {
+    if (t.locations.length > 0) {
+      const loc = t.locations[0];
+      const dist = getDistanceFromLatLonInKm(lat, lng, loc.lat, loc.lng);
+      if (dist <= radiusKm) {
+        console.log(`[All-Clear] Archiving threat ${t.id} (${t.type}) due to region all-clear (${dist.toFixed(1)} km away)`);
+        const archived = await prisma.threatObject.update({
+          where: { id: t.id },
+          data: { status: 'ARCHIVED' },
+          include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
+        });
+        io.emit('threat:update', archived);
+      }
+    }
+  }
+}
+
 function rad2deg(rad: number) { return rad * (180/Math.PI); }

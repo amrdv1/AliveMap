@@ -218,7 +218,7 @@ function parseTarget(text: string): { targetName: string | null, targetLat: numb
 
 function detectThreatType(text: string): ParsedThreat['type'] | null {
   const t = text.toLowerCase();
-  if (t.match(/(збит[оіа]|знищен[оіа]|перехоплен[оіа]|мінус|відбит[оіа]|ліквідован[оіа]|ппо\s*спрацюва|зенітн)/)) {
+  if (t.match(/(збит[оіа]|знищен[оіа]|перехоплен[оіа]|мінус|відбит[оіа]|ліквідован[оіа]|ппо\s*спрацюва|зенітн|вибух|влучанн|приліт|попав)/)) {
     if (!t.match(/(за добу|за ніч|за тиждень|підсумки|загалом|втрати)/)) return 'PPO';
   }
   if (t.match(/(циркон|3м22)/)) return 'ZIRCON';
