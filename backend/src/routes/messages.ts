@@ -5,10 +5,10 @@ const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
+    const oneHourAgo = new Date(Date.now() - 1 * 60 * 60 * 1000);
     const messages = await prisma.monitoringMessage.findMany({
       where: { 
-        timestamp: { gte: sixHoursAgo },
+        timestamp: { gte: oneHourAgo },
         channelName: {
           notIn: ['air_alert_ua', 'ukraine_alarm_bot', 'Офіційні Тривоги']
         },
