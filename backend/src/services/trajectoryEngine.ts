@@ -25,7 +25,7 @@ export function projectTrajectory(
     // turf destination uses bearing (-180 to 180). course is 0-360.
     const bearing = courseDegrees > 180 ? courseDegrees - 360 : courseDegrees;
     
-    const destination = turf.destination(point, distanceKm, bearing, { units: 'kilometers' });
+    const destination = turf.destination(point, distanceKm, bearing, { units: 'kilometers' as any });
     const coords = destination.geometry.coordinates;
 
     return {
@@ -54,6 +54,6 @@ export function willIntersectLocation(
     const targetPoint = turf.point([targetLng, targetLat]);
     
     // Distance from the point to the closest segment of the line
-    const distance = turf.pointToLineDistance(targetPoint, line, { units: 'kilometers' });
+    const distance = (turf as any).pointToLineDistance(targetPoint, line, { units: 'kilometers' as any });
     return distance <= radiusKm;
 }

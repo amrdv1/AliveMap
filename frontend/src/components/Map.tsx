@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from 'react';
-import Map, { Source, Layer, Marker, NavigationControl } from 'react-map-gl';
+import Map, { Source, Layer, Marker, NavigationControl } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useStore, ThreatObject } from '../store/useStore';
 import { socket } from '../lib/socket';
@@ -40,7 +40,7 @@ const ThreatMarker = ({ threat }: { threat: ThreatObject }) => {
   if (!loc) return null;
 
   const isThreat = Object.keys(THREAT_SVGS).includes(threat.type);
-  const rot = loc.direction || 0;
+  const rot = threat.course || 0;
   
   let svgIcon = THREAT_SVGS[threat.type as keyof typeof THREAT_SVGS] || THREAT_SVGS['DRONE'];
   let ringColor = THREAT_COLORS[threat.type as keyof typeof THREAT_COLORS] || '#ffffff';

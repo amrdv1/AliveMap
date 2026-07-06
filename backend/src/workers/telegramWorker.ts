@@ -333,7 +333,7 @@ export async function startTelegramWorker(io: Server) {
                     select: { id: true }
                 });
                 await prisma.monitoringMessage.deleteMany({
-                    where: { id: { in: oldest.map(m => m.id) } }
+                    where: { id: { in: oldest.map((m: { id: string }) => m.id) } }
                 });
                 console.log(`[Cleanup] Capped messages, deleted ${toDelete} excess.`);
             }
