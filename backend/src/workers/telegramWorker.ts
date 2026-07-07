@@ -273,12 +273,11 @@ export async function startTelegramWorker(io: Server) {
         try {
             console.log("Fetching recent Telegram history (polling top channels)...");
             
-            // Fetch directly from top 3 channels to avoid ResolveUsername FloodWait
-            // Live events will still capture messages from all 50+ channels.
-            const pollChannels = ['vanek_nikolaev', 'monitor', 'kievreal1'];
+            // Fetch from all channels as requested by user
+            const pollChannels = [...CHANNELS];
             for (const channel of pollChannels) {
                 try {
-                    await new Promise(r => setTimeout(r, 2000)); // Prevent FloodWait
+                    await new Promise(r => setTimeout(r, 3000)); // 3s delay to prevent FloodWait
                     const messages = await client.getMessages(channel, { limit: 10 });
                     
                     for (const message of messages.reverse()) {
