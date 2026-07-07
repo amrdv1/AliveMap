@@ -456,7 +456,19 @@ export const CITY_COORDS: Record<string, {lat: number, lng: number}> = {
   "лісна стінк": { lat: 49.49, lng: 37.62 },
   "лесная стенк": { lat: 49.49, lng: 37.62 },
   "петрівк": { lat: 49.9, lng: 36.8 }, // Approximate central point for Petrovka
-  "петровк": { lat: 49.9, lng: 36.8 }
+  "петровк": { lat: 49.9, lng: 36.8 },
+  "корабел": { lat: 46.61, lng: 32.58 },
+  "нафтогавань": { lat: 46.60, lng: 32.56 },
+  "антонівк": { lat: 46.67, lng: 32.72 },
+  "антоновк": { lat: 46.67, lng: 32.72 },
+  "садов": { lat: 46.68, lng: 32.81 },
+  "білозерк": { lat: 46.62, lng: 32.44 },
+  "белозерк": { lat: 46.62, lng: 32.44 },
+  "станіслав": { lat: 46.57, lng: 32.14 },
+  "острів": { lat: 46.61, lng: 32.59 },
+  "остров": { lat: 46.61, lng: 32.59 },
+  "кізомис": { lat: 46.58, lng: 32.32 },
+  "кизомыс": { lat: 46.58, lng: 32.32 }
 };
 
 export const AIRBASE_COORDS: Record<string, {lat: number, lng: number}> = {
@@ -700,6 +712,9 @@ export function parseTelegramText(text: string): ParsedThreat[] {
 }
 
 function legacyFallback(lowerText: string, type: ParsedThreat['type']): ParsedThreat[] {
+  // Never spawn FPVs, Recons, or small decoys in random generic locations if we don't know where they are
+  if (type === 'FPV' || type === 'RECON' || type === 'MOLNIYA' || type === 'DECOY') return [];
+
   const qty = parseQuantity(lowerText);
   const dir = parseDirection(lowerText);
   
@@ -708,7 +723,7 @@ function legacyFallback(lowerText: string, type: ParsedThreat['type']): ParsedTh
   else if (type === 'BALLISTIC_MISSILE' || type === 'ISKANDER' || type === 'KINZHAL' || type === 'ZIRCON') spawn = GENERIC_SPAWN.BLACK_SEA;
   else if (type === 'AIRCRAFT') spawn = GENERIC_SPAWN.AIRCRAFT;
   else if (type === 'KAB') spawn = GENERIC_SPAWN.DRONE_NORTH;
-  else if (type === 'DRONE' || type === 'FPV' || type === 'RECON') spawn = GENERIC_SPAWN.DRONE_SOUTH;
+  else if (type === 'DRONE') spawn = GENERIC_SPAWN.DRONE_SOUTH;
   else spawn = GENERIC_SPAWN.DRONE_SOUTH;
 
   return [{ type, lat: spawn.lat + jitter(), lng: spawn.lng + jitter(), confidence: 50, direction: dir, quantity: qty }];
