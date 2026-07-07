@@ -49,6 +49,8 @@ export const CITY_COORDS: Record<string, {lat: number, lng: number}> = {
   "павлоград": { lat: 48.5167, lng: 35.8667 },
   "камянськ": { lat: 48.6833, lng: 34.6167 },
   "олександрі": { lat: 48.6667, lng: 33.1167 },
+  "галицинове": { lat: 46.8208, lng: 31.9767 },
+  "крим": { lat: 45.2, lng: 34.3 },
 
   // ═══ КИЇВСЬКА ОБЛАСТЬ ═══
   "бровар": { lat: 50.5094, lng: 30.7942 },
@@ -657,7 +659,15 @@ function legacyFallback(lowerText: string, type: ParsedThreat['type']): ParsedTh
   const qty = parseQuantity(lowerText);
   const dir = parseDirection(lowerText) ?? Math.floor(Math.random() * 360);
   
-  return [{ type, lat: null, lng: null, confidence: 50, direction: dir, quantity: qty }];
+  let spawn = GENERIC_SPAWN.DRONE_SOUTH;
+  if (type === 'CRUISE_MISSILE' || type === 'MISSILE' || type === 'KH101' || type === 'KALIBR') spawn = GENERIC_SPAWN.CASPIAN_SEA;
+  else if (type === 'BALLISTIC_MISSILE' || type === 'ISKANDER' || type === 'KINZHAL' || type === 'ZIRCON') spawn = GENERIC_SPAWN.BLACK_SEA;
+  else if (type === 'AIRCRAFT') spawn = GENERIC_SPAWN.AIRCRAFT;
+  else if (type === 'KAB') spawn = GENERIC_SPAWN.DRONE_NORTH;
+  else if (type === 'DRONE' || type === 'FPV' || type === 'RECON') spawn = GENERIC_SPAWN.DRONE_SOUTH;
+  else spawn = GENERIC_SPAWN.DRONE_SOUTH;
+
+  return [{ type, lat: spawn.lat + jitter(), lng: spawn.lng + jitter(), confidence: 50, direction: dir, quantity: qty }];
 }
 
 function jitter(): number {
