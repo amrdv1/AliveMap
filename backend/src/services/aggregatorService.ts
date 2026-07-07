@@ -122,10 +122,6 @@ export async function processExternalThreat(
   }
 
   // 3. Create new threat
-  // Never create a brand new target for UNKNOWN generic movements. 
-  // They should ONLY update existing targets.
-  if (threatType === 'UNKNOWN') return null;
-  
   let defaultSpeed = speed;
   if (defaultSpeed == null) {
       switch (threatType as ReportType) {
