@@ -102,15 +102,24 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
       return;
     }
 
-    if (!threat.speed || threat.course === null || threat.course === undefined) {
-       setCurrentLoc({ lng: loc.lng, lat: loc.lat });
-       return;
+    let speedKmh = threat.speed;
+    let bearing = threat.course;
+
+    if (!speedKmh) {
+        speedKmh = ['DRONE', 'RECON', 'MOLNIYA', 'DECOY', 'FPV'].includes(threat.type) ? 150 : 800;
+    }
+
+    if (bearing == null || bearing === undefined) {
+        if (threat.targetLat && threat.targetLng) {
+            bearing = turf.bearing(turf.point([loc.lng, loc.lat]), turf.point([threat.targetLng, threat.targetLat]));
+            if (bearing < 0) bearing += 360;
+        } else {
+            bearing = 0; // default north
+        }
     }
 
     const startPt = turf.point([loc.lng, loc.lat]);
     const startTime = new Date(loc.time).getTime();
-    const speedKmh = threat.speed;
-    const bearing = threat.course;
 
     const updatePosition = () => {
        const now = Date.now();
