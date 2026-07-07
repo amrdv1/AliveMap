@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const THREAT_LABELS: Record<string, string> = {
   'DRONE': 'ШАХЕД / БПЛА',
+  'MOLNIYA': 'БПЛА МОЛНІЯ',
   'FPV': 'FPV ДРОН',
   'CRUISE_MISSILE': 'КРИЛАТА РАКЕТА',
   'KH101': 'Х-101/55',
@@ -23,7 +24,7 @@ const THREAT_LABELS: Record<string, string> = {
 };
 
 const THREAT_COLORS: Record<string, string> = {
-  'DRONE': '#ef4444', 'FPV': '#f97316', 'CRUISE_MISSILE': '#f97316',
+  'DRONE': '#ef4444', 'MOLNIYA': '#ef4444', 'FPV': '#f97316', 'CRUISE_MISSILE': '#f97316',
   'KH101': '#ea580c', 'KALIBR': '#e11d48', 'BALLISTIC_MISSILE': '#a855f7',
   'ISKANDER': '#d946ef', 'KINZHAL': '#dc2626', 'MISSILE': '#f97316',
   'KAB': '#eab308', 'AIRCRAFT': '#3b82f6', 'ZIRCON': '#dc2626',
@@ -35,6 +36,7 @@ export default function MobileBottomSheet() {
   const scrollRef = useRef<HTMLDivElement>(null);
   
   const activeThreats = threats.filter(t => t.status === 'ACTIVE');
+  const totalQuantity = activeThreats.reduce((acc, t) => acc + (t.quantity || 1), 0);
 
   if (activeThreats.length === 0) return null;
 
@@ -54,7 +56,7 @@ export default function MobileBottomSheet() {
         <div className="bg-black/80 backdrop-blur-xl border border-white/10 rounded-full px-3 py-1 flex items-center gap-2">
           <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
           <span className="text-[10px] font-bold text-gray-300 tracking-wider uppercase">
-            {activeThreats.length} {activeThreats.length === 1 ? 'ціль' : 'цілей'}
+            {totalQuantity} {totalQuantity === 1 ? 'ціль' : 'цілей'}
           </span>
         </div>
       </div>
@@ -62,7 +64,7 @@ export default function MobileBottomSheet() {
       {/* Horizontal scroll cards */}
       <div 
         ref={scrollRef}
-        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide px-3 pb-1 gap-2.5 pointer-events-auto"
+        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide px-3 pb-1 gap-2.5 pointer-events-auto touch-pan-x"
       >
         {activeThreats.map((threat) => {
           const color = THREAT_COLORS[threat.type] || '#ffffff';
@@ -81,7 +83,7 @@ export default function MobileBottomSheet() {
                   className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                   style={{ backgroundColor: color + '20', border: `1px solid ${color}40` }}
                 >
-                  <ThreatIcon type={threat.type} className="w-5 h-5" style={{ color }} />
+                  <ThreatIcon type={threat.type} className="w-5 h-5" color={color} />
                 </div>
 
                 {/* Info */}

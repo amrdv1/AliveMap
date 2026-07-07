@@ -9,20 +9,25 @@ export default function SummaryView() {
   const activeThreats = threats.filter(t => t.status === 'ACTIVE');
   const alertRegions = Object.entries(alerts).filter(([_, data]) => data.alertnow).map(([region]) => region);
 
-  const drones = activeThreats.filter(t => t.type === 'DRONE').length;
-  const fpvs = activeThreats.filter(t => t.type === 'FPV').length;
-  const missiles = activeThreats.filter(t => t.type === 'MISSILE').length;
-  const cruise = activeThreats.filter(t => t.type === 'CRUISE_MISSILE').length;
-  const ballistic = activeThreats.filter(t => t.type === 'BALLISTIC_MISSILE').length;
-  const zircon = activeThreats.filter(t => t.type === 'ZIRCON').length;
-  const kh101 = activeThreats.filter(t => t.type === 'KH101').length;
-  const iskander = activeThreats.filter(t => t.type === 'ISKANDER').length;
-  const kinzhal = activeThreats.filter(t => t.type === 'KINZHAL').length;
-  const kalibr = activeThreats.filter(t => t.type === 'KALIBR').length;
-  const aircraft = activeThreats.filter(t => t.type === 'AIRCRAFT').length;
-  const kabs = activeThreats.filter(t => t.type === 'KAB').length;
-  const recons = activeThreats.filter(t => t.type === 'RECON').length;
-  const unknowns = activeThreats.filter(t => t.type === 'UNKNOWN').length;
+  const sumQuantity = (type: string) => activeThreats.filter(t => t.type === type).reduce((acc, t) => acc + (t.quantity || 1), 0);
+
+  const drones = sumQuantity('DRONE');
+  const fpvs = sumQuantity('FPV');
+  const molniya = sumQuantity('MOLNIYA');
+  const missiles = sumQuantity('MISSILE');
+  const cruise = sumQuantity('CRUISE_MISSILE');
+  const ballistic = sumQuantity('BALLISTIC_MISSILE');
+  const zircon = sumQuantity('ZIRCON');
+  const kh101 = sumQuantity('KH101');
+  const iskander = sumQuantity('ISKANDER');
+  const kinzhal = sumQuantity('KINZHAL');
+  const kalibr = sumQuantity('KALIBR');
+  const aircraft = sumQuantity('AIRCRAFT');
+  const kabs = sumQuantity('KAB');
+  const recons = sumQuantity('RECON');
+  const unknowns = sumQuantity('UNKNOWN');
+  
+  const totalActiveQuantity = activeThreats.reduce((acc, t) => acc + (t.quantity || 1), 0);
 
   return (
     <div className="absolute inset-0 z-20 bg-black/40 backdrop-blur-md pt-16 md:pt-24 px-4 pb-20 md:pb-24 overflow-y-auto custom-scrollbar flex justify-center">
@@ -40,14 +45,14 @@ export default function SummaryView() {
             </p>
           </div>
           <div className="bg-red-500/10 border border-red-500/20 px-6 py-4 rounded-2xl text-center min-w-[150px]">
-            <div className="text-3xl font-black text-red-500 mb-1">{activeThreats.length}</div>
+            <div className="text-3xl font-black text-red-500 mb-1">{totalActiveQuantity}</div>
             <div className="text-xs font-bold text-red-400/80 uppercase tracking-widest">Активних цілей</div>
           </div>
         </div>
 
         {/* Detailed Stats */}
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-6 gap-4">
-          <StatCard title="Шахеди" count={drones + fpvs} color="bg-red-500" icon="🛸" />
+          <StatCard title="Шахеди" count={drones + fpvs + molniya} color="bg-red-500" icon="🛸" />
           <StatCard title="Ракети" count={missiles + cruise + ballistic + zircon + kh101 + iskander + kinzhal + kalibr} color="bg-orange-500" icon="🚀" />
           <StatCard title="Авіація" count={aircraft} color="bg-blue-500" icon="✈️" />
           <StatCard title="КАБи" count={kabs} color="bg-yellow-500" icon="🎯" />

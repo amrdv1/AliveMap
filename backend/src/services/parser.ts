@@ -537,10 +537,10 @@ function parseDirection(text: string): number | null {
 }
 
 function parseQuantity(text: string): number {
-  const numMatch = text.match(/(?<![a-zа-яіїєґ])(\d{1,2})\s*(?:х|x)?\s*(?:шт|шахед|ракет|бпла|каб|дрон)/i);
+  const numMatch = text.match(/(?<![a-zа-яіїєґ])(\d{1,2})\s*(?:х|x|-|шт)?\s*(?:шт|шахед|ракет|бпла|каб|дрон|ціл)/i);
   if (numMatch) return Math.min(parseInt(numMatch[1], 10), 30);
   
-  const numMatchReverse = text.match(/(?:шахед|ракет|бпла|каб|дрон)[^\d]{0,10}(\d{1,2})(?![a-zа-яіїєґ])/i);
+  const numMatchReverse = text.match(/(?:шахед|ракет|бпла|каб|дрон|ціл)[^\d]{0,10}(\d{1,2})(?![a-zа-яіїєґ])/i);
   if (numMatchReverse) return Math.min(parseInt(numMatchReverse[1], 10), 30);
   
   if (text.match(/\b(пара|пару)\b/i)) return 2;
@@ -571,7 +571,7 @@ function detectThreatType(text: string): ParsedThreat['type'] | null {
   if (t.match(/(молнія|блискавка|molniya)/)) return 'MOLNIYA';
   if (t.match(/(гербер|імітатор|пародія|decoy|parodi|gerbera)/)) return 'DECOY';
   if (t.match(/(розвідник|орлан|zala|зала|supercam|суперкам|recon)/)) return 'RECON';
-  if (t.match(/(шахед|бпла|\bдрон\b|\bдрони\b|мопед|геран|\bdrone\b|shahed|италмас|італмас)/)) return 'DRONE';
+  if (t.match(/(реактивн|шахед|бпла|\bдрон\b|\bдрони\b|мопед|геран|\bdrone\b|shahed|италмас|італмас)/)) return 'DRONE';
   if (t.match(/(авіація|су-3|су-2|міг|ту-9|ту-2|літак|борти)/)) return 'AIRCRAFT';
   
   if (t.match(/(швидкісна ціль|швидкісні цілі|швидкісна п\.ц\.|швидкісні п\.ц\.)/)) return 'UNKNOWN';

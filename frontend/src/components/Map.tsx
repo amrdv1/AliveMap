@@ -221,6 +221,7 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
                  </div>
               </div>
               <div className="text-[13px] text-white/80 mb-4 leading-relaxed">
+                 {threat.quantity > 1 && <span className="font-bold text-red-400">Кількість: ~{threat.quantity} шт. </span>}
                  {threat.type === 'DRONE' ? 'Ударний БпЛА' : threat.type === 'RECON' ? 'Розвідувальний БпЛА' : threat.type === 'MISSILE' ? 'Ракета' : 'Повітряна ціль'} 
                  {threat.targetName ? ` курсом на ${threat.targetName}` : (threat.course != null ? `, курс ${getCourseText(threat.course).toLowerCase()}` : '')}.
                  <br/>
@@ -561,7 +562,7 @@ export default function UkraineMap() {
           
           return (
             <div 
-              className="absolute z-[100] pointer-events-none bg-black/80 backdrop-blur-xl border border-white/10 text-white rounded-2xl p-4 shadow-2xl transition-all duration-75 min-w-[200px]"
+              className="hidden md:block absolute z-[100] pointer-events-none bg-black/80 backdrop-blur-xl border border-white/10 text-white rounded-2xl p-4 shadow-2xl transition-all duration-75 min-w-[200px]"
               style={{ left: hoverInfo.x + 15, top: hoverInfo.y + 15 }}
             >
               <div className="font-bold text-lg mb-1 drop-shadow-md">{alertInfo.name}</div>

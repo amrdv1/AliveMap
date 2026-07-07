@@ -20,7 +20,7 @@ export default function MobileTopBar() {
     };
   }, []);
 
-  const activeThreats = threats.filter(t => t.status === 'ACTIVE').length;
+  const activeThreatsCount = threats.filter(t => t.status === 'ACTIVE').reduce((acc, t) => acc + (t.quantity || 1), 0);
   const alertCount = Object.values(alerts).filter(a => a.alertnow).length;
 
   return (
