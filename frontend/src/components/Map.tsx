@@ -9,6 +9,16 @@ import { THREAT_SVGS, THREAT_COLORS } from './ThreatIcon';
 import { Flame, X } from 'lucide-react';
 import * as turf from '@turf/turf';
 
+export const getCourseText = (course: number) => {
+  if (course >= 337.5 || course < 22.5) return 'Північний';
+  if (course >= 22.5 && course < 67.5) return 'Північно-східний';
+  if (course >= 67.5 && course < 112.5) return 'Східний';
+  if (course >= 112.5 && course < 157.5) return 'Південно-східний';
+  if (course >= 157.5 && course < 202.5) return 'Південний';
+  if (course >= 202.5 && course < 247.5) return 'Південно-західний';
+  if (course >= 247.5 && course < 292.5) return 'Західний';
+  return 'Північно-західний';
+};
 // Maptiler / Carto Dark Matter style for free
 const DARK_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 const SATELLITE_STYLE = {
