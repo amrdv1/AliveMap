@@ -393,19 +393,7 @@ export async function startTelegramWorker(io: Server) {
                 console.log(`[Cleanup] Capped messages, deleted ${toDelete} excess.`);
             }
 
-            // Delete monitoring messages with non-movement types (cleanup legacy)
-            await prisma.monitoringMessage.deleteMany({
-                where: {
-                    OR: [
-                        { tags: { has: 'SUMMARY' } },
-                        { tags: { has: 'INFO' } },
-                        { tags: { has: 'ALERT' } },
-                        { tags: { has: 'PPO' } },
-                        { channelName: { in: ['air_alert_ua', 'ukraine_alarm_bot', 'Офіційні Тривоги'] } }
-                    ]
-                }
-            });
-        } catch (e) {
+                    } catch (e) {
             console.error("[Cleanup] Error:", e);
         }
     };
