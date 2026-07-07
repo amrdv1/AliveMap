@@ -216,14 +216,26 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
                  <div>
                     <div className="font-bold text-[15px]">{threat.type === 'DRONE' ? 'Ударний БпЛА' : threat.type === 'RECON' ? 'Розвідувальний БпЛА' : threat.type === 'MISSILE' ? 'Ракета' : 'Повітряна ціль'}</div>
                     <div className="text-xs text-white/60 truncate w-[220px]">
-                       {threat.targetName ? `Курсом на ${threat.targetName}` : (threat.course != null ? `Курс: ${getCourseText(threat.course)}` : 'Курс невідомий')}
+                       {(() => {
+                           const clat = currentLoc?.lat || loc.lat;
+                           const clng = currentLoc?.lng || loc.lng;
+                           const isOver = threat.targetLat && threat.targetLng && (Math.sqrt(Math.pow(clat - threat.targetLat, 2) + Math.pow(clng - threat.targetLng, 2)) < 0.25);
+                           if (threat.targetName) return isOver ? `В районі: ${threat.targetName}` : `Напрямок: ${threat.targetName}`;
+                           return threat.course != null ? `Курс: ${getCourseText(threat.course)}` : 'Курс невідомий';
+                       })()}
                     </div>
                  </div>
               </div>
               <div className="text-[13px] text-white/80 mb-4 leading-relaxed">
                  {threat.quantity > 1 && <span className="font-bold text-red-400">Кількість: ~{threat.quantity} шт. </span>}
                  {threat.type === 'DRONE' ? 'Ударний БпЛА' : threat.type === 'RECON' ? 'Розвідувальний БпЛА' : threat.type === 'MISSILE' ? 'Ракета' : 'Повітряна ціль'} 
-                 {threat.targetName ? ` курсом на ${threat.targetName}` : (threat.course != null ? `, курс ${getCourseText(threat.course).toLowerCase()}` : '')}.
+                 {(() => {
+                     const clat = currentLoc?.lat || loc.lat;
+                     const clng = currentLoc?.lng || loc.lng;
+                     const isOver = threat.targetLat && threat.targetLng && (Math.sqrt(Math.pow(clat - threat.targetLat, 2) + Math.pow(clng - threat.targetLng, 2)) < 0.25);
+                     if (threat.targetName) return isOver ? ` (в районі: ${threat.targetName})` : ` (напрямок: ${threat.targetName})`;
+                     return threat.course != null ? `, курс ${getCourseText(threat.course).toLowerCase()}` : '';
+                 })()}.
                  <br/>
                  Підтверджень: {Math.max(1, Math.round(threat.confidence * 5) - 1)}.
                  {threat.speed ? ` Швидкість: ${Math.round(threat.speed)} км/год.` : ''}

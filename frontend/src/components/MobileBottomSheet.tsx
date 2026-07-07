@@ -117,7 +117,12 @@ export default function MobileBottomSheet() {
               {threat.targetName && (
                 <div className="mt-2 pt-2 border-t border-white/5">
                   <span className="text-[10px] text-gray-500 font-semibold">
-                    Курсом на <span className="text-gray-300">{threat.targetName}</span>
+                    {(() => {
+                        const loc = threat.locations && threat.locations.length > 0 ? threat.locations[0] : null;
+                        const isOver = loc && threat.targetLat && threat.targetLng && (Math.sqrt(Math.pow(loc.lat - threat.targetLat, 2) + Math.pow(loc.lng - threat.targetLng, 2)) < 0.25);
+                        return isOver ? 'В районі: ' : 'Напрямок: ';
+                    })()}
+                    <span className="text-gray-300">{threat.targetName}</span>
                   </span>
                 </div>
               )}
