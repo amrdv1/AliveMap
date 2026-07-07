@@ -264,8 +264,19 @@ export async function startTelegramWorker(io: Server) {
 
         // Add all matched targets to map (including PPO)
         for (const parsed of threatsToProcess) {
-          const finalLat = parsed.lat ?? parsed.targetLat;
-          const finalLng = parsed.lng ?? parsed.targetLng;
+          let finalLat = parsed.lat ?? parsed.targetLat;
+          let finalLng = parsed.lng ?? parsed.targetLng;
+
+          // If no coordinates but we have a location name, geocode it
+          if (finalLat == null && finalLng == null && parsed.targetName) {
+            const geoResult = await geocodeLocation(parsed.targetName);
+            if (geoResult) {
+              finalLat = geoResult.lat;
+              finalLng = geoResult.lng;
+              parsed.targetLat = geoResult.lat;
+              parsed.targetLng = geoResult.lng;
+            }
+          }
 
           if (finalLat !== null && finalLng !== null) {
               if (parsed.type === 'INFO' || parsed.type === 'SUMMARY') {
@@ -378,8 +389,19 @@ export async function startTelegramWorker(io: Server) {
                         if (isFreshMap) {
                             for (const parsed of parsedThreats) {
                                 // Fallback lat/lng to targetLat/targetLng for map spawning
-                                const finalLat = parsed.lat ?? parsed.targetLat;
-                                const finalLng = parsed.lng ?? parsed.targetLng;
+                                let finalLat = parsed.lat ?? parsed.targetLat;
+                                let finalLng = parsed.lng ?? parsed.targetLng;
+
+                                // If no coordinates but we have a location name, geocode it
+                                if (finalLat == null && finalLng == null && parsed.targetName) {
+                                    const geoResult = await geocodeLocation(parsed.targetName);
+                                    if (geoResult) {
+                                        finalLat = geoResult.lat;
+                                        finalLng = geoResult.lng;
+                                        parsed.targetLat = geoResult.lat;
+                                        parsed.targetLng = geoResult.lng;
+                                    }
+                                }
 
                                 if (finalLat != null && finalLng != null) {
                                       if (parsed.type === 'INFO' || parsed.type === 'SUMMARY') {

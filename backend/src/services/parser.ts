@@ -574,8 +574,8 @@ function detectThreatType(text: string): ParsedThreat['type'] | null {
   if (t.match(/(шахед|бпла|\bдрон\b|\bдрони\b|мопед|геран|\bdrone\b|shahed|италмас|італмас)/)) return 'DRONE';
   if (t.match(/(авіація|су-3|су-2|міг|ту-9|ту-2|літак|борти)/)) return 'AIRCRAFT';
   
-  if (t.match(/(швидкісна ціль|швидкісні цілі|швидкісна п\.ц\.|швидкісні п\.ц\.|ціль|п\.ц\.)/) && !t.match(/швидкісна/)) return 'UNKNOWN';
-  if (t.match(/(рух|рухає|летить|курс|вектор|напрямок|повз|через|на\s|до\s|звернув|летять)/)) return 'UNKNOWN';
+  if (t.match(/(швидкісна ціль|швидкісні цілі|швидкісна п\.ц\.|швидкісні п\.ц\.)/)) return 'UNKNOWN';
+  if (t.match(/(невідом\S*\s+(тип|об.єкт|ціль|засіб)|об.єкт\s+невідом|ціль\s+невідом|невстановлен\S*\s+тип|повітряна?\s+ціль|п\.ц\.)/)) return 'UNKNOWN';
   
   return null;
 }
@@ -676,24 +676,53 @@ export function parseTelegramText(text: string): ParsedThreat[] {
       }
     }
 
-    if (currentLoc && targetLoc && dir === null) {
+    // If no location found in dictionaries, try to extract unknown city names from text
+    // This allows the geocoder in telegramWorker to resolve them dynamically
+    if (!currentLoc && !targetLoc) {
+      const targetMatch = chunk.match(/(?:на|курсом на|напрямку|до)\s+([А-ЯІЇЄҐа-яіїєґ''`\-]{3,}(?:\s+[А-ЯІЇЄҐа-яіїєґ''`\-]{3,}){0,2})/);
+      if (targetMatch) {
+        const extractedName = targetMatch[1].trim();
+        // Skip common false positives (prepositions, generic words)
+        const skipWords = ['також', 'шахед', 'дрон', 'бпла', 'ракет', 'район', 'область', 'типу', 'невідом', 'ударний', 'реактивний'];
+        const isValidName = !skipWords.some(w => extractedName.toLowerCase().startsWith(w));
+        if (isValidName && extractedName.length >= 3) {
+          targetLoc = { lat: 0, lng: 0, name: extractedName };
+        }
+      }
+      
+      if (!targetLoc) {
+        const fromMatch = chunk.match(/(?:з|від|через|район[уі]?)\s+([А-ЯІЇЄҐа-яіїєґ''`\-]{3,}(?:\s+[А-ЯІЇЄҐа-яіїєґ''`\-]{3,}){0,2})/);
+        if (fromMatch) {
+          const extractedName = fromMatch[1].trim();
+          const skipWords = ['також', 'шахед', 'дрон', 'бпла', 'ракет', 'район', 'область', 'типу', 'невідом', 'ударний', 'реактивний'];
+          const isValidName = !skipWords.some(w => extractedName.toLowerCase().startsWith(w));
+          if (isValidName && extractedName.length >= 3) {
+            currentLoc = { lat: 0, lng: 0, name: extractedName };
+          }
+        }
+      }
+    }
+
+    if (currentLoc && targetLoc && dir === null && currentLoc.lat !== 0 && targetLoc.lat !== 0) {
       dir = calculateAzimuth(currentLoc.lat, currentLoc.lng, targetLoc.lat, targetLoc.lng);
     }
 
     if (currentLoc || targetLoc) {
       const plotLoc = currentLoc || targetLoc!;
-      const conf = currentLoc ? 80 : 40; 
+      // If coordinates are 0,0 (unknown location), set lat/lng to null so geocoder handles it
+      const hasRealCoords = plotLoc.lat !== 0 && plotLoc.lng !== 0;
+      const conf = hasRealCoords ? (currentLoc ? 80 : 40) : 30;
       
       results.push({
         type: chunkType,
-        lat: plotLoc.lat + jitter(),
-        lng: plotLoc.lng + jitter(),
+        lat: hasRealCoords ? plotLoc.lat + jitter() : null,
+        lng: hasRealCoords ? plotLoc.lng + jitter() : null,
         confidence: conf,
         direction: dir,
         quantity: qty,
-        targetName: targetLoc ? targetLoc.name : null,
-        targetLat: targetLoc ? targetLoc.lat : null,
-        targetLng: targetLoc ? targetLoc.lng : null
+        targetName: targetLoc ? targetLoc.name : (currentLoc ? currentLoc.name : null),
+        targetLat: (targetLoc && targetLoc.lat !== 0) ? targetLoc.lat : null,
+        targetLng: (targetLoc && targetLoc.lng !== 0) ? targetLoc.lng : null
       });
     }
   }
