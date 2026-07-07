@@ -179,12 +179,14 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
                  </div>
                  <div>
                     <div className="font-bold text-[15px]">{threat.type === 'DRONE' ? 'Ударний БпЛА' : threat.type === 'RECON' ? 'Розвідувальний БпЛА' : threat.type === 'MISSILE' ? 'Ракета' : 'Повітряна ціль'}</div>
-                    <div className="text-xs text-white/60 truncate w-[220px]">{threat.targetName || 'Курс невідомий'}</div>
+                    <div className="text-xs text-white/60 truncate w-[220px]">
+                       {threat.targetName ? `Курсом на ${threat.targetName}` : (threat.course != null ? `Курс: ${getCourseText(threat.course)}` : 'Курс невідомий')}
+                    </div>
                  </div>
               </div>
               <div className="text-[13px] text-white/80 mb-4 leading-relaxed">
                  {threat.type === 'DRONE' ? 'Ударний БпЛА' : threat.type === 'RECON' ? 'Розвідувальний БпЛА' : threat.type === 'MISSILE' ? 'Ракета' : 'Повітряна ціль'} 
-                 {threat.targetName ? ` курсом на ${threat.targetName}` : ''}.
+                 {threat.targetName ? ` курсом на ${threat.targetName}` : (threat.course != null ? `, курс ${getCourseText(threat.course).toLowerCase()}` : '')}.
                  <br/>
                  Підтверджень: {Math.max(1, Math.round(threat.confidence * 5) - 1)}.
                  {threat.speed ? ` Швидкість: ${threat.speed} км/год.` : ''}
