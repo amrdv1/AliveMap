@@ -290,8 +290,8 @@ export async function startTelegramWorker(io: Server) {
                         const channelDisplay = channel;
                         const threatType = parsedThreats[0].type;
 
-                        // Only save to monitoring if it's actual target movement and fresh (<2h)
-                        const isFreshMonitoring = (Date.now() - msgTime) < 2 * 60 * 60 * 1000;
+                        // Only save to monitoring if it's actual target movement and fresh (<24h)
+                        const isFreshMonitoring = (Date.now() - msgTime) < 24 * 60 * 60 * 1000;
 
                         const shouldSaveToFeedHistory = MOVEMENT_TYPES.has(threatType) || ['INFO', 'SUMMARY', 'PPO'].includes(threatType);
                         if (isFreshMonitoring && shouldSaveToFeedHistory) {
@@ -322,10 +322,10 @@ export async function startTelegramWorker(io: Server) {
                             }
                         }
 
-                        // Spawn threats on the map if the message is recent (<2 hours)
-                        const isFresh = (Date.now() - msgTime) < 2 * 60 * 60 * 1000;
+                        // Spawn threats on the map if the message is very recent (<15 minutes)
+                        const isFreshMap = (Date.now() - msgTime) < 15 * 60 * 1000;
                         
-                        if (isFresh) {
+                        if (isFreshMap) {
                             for (const parsed of parsedThreats) {
                                 if (parsed.lat !== null && parsed.lng !== null) {
                                     if (parsed.type === 'INFO' || parsed.type === 'SUMMARY') {
