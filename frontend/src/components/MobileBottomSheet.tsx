@@ -64,7 +64,7 @@ export default function MobileBottomSheet() {
       {/* Horizontal scroll cards */}
       <div 
         ref={scrollRef}
-        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide px-3 pb-1 gap-2.5 pointer-events-auto touch-pan-x"
+        className="flex overflow-x-auto scrollbar-hide px-3 pb-1 gap-2.5 pointer-events-auto touch-pan-x"
       >
         {activeThreats.map((threat) => {
           const color = THREAT_COLORS[threat.type] || '#ffffff';
@@ -75,7 +75,7 @@ export default function MobileBottomSheet() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               onClick={() => handleThreatClick(threat)}
-              className="flex-shrink-0 w-[260px] snap-center bg-black/85 backdrop-blur-2xl border border-white/[0.08] rounded-2xl p-3.5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] cursor-pointer active:scale-[0.97] transition-transform"
+              className="flex-shrink-0 w-[260px] bg-black/85 backdrop-blur-2xl border border-white/[0.08] rounded-2xl p-3.5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] cursor-pointer active:scale-[0.97] transition-transform"
             >
               <div className="flex items-center gap-3">
                 {/* Icon */}

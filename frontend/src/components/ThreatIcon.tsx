@@ -52,7 +52,7 @@ export function ThreatIcon({ type, className = "w-6 h-6", color }: ThreatIconPro
   
   return (
     <div 
-      className={`inline-flex items-center justify-center ${className}`}
+      className={`inline-flex items-center justify-center [&>svg]:w-full [&>svg]:h-full ${className}`}
       style={{ color: color || defaultColor }}
       dangerouslySetInnerHTML={{ __html: svgContent }}
     />
