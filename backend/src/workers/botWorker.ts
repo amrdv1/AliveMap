@@ -118,12 +118,22 @@ export async function sendAlertNotification(region: string, isAlert: boolean) {
     });
 
     if (subscribers.length === 0) return;
+    
+    // Deduplicate by chatId to prevent spam if db has duplicates
+    const uniqueSubscribers = [];
+    const seen = new Set();
+    for (const sub of subscribers) {
+        if (!seen.has(sub.chatId)) {
+            seen.add(sub.chatId);
+            uniqueSubscribers.push(sub);
+        }
+    }
 
     const message = isAlert 
       ? `🔴 **Повітряна тривога!**\n\nРегіон: ${region}\nПрямуйте в укриття!`
       : `🟢 **Відбій тривоги!**\n\nРегіон: ${region}`;
 
-    for (const sub of subscribers) {
+    for (const sub of uniqueSubscribers) {
       try {
         await bot.sendMessage(sub.chatId, message, { parse_mode: "Markdown" });
       } catch (err: any) {
@@ -159,10 +169,20 @@ export async function sendSmartThreatNotification(
         });
         
         if (smartSubs.length === 0) return;
+
+        // Deduplicate to prevent spam
+        const uniqueSmartSubs = [];
+        const seenSmart = new Set();
+        for (const sub of smartSubs) {
+            if (!seenSmart.has(sub.chatId)) {
+                seenSmart.add(sub.chatId);
+                uniqueSmartSubs.push(sub);
+            }
+        }
         
         const projection = projectTrajectory(lat, lng, speedKmh, courseDegrees, 30); // Project 30 mins
         
-        for (const sub of smartSubs) {
+        for (const sub of uniqueSmartSubs) {
             if (willIntersectLocation(projection, sub.lat!, sub.lng!, 20)) {
                 // Threat passes within 20km!
                 const message = `⚠️ **УВАГА! РОЗУМНЕ СПОВІЩЕННЯ** ⚠️\n\nОб'єкт **${threatType}** рухається у вашому напрямку! \nРозрахунковий вектор проходить близько до вашої локації. Прямуйте в укриття!`;

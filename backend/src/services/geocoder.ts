@@ -46,6 +46,14 @@ export async function geocodeLocation(locationName: string): Promise<GeocodeResu
       const lat = parseFloat(data[0].lat);
       const lng = parseFloat(data[0].lon);
       
+      // Bounding box for Ukraine + surrounding threat origins (Belarus, RF borders, Black/Azov Seas)
+      // Lat: 43 to 54, Lng: 21 to 42
+      if (lat < 43 || lat > 54 || lng < 21 || lng > 42) {
+         console.log(`[Geocoder] Rejected out of bounds: ${query} -> [${lat}, ${lng}]`);
+         cache.set(query, { lat: 0, lng: 0 });
+         return null;
+      }
+      
       const result = { lat, lng };
       cache.set(query, result);
       console.log(`[Geocoder] Found: ${query} -> [${lat}, ${lng}]`);
