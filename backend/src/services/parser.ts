@@ -576,7 +576,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
         const matchIndex = match.index as number;
         const prefix = chunk.substring(Math.max(0, matchIndex - 20), matchIndex);
         
-        if (prefix.match(/(?:на|курс|вектор|напрямку|до)\s+$/)) {
+        if (prefix.match(/(?:на|напрямку|напрямок|курсом на|до)\s*$/)) {
           // If there's already a targetLoc, we push the current built threat and start a new one!
           // This handles cases like "на Київ, Суми" where commas were missing
           if (targetLoc) {
@@ -593,7 +593,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
             });
           }
           targetLoc = { lat: coords.lat, lng: coords.lng, name: cityKey };
-        } else if (prefix.match(/(?:з|від|через)\s+$/)) {
+        } else if (prefix.match(/(?:з|від|через)\s*$/)) {
           originLoc = { lat: coords.lat, lng: coords.lng, name: cityKey };
         } else {
           // It's a current loc. Same logic, if already have one, push the previous
