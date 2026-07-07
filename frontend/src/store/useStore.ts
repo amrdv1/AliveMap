@@ -72,6 +72,7 @@ export interface AppState {
   setAlerts: (alerts: AlertsData) => void;
   setMessages: (messages: MonitoringMessage[]) => void;
   addMessage: (message: MonitoringMessage) => void;
+  cleanupMessages: () => void;
   setFilter: (key: keyof AppState['filters'], value: any) => void;
   setAboutOpen: (open: boolean) => void;
   setActiveTab: (tab: 'MAP' | 'SUMMARY' | 'MONITORING') => void;
