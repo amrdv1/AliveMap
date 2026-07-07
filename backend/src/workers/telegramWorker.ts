@@ -114,14 +114,11 @@ export async function startTelegramWorker(io: Server) {
   globalClient = client;
 
   // ═══ ZERO-DOWNTIME DEPLOY PROTECTION ═══
-  // Wait 30 seconds before connecting to Telegram.
-  // During Railway's zero-downtime deploy, the OLD container receives SIGTERM
-  // and our graceful shutdown disconnects the Telegram session.
-  // This 30s delay gives the old container plenty of time to release the Auth Key,
-  // so this new container never hits AUTH_KEY_DUPLICATED.
-  console.log("[TelegramWorker] Waiting 30s for old container to release Telegram session...");
-  await new Promise(resolve => setTimeout(resolve, 30000));
-  console.log("[TelegramWorker] Starting Telegram connection...");
+  // Wait 10s for the old container to gracefully release the Telegram session.
+  // Our SIGTERM handler disconnects in <1s, so 10s is plenty of safety margin.
+  console.log("[TelegramWorker] Waiting 10s for old container to release session...");
+  await new Promise(resolve => setTimeout(resolve, 10000));
+  console.log("[TelegramWorker] Connecting to Telegram...");
 
   let connected = false;
   let retries = 0;
