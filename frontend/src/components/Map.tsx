@@ -500,11 +500,14 @@ export default function UkraineMap() {
             />
           ))}
 
-          {/* Explosions */}
+          {/* Explosions / Shootdowns */}
           {explosions.map(exp => (
             <Marker key={exp.id} longitude={exp.lng} latitude={exp.lat} anchor="center">
-              <div className="explosion-circle z-50 flex items-center justify-center text-orange-500 bg-orange-500/20 rounded-full border border-orange-500/50 shadow-[0_0_15px_rgba(249,115,22,0.8)]" style={{ width: '40px', height: '40px' }}>
-                <Flame size={24} className="animate-pulse" />
+              <div className="z-50 flex items-center justify-center bg-orange-600/30 rounded-full border-2 border-orange-500 shadow-[0_0_30px_rgba(249,115,22,1)] animate-ping" style={{ width: '50px', height: '50px', animationDuration: '2s' }}>
+                <span className="text-2xl animate-pulse">💥</span>
+              </div>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 flex items-center justify-center">
+                <span className="text-3xl">💥</span>
               </div>
             </Marker>
           ))}
