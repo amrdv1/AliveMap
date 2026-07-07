@@ -341,7 +341,7 @@ export async function startTelegramWorker(io: Server) {
                                 const finalLat = parsed.lat ?? parsed.targetLat;
                                 const finalLng = parsed.lng ?? parsed.targetLng;
 
-                                if (finalLat !== null && finalLng !== null) {
+                                if (finalLat != null && finalLng != null) {
                                       if (parsed.type === 'INFO' || parsed.type === 'SUMMARY') {
                                           const { archiveThreatsNear } = require('../services/aggregatorService');
                                           const radius = parsed.confidence === 50 ? 2000 : 150;
@@ -355,7 +355,7 @@ export async function startTelegramWorker(io: Server) {
                                           continue;
                                       }
                                       const savedThreat = await processExternalThreat(
-                                        null, parsed.type as any, finalLat, finalLng,
+                                        null, parsed.type as any, finalLat as number, finalLng as number,
                                         new Date(msgTime),
                                         sourceId, null, parsed.direction, parsed.confidence / 100,
                                         parsed.quantity, parsed.targetName ?? null, parsed.targetLat ?? null, parsed.targetLng ?? null
