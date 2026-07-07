@@ -30,6 +30,8 @@ enum ReportType {
   KALIBR
   UNKNOWN
   PPO
+  MOLNIYA
+  DECOY
 }
 
 enum ReportStatus {

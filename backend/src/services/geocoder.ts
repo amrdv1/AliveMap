@@ -31,7 +31,7 @@ export async function geocodeLocation(locationName: string): Promise<GeocodeResu
 
   try {
     // Append ", Україна" to restrict results to Ukraine for accuracy
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query + ', Україна')}&format=json&limit=1`;
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
     
     // Nominatim strictly requires a valid User-Agent
     const response = await axios.get(url, {

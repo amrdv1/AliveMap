@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ReportType = 'DRONE' | 'FPV' | 'MISSILE' | 'CRUISE_MISSILE' | 'BALLISTIC_MISSILE' | 'KAB' | 'AIRCRAFT' | 'ALERT' | 'RECON' | 'UNKNOWN' | 'KH101' | 'ISKANDER' | 'KINZHAL' | 'KALIBR' | 'ZIRCON';
+export type ReportType = 'DRONE' | 'FPV' | 'MISSILE' | 'CRUISE_MISSILE' | 'BALLISTIC_MISSILE' | 'KAB' | 'AIRCRAFT' | 'ALERT' | 'RECON' | 'UNKNOWN' | 'KH101' | 'ISKANDER' | 'KINZHAL' | 'KALIBR' | 'ZIRCON' | 'MOLNIYA' | 'DECOY';
 
 export type ReportStatus = 'ACTIVE' | 'ARCHIVED';
 
@@ -20,7 +20,7 @@ export interface ExplosionEvent {
 
 export interface ThreatObject {
   id: string;
-  type: ReportType | 'SUMMARY' | 'INFO' | 'ZIRCON' | 'PPO' | 'RECON' | 'ALERT';
+  type: ReportType | 'SUMMARY' | 'INFO' | 'ZIRCON' | 'PPO' | 'RECON' | 'ALERT' | 'MOLNIYA' | 'DECOY';
   status: ReportStatus;
   speed?: number | null;
   course?: number | null;
@@ -48,7 +48,7 @@ export interface MonitoringMessage {
 export type AlertsData = Record<string, any>;
 
 export interface FilterState {
-  types: (ReportType | 'SUMMARY' | 'INFO' | 'ZIRCON' | 'PPO' | 'RECON' | 'ALERT')[];
+  types: (ReportType | 'SUMMARY' | 'INFO' | 'ZIRCON' | 'PPO' | 'RECON' | 'ALERT' | 'MOLNIYA' | 'DECOY')[];
   minConfidence: number;
   showArchived: boolean;
 }
@@ -93,7 +93,7 @@ export const useStore = create<AppState>((set) => ({
   showHeatmap: false,
   flyToLocation: null,
   filters: {
-    types: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KAB', 'AIRCRAFT', 'ALERT', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR', 'PPO', 'RECON', 'FPV', 'UNKNOWN'],
+    types: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KAB', 'AIRCRAFT', 'ALERT', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR', 'PPO', 'RECON', 'FPV', 'UNKNOWN', 'MOLNIYA', 'DECOY'],
     showArchived: false,
     minConfidence: 0.0,
   },

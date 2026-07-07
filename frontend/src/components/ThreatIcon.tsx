@@ -2,6 +2,8 @@ import React from 'react';
 
 export const THREAT_COLORS = {
   'DRONE': '#f87171', // Flat soft red
+  'MOLNIYA': '#f87171', // Flat soft red
+  'DECOY': '#9ca3af', // Gray
   'FPV': '#fb923c', // Orange
   'MISSILE': '#ef4444', // Flat strong red
   'CRUISE_MISSILE': '#dc2626', // Deep red
@@ -20,6 +22,8 @@ export const THREAT_COLORS = {
 
 export const THREAT_SVGS = {
   'DRONE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L14.5 12L22 17L21.5 19L13 16V20L15 22H9L11 20V16L2.5 19L2 17L9.5 12L12 2Z"/><path d="M12 4L13 12L18 16L12 15L6 16L11 12L12 4Z" fill="black" fill-opacity="0.25"/></svg>`,
+  'MOLNIYA': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L14.5 12L22 17L21.5 19L13 16V20L15 22H9L11 20V16L2.5 19L2 17L9.5 12L12 2Z"/><path d="M12 4L13 12L18 16L12 15L6 16L11 12L12 4Z" fill="black" fill-opacity="0.25"/></svg>`,
+  'DECOY': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L14.5 12L22 17L21.5 19L13 16V20L15 22H9L11 20V16L2.5 19L2 17L9.5 12L12 2Z"/><path d="M12 4L13 12L18 16L12 15L6 16L11 12L12 4Z" fill="black" fill-opacity="0.25"/></svg>`,
   'FPV': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 7 17 17M17 7 7 17"/><circle cx="5.4" cy="5.4" r="2.9"/><circle cx="18.6" cy="5.4" r="2.9"/><circle cx="5.4" cy="18.6" r="2.9"/><circle cx="18.6" cy="18.6" r="2.9"/><rect x="9.2" y="9.2" width="5.6" height="5.6" rx="1.3" fill="currentColor"/></svg>`,
   'MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C11.5 1 11 1.5 11 2.5V8L6 11V13L11 12V17.5L8 20V22L12 21L16 22V20L13 17.5V12L18 13V11L13 8V2.5C13 1.5 12.5 1 12 1Z"/><path d="M12 3V8L14 11V12L12 11.5V17L14 19V20L12 19.5V3Z" fill="black" fill-opacity="0.25"/></svg>`,
   'CRUISE_MISSILE': `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1C11.5 1 11 1.5 11 2.5V8L6 11V13L11 12V17.5L8 20V22L12 21L16 22V20L13 17.5V12L18 13V11L13 8V2.5C13 1.5 12.5 1 12 1Z"/><path d="M12 3V8L14 11V12L12 11.5V17L14 19V20L12 19.5V3Z" fill="black" fill-opacity="0.25"/></svg>`,

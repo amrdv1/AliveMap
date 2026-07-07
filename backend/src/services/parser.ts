@@ -1,5 +1,5 @@
 export interface ParsedThreat {
-  type: 'DRONE' | 'MISSILE' | 'AIRCRAFT' | 'ALERT' | 'BALLISTIC_MISSILE' | 'CRUISE_MISSILE' | 'KAB' | 'SUMMARY' | 'INFO' | 'ZIRCON' | 'KH101' | 'ISKANDER' | 'KINZHAL' | 'KALIBR' | 'PPO' | 'FPV' | 'UNKNOWN' | 'RECON';
+  type: 'DRONE' | 'MISSILE' | 'AIRCRAFT' | 'ALERT' | 'BALLISTIC_MISSILE' | 'CRUISE_MISSILE' | 'KAB' | 'SUMMARY' | 'INFO' | 'ZIRCON' | 'KH101' | 'ISKANDER' | 'KINZHAL' | 'KALIBR' | 'PPO' | 'FPV' | 'UNKNOWN' | 'RECON' | 'MOLNIYA' | 'DECOY';
   lat: number | null;
   lng: number | null;
   confidence: number;
@@ -514,6 +514,8 @@ function detectThreatType(text: string): ParsedThreat['type'] | null {
   if (t.match(/(ракет|missile)/)) return 'MISSILE';
   if (t.match(/(\bкаб\b|\bкаби\b|\bкабів\b|\bфаб\b|\bфаби\b|авіабомб|\bбомб\b|\bбомби\b|\bбомбу\b)/)) return 'KAB';
   if (t.match(/(fpv|фпв|фпві)/)) return 'FPV';
+  if (t.match(/(молнія|блискавка|molniya)/)) return 'MOLNIYA';
+  if (t.match(/(гербер|імітатор|пародія|decoy|parodi|gerbera)/)) return 'DECOY';
   if (t.match(/(розвідник|орлан|zala|зала|supercam|суперкам|recon)/)) return 'RECON';
   if (t.match(/(шахед|бпла|\bдрон\b|\bдрони\b|мопед|геран|\bdrone\b|shahed)/)) return 'DRONE';
   if (t.match(/(авіація|су-3|су-2|міг|ту-9|ту-2|літак|борти)/)) return 'AIRCRAFT';

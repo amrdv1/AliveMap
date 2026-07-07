@@ -112,6 +112,8 @@ export default function Sidebar() {
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-semibold text-white/90 truncate">
                   {threat.type === 'DRONE' ? 'Шахед / БПЛА' : 
+                   threat.type === 'MOLNIYA' ? 'БПЛА "Молнія"' :
+                   threat.type === 'DECOY' ? 'БПЛА (Імітатор)' :
                    threat.type === 'FPV' ? 'FPV / Ланцет' :
                    threat.type === 'CRUISE_MISSILE' ? 'Крилата Ракета' : 
                    threat.type === 'KH101' ? 'Крилата Ракета (Х-101/555)' :
