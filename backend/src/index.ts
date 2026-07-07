@@ -13,7 +13,7 @@ import adminRoutes from './routes/admin';
 import webhookRoutes from './routes/webhooks';
 
 import { startAlertsWorker } from './workers/alertsWorker';
-import { startTelegramWorker } from './workers/telegramWorker';
+import { startTelegramWorker, stopTelegramWorker } from './workers/telegramWorker';
 import { startMapaWorker } from './workers/mapaWorker';
 import { startBotWorker } from './workers/botWorker';
 
@@ -147,3 +147,27 @@ server.listen(PORT, async () => {
     }
   }, 5 * 60 * 1000); // Every 5 minutes
 });
+
+// --- GRACEFUL SHUTDOWN ---
+// Required for Railway Zero-Downtime Deploys to release the Telegram Auth Key cleanly
+async function gracefulShutdown(signal: string) {
+    console.log(`\n[Server] Received ${signal}, starting graceful shutdown...`);
+    
+    // Stop Telegram Worker first to release the session instantly
+    await stopTelegramWorker();
+
+    // Close Express Server
+    server.close(() => {
+        console.log("[Server] HTTP server closed.");
+        process.exit(0);
+    });
+
+    // Fallback if connections hang
+    setTimeout(() => {
+        console.error("[Server] Forcefully shutting down after 10s.");
+        process.exit(1);
+    }, 10000);
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));

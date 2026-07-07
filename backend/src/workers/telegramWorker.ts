@@ -8,6 +8,18 @@ import { processExternalThreat } from '../services/aggregatorService';
 import { extractWithAI } from '../services/aiParser';
 import { geocodeLocation } from '../services/geocoder';
 
+let globalClient: TelegramClient | null = null;
+
+export async function stopTelegramWorker() {
+    if (globalClient) {
+        console.log("Disconnecting Telegram client gracefully...");
+        try {
+            await globalClient.disconnect();
+        } catch (e) {}
+        globalClient = null;
+    }
+}
+
 const CHANNELS = [
   // OLD CHANNELS
   'vanek_nikolaev', 'monitor', 'kievreal1', 'operativnoZSU', 'insiderUKR', 'smolii_ukraine', 
@@ -96,7 +108,10 @@ export async function startTelegramWorker(io: Server) {
   const stringSession = new StringSession(sessionString);
   const client = new TelegramClient(stringSession, apiId, apiHash, {
     connectionRetries: 5,
+    useWSS: false
   });
+  
+  globalClient = client;
 
   let connected = false;
   let retries = 0;
