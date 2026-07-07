@@ -300,8 +300,8 @@ export async function startTelegramWorker(io: Server) {
                         const channelDisplay = channel;
                         const threatType = parsedThreats[0].type;
 
-                        // Only save to monitoring if it's actual target movement and extremely fresh (<30m)
-                        const isFreshMonitoring = (Date.now() - msgTime) < 30 * 60 * 1000;
+                        // Only save to monitoring if it's actual target movement and fresh (<2h)
+                        const isFreshMonitoring = (Date.now() - msgTime) < 2 * 60 * 60 * 1000;
 
                         const shouldSaveToFeedHistory = MOVEMENT_TYPES.has(threatType) || ['INFO', 'SUMMARY', 'PPO'].includes(threatType);
                         if (isFreshMonitoring && shouldSaveToFeedHistory) {
