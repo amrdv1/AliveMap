@@ -107,7 +107,7 @@ export async function startTelegramWorker(io: Server) {
 
   const stringSession = new StringSession(sessionString);
   const client = new TelegramClient(stringSession, apiId, apiHash, {
-    connectionRetries: 5,
+    connectionRetries: 100,
     useWSS: false
   });
   
@@ -115,7 +115,7 @@ export async function startTelegramWorker(io: Server) {
 
   let connected = false;
   let retries = 0;
-  while (!connected && retries < 15) {
+  while (!connected && retries < 100) {
     try {
       await client.connect();
       // Use a timeout for getMe() to prevent hanging on AUTH_KEY_DUPLICATED during zero-downtime deploys
@@ -126,7 +126,7 @@ export async function startTelegramWorker(io: Server) {
       console.log(`Logged in as: ${me.username || me.id}`);
       connected = true;
     } catch (error: any) {
-      console.error(`Error connecting Telegram worker (Attempt ${retries + 1}/15):`, error.message);
+      console.error(`Error connecting Telegram worker (Attempt ${retries + 1}/100):`, error.message);
       try { await client.disconnect(); } catch(e) {}
       retries++;
       await new Promise(resolve => setTimeout(resolve, 5000));
