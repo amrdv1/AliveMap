@@ -8,10 +8,7 @@ router.get('/', async (req: Request, res: Response) => {
     const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
     const messages = await prisma.monitoringMessage.findMany({
       where: { 
-        timestamp: { gte: twoHoursAgo },
-        channelName: {
-          notIn: ['air_alert_ua', 'ukraine_alarm_bot', 'Тривога Україна']
-        }
+        timestamp: { gte: twoHoursAgo }
       },
       orderBy: { timestamp: 'desc' },
       take: 500
