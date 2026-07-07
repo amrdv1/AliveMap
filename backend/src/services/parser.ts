@@ -27,7 +27,7 @@ export const CITY_COORDS: Record<string, {lat: number, lng: number}> = {
   "полтав": { lat: 49.5883, lng: 34.5514 },
   "черкас": { lat: 49.4444, lng: 32.0598 },
   "вінниц": { lat: 49.2331, lng: 28.4682 },
-  "житомир": { lat: 50.2547, lng: 28.6587 },
+  "житомир": { lat: 50.5547, lng: 28.6587 },
   "рівн": { lat: 50.6199, lng: 26.2516 },
   "кропивницьк": { lat: 48.5079, lng: 32.2623 },
   "хмельницьк": { lat: 49.4230, lng: 26.9871 },
@@ -57,20 +57,20 @@ export const CITY_COORDS: Record<string, {lat: number, lng: number}> = {
   "обухів": { lat: 50.1009, lng: 30.6229 },
   "васильків": { lat: 50.1681, lng: 30.3230 },
   "вишгород": { lat: 50.5838, lng: 30.4887 },
-  "буч": { lat: 50.5461, lng: 30.2283 },
-  "ірпін": { lat: 50.5194, lng: 30.2505 },
+  "буч": { lat: 50.5461, lng: 30.5283 },
+  "ірпін": { lat: 50.5194, lng: 30.5505 },
   "троєщин": { lat: 50.5158, lng: 30.6167 },
   "оболон": { lat: 50.5028, lng: 30.4988 },
   "позняк": { lat: 50.3979, lng: 30.6328 },
   "березан": { lat: 50.3167, lng: 31.4833 },
-  "яготин": { lat: 50.2667, lng: 31.7667 },
+  "яготин": { lat: 50.5667, lng: 31.7667 },
   "переяслав": { lat: 50.0667, lng: 31.4500 },
   "кагарлик": { lat: 49.8500, lng: 30.8333 },
   "тарас": { lat: 50.4900, lng: 30.3600 },
-  "гостомел": { lat: 50.5653, lng: 30.2542 },
-  "боярк": { lat: 50.3242, lng: 30.2867 },
+  "гостомел": { lat: 50.5653, lng: 30.5542 },
+  "боярк": { lat: 50.3242, lng: 30.5867 },
   "вишнев": { lat: 50.3862, lng: 30.3675 },
-  "ворзел": { lat: 50.5553, lng: 30.2433 },
+  "ворзел": { lat: 50.5553, lng: 30.5433 },
   "макарів": { lat: 50.4628, lng: 29.8092 },
   "славутич": { lat: 51.5167, lng: 30.7500 },
 
@@ -90,7 +90,7 @@ export const CITY_COORDS: Record<string, {lat: number, lng: number}> = {
   "юнаків": { lat: 50.3167, lng: 35.2500 },
   "краснопіл": { lat: 50.7627, lng: 35.6567 },
   "свес": { lat: 51.5667, lng: 33.5167 },
-  "велик писарів": { lat: 50.2333, lng: 35.6500 },
+  "велик писарів": { lat: 50.5333, lng: 35.6500 },
   "хотін": { lat: 51.2500, lng: 33.4167 },
 
   // ═══ ХАРКІВСЬКА ОБЛАСТЬ ═══
@@ -101,7 +101,7 @@ export const CITY_COORDS: Record<string, {lat: number, lng: number}> = {
   "первомайськ": { lat: 48.6333, lng: 36.2333 },
   "барвінков": { lat: 48.9001, lng: 37.0196 },
   "балакл": { lat: 49.4667, lng: 36.6333 },
-  "вовчанськ": { lat: 50.2833, lng: 36.9333 },
+  "вовчанськ": { lat: 50.5833, lng: 36.9333 },
   "дергач": { lat: 50.1000, lng: 36.1167 },
   "мерефа": { lat: 49.8167, lng: 36.0500 },
   "шевченков": { lat: 49.7000, lng: 37.0833 },
@@ -109,9 +109,9 @@ export const CITY_COORDS: Record<string, {lat: number, lng: number}> = {
   "красноград": { lat: 49.3667, lng: 35.4333 },
   "богодухів": { lat: 50.1667, lng: 35.5167 },
   "валки": { lat: 49.8333, lng: 35.8000 },
-  "золочів": { lat: 50.2833, lng: 35.9667 },
+  "золочів": { lat: 50.5833, lng: 35.9667 },
   "нов водолаг": { lat: 49.7167, lng: 35.8833 },
-  "липц": { lat: 50.2167, lng: 36.4167 },
+  "липц": { lat: 50.5167, lng: 36.4167 },
   "двурічн": { lat: 49.7333, lng: 37.6833 },
   "борова": { lat: 49.4167, lng: 37.0500 },
   "мал данилів": { lat: 50.0667, lng: 36.4000 },
@@ -138,12 +138,12 @@ export const CITY_COORDS: Record<string, {lat: number, lng: number}> = {
   "горішн": { lat: 49.0000, lng: 33.4500 },
   "котельв": { lat: 50.0667, lng: 35.0500 },
   "хорол": { lat: 49.7833, lng: 33.2667 },
-  "пирятин": { lat: 50.2333, lng: 32.5167 },
+  "пирятин": { lat: 50.5333, lng: 32.5167 },
   "карлівк": { lat: 49.4500, lng: 35.1333 },
   "гребінк": { lat: 50.1167, lng: 31.9000 },
   "глобин": { lat: 49.4000, lng: 33.2833 },
   "козельщин": { lat: 49.2333, lng: 34.0667 },
-  "зіньків": { lat: 50.2000, lng: 34.3667 },
+  "зіньків": { lat: 50.5000, lng: 34.3667 },
 
   // ═══ ДНІПРОПЕТРОВСЬКА ОБЛАСТЬ ═══
   "новомосков": { lat: 48.6333, lng: 35.2333 },
@@ -235,7 +235,7 @@ export const CITY_COORDS: Record<string, {lat: number, lng: number}> = {
   "хрестищ": { lat: 49.0067, lng: 37.5233 },
 
   // ═══ ЧЕРКАСЬКА ОБЛАСТЬ ═══
-  "умань": { lat: 48.7500, lng: 30.2167 },
+  "умань": { lat: 48.7500, lng: 30.5167 },
   "сміл": { lat: 49.2167, lng: 31.8667 },
   "золотонош": { lat: 49.6667, lng: 32.0333 },
   "канів": { lat: 49.7500, lng: 31.4667 },
@@ -372,7 +372,7 @@ export const CITY_COORDS: Record<string, {lat: number, lng: number}> = {
   "рубіжн": { lat: 49.0167, lng: 38.3833 },
 
   // ═══ РЕГІОНИ / ОБЛАСТІ ═══
-  "київщин": { lat: 50.25, lng: 30.5 },
+  "київщин": { lat: 50.55, lng: 30.5 },
   "сумщин": { lat: 51.0, lng: 34.0 },
   "харківщин": { lat: 49.5, lng: 36.5 },
   "чернігівщин": { lat: 51.5, lng: 32.0 },
@@ -400,7 +400,7 @@ export const CITY_COORDS: Record<string, {lat: number, lng: number}> = {
   "східн": { lat: 48.5, lng: 38.0 },
   "південн": { lat: 47.0, lng: 33.0 },
   "північн": { lat: 51.5, lng: 33.0 },
-  "київська обл": { lat: 50.25, lng: 30.5 },
+  "київська обл": { lat: 50.55, lng: 30.5 },
   "сумська обл": { lat: 51.0, lng: 34.0 },
   "харківська обл": { lat: 49.5, lng: 36.5 },
   "чернігівська обл": { lat: 51.5, lng: 32.0 },
@@ -514,13 +514,19 @@ function detectThreatType(text: string): ParsedThreat['type'] | null {
   if (t.match(/(шахед|бпла|дрон|мопед|геран|drone|shahed)/)) return 'DRONE';
   if (t.match(/(авіація|су-3|су-2|міг|ту-9|ту-2|літак|борти)/)) return 'AIRCRAFT';
   
-  if (t.match(/(невідом|ціль|об\.єкт)/)) return 'UNKNOWN';
+  if (t.match(/(невідома ціль|невідомі цілі|невідомий об\.єкт|невідомі об\.єкти|ціль|об\.єкт)/) && !t.match(/невідомо/)) return 'UNKNOWN';
   
   return null;
 }
 
+
+const IGNORE_WORDS = /(наслідок|наслідки|депутат|санкці|врятував|врятувала|на жаль|помер|загинув|постражда|фото|відео|наживо|пишуть|повідомляє|заявив|інтерв.ю|стаття|новина|деталі|читайте|джерело|коментар|підписав|впк|виробництво|комплектуючих|російського|зведення|брифінг|поранений|евакуація|смерт|колишнього|нардеп)/;
+
 export function parseTelegramText(text: string): ParsedThreat[] {
   let lowerText = text.toLowerCase();
+  
+  if (lowerText.match(IGNORE_WORDS)) return [];
+
   
   // DON'T REPLACE COMMAS YET, but replace other punctuation
   lowerText = lowerText.replace(/[.!?;:]/g, ' ');
@@ -636,8 +642,8 @@ export function parseTelegramText(text: string): ParsedThreat[] {
   for (const res of results) {
     const isDuplicate = uniqueResults.some(u => 
       u.type === res.type && 
-      Math.abs(u.lat! - res.lat!) < 0.2 && 
-      Math.abs(u.lng! - res.lng!) < 0.2
+      Math.abs(u.lat! - res.lat!) < 0.5 && 
+      Math.abs(u.lng! - res.lng!) < 0.5
     );
     if (!isDuplicate) uniqueResults.push(res);
   }
@@ -650,19 +656,6 @@ export function parseTelegramText(text: string): ParsedThreat[] {
 function legacyFallback(lowerText: string, type: ParsedThreat['type']): ParsedThreat[] {
   const qty = parseQuantity(lowerText);
   const dir = parseDirection(lowerText) ?? Math.floor(Math.random() * 360);
-  
-  if (type === 'AIRCRAFT') return [{ ...GENERIC_SPAWN.AIRCRAFT, type, confidence: 50, direction: dir, quantity: qty }];
-  if ((type === 'CRUISE_MISSILE' || type === 'KALIBR' || type === 'KH101') && lowerText.match(/(морі|море|ракетонос|каспій|чорн)/)) {
-    if (lowerText.match(/каспій/)) return [{ ...GENERIC_SPAWN.CASPIAN_SEA, type, confidence: 70, direction: dir, quantity: qty }];
-    return [{ ...GENERIC_SPAWN.BLACK_SEA, type, confidence: 80, direction: dir, quantity: qty }];
-  }
-  if (type === 'DRONE') {
-    if (lowerText.match(/(північ|курськ|брянськ|сум|чернігів)/)) return [{ ...GENERIC_SPAWN.DRONE_NORTH, type, confidence: 50, direction: dir, quantity: qty }];
-    return [{ ...GENERIC_SPAWN.DRONE_SOUTH, type, confidence: 50, direction: dir, quantity: qty }];
-  }
-  if (['MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON', 'ISKANDER', 'KINZHAL'].includes(type)) {
-    return [{ ...GENERIC_SPAWN.MISSILE, type, confidence: 50, direction: dir, quantity: qty }];
-  }
   
   return [{ type, lat: null, lng: null, confidence: 50, direction: dir, quantity: qty }];
 }
