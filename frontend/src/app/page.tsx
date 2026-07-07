@@ -135,11 +135,28 @@ export default function Home() {
         
         {activeTab === 'MAP' && <ThreatFilters />}
         
-        {activeTab === 'MONITORING' && (
-          <div className="absolute inset-0 pt-20 pb-24 z-30 bg-black/80 backdrop-blur-2xl">
-            <MonitoringFeed isMobile />
-          </div>
-        )}
+        <AnimatePresence>
+          {activeTab === 'MONITORING' && (
+            <motion.div 
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(e, info) => {
+                if (info.offset.y > 150 || info.velocity.y > 500) {
+                  useStore.getState().setActiveTab('MAP');
+                }
+              }}
+              className="fixed inset-0 pt-16 pb-20 z-50 bg-black/95 backdrop-blur-3xl overflow-hidden shadow-[0_-10px_40px_rgba(0,0,0,0.8)] rounded-t-3xl border-t border-white/10"
+            >
+              <div className="w-16 h-1.5 bg-gray-600 rounded-full mx-auto mb-2 opacity-50 cursor-grab active:cursor-grabbing" />
+              <MonitoringFeed isMobile />
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         {activeTab === 'MAP' && <MobileBottomSheet />}
         <MobileBottomNav />

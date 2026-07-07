@@ -5,21 +5,12 @@ const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const oneHourAgo = new Date(Date.now() - 1 * 60 * 60 * 1000);
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
     const messages = await prisma.monitoringMessage.findMany({
       where: { 
-        timestamp: { gte: oneHourAgo },
+        timestamp: { gte: twoHoursAgo },
         channelName: {
-          notIn: ['air_alert_ua', 'ukraine_alarm_bot', 'Офіційні Тривоги']
-        },
-        // Only return messages with movement tags
-        NOT: {
-          OR: [
-            { tags: { has: 'SUMMARY' } },
-            { tags: { has: 'INFO' } },
-            { tags: { has: 'ALERT' } },
-            { tags: { has: 'PPO' } },
-          ]
+          notIn: ['air_alert_ua', 'ukraine_alarm_bot', 'Тривога Україна']
         }
       },
       orderBy: { timestamp: 'desc' },

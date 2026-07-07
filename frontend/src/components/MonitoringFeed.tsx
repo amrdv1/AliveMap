@@ -7,11 +7,13 @@ export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
   const { messages } = useStore();
 
   return (
-    <div className={`flex flex-col bg-gradient-to-b from-black/40 to-black/10 backdrop-blur-xl border border-white/10 font-sans overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)] ${
-      isMobile ? 'w-full h-full rounded-none' : 'w-full h-full rounded-3xl'
+    <div className={`flex flex-col font-sans overflow-hidden ${
+      isMobile 
+        ? 'w-full h-full bg-transparent' 
+        : 'w-full h-full bg-gradient-to-b from-black/40 to-black/10 backdrop-blur-xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.3)]'
     }`}>
       {/* Header */}
-      <div className="p-5 border-b border-white/5 flex items-center justify-between bg-black/20">
+      <div className={`p-5 flex items-center justify-between ${isMobile ? 'bg-transparent' : 'border-b border-white/5 bg-black/20'}`}>
         <h2 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-3">
           <Activity className="text-red-500 w-5 h-5" />
           Моніторинг
