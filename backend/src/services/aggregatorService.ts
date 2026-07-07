@@ -106,7 +106,14 @@ export async function processExternalThreat(
       const dtHours = (time.getTime() - prevLoc.time.getTime()) / (1000 * 60 * 60);
       if (dtHours > 0) {
         const dist = getDistanceFromLatLonInKm(lat, lng, prevLoc.lat, prevLoc.lng);
-        if (finalSpeed == null) finalSpeed = dist / dtHours;
+        if (finalSpeed == null) {
+            finalSpeed = dist / dtHours;
+            // Cap calculated speeds to prevent insane values from GPS jumps
+            const maxSpeed = matchedThreat.type.includes('BALLISTIC') || matchedThreat.type === 'KINZHAL' || matchedThreat.type === 'ZIRCON' ? 12000 :
+                             matchedThreat.type.includes('MISSILE') || matchedThreat.type === 'KALIBR' || matchedThreat.type === 'KH101' ? 1200 : 
+                             300; // Drones
+            if (finalSpeed > maxSpeed) finalSpeed = maxSpeed;
+        }
         if (finalCourse == null) finalCourse = calculateBearing(prevLoc.lat, prevLoc.lng, lat, lng);
       }
     }
@@ -115,6 +122,9 @@ export async function processExternalThreat(
   }
 
   // 3. Create new threat
+  // Never create a brand new target for UNKNOWN generic movements. 
+  // They should ONLY update existing targets.
+  if (threatType === 'UNKNOWN') return null;
   
   let defaultSpeed = speed;
   if (defaultSpeed == null) {
