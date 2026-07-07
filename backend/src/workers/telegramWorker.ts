@@ -119,7 +119,11 @@ export async function startTelegramWorker(io: Server) {
   try {
     console.log("Connected to Telegram using string session.");
 
-    const me = await client.getMe();
+    // Use a timeout for getMe() to prevent hanging on AUTH_KEY_DUPLICATED during zero-downtime deploys
+    const me = await Promise.race([
+        client.getMe(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout getting user info (GramJS hung)")), 10000))
+    ]) as any;
     console.log(`Logged in as: ${me.username || me.id}`);
 
     let source = await prisma.source.findFirst({ where: { name: 'Telegram Worker' } });
