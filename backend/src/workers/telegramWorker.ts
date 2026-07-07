@@ -107,34 +107,55 @@ export async function startTelegramWorker(io: Server) {
 
   const stringSession = new StringSession(sessionString);
   const client = new TelegramClient(stringSession, apiId, apiHash, {
-    connectionRetries: 100,
+    connectionRetries: 5,
     useWSS: false
   });
   
   globalClient = client;
 
+  // ═══ ZERO-DOWNTIME DEPLOY PROTECTION ═══
+  // Wait 30 seconds before connecting to Telegram.
+  // During Railway's zero-downtime deploy, the OLD container receives SIGTERM
+  // and our graceful shutdown disconnects the Telegram session.
+  // This 30s delay gives the old container plenty of time to release the Auth Key,
+  // so this new container never hits AUTH_KEY_DUPLICATED.
+  console.log("[TelegramWorker] Waiting 30s for old container to release Telegram session...");
+  await new Promise(resolve => setTimeout(resolve, 30000));
+  console.log("[TelegramWorker] Starting Telegram connection...");
+
   let connected = false;
   let retries = 0;
-  while (!connected && retries < 100) {
+  const MAX_RETRIES = 20;
+  while (!connected && retries < MAX_RETRIES) {
     try {
       await client.connect();
-      // Use a timeout for getMe() to prevent hanging on AUTH_KEY_DUPLICATED during zero-downtime deploys
       const me = await Promise.race([
         client.getMe(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout getting user info (GramJS hung)")), 10000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout getting user info")), 10000))
       ]) as any;
-      console.log(`Logged in as: ${me.username || me.id}`);
+      console.log(`[TelegramWorker] Logged in as: ${me.username || me.id}`);
       connected = true;
     } catch (error: any) {
-      console.error(`Error connecting Telegram worker (Attempt ${retries + 1}/100):`, error.message);
-      try { await client.disconnect(); } catch(e) {}
+      const isAuthDuplicated = error.message?.includes('AUTH_KEY_DUPLICATED');
       retries++;
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      console.error(`[TelegramWorker] Connection attempt ${retries}/${MAX_RETRIES} failed: ${error.message}`);
+      try { await client.disconnect(); } catch(e) {}
+      
+      if (isAuthDuplicated) {
+        // Auth key is still held by old container — wait longer (30s)
+        console.log("[TelegramWorker] AUTH_KEY_DUPLICATED — old container still alive. Waiting 30s...");
+        await new Promise(resolve => setTimeout(resolve, 30000));
+      } else {
+        // Generic error — short retry
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
     }
   }
 
   if (!connected) {
-    console.error("Failed to start Telegram worker after 15 attempts. Exiting worker.");
+    console.error(`[TelegramWorker] Failed after ${MAX_RETRIES} attempts. Will auto-retry in 5 minutes...`);
+    // Instead of dying forever, schedule a full restart of the worker
+    setTimeout(() => startTelegramWorker(io), 5 * 60 * 1000);
     return;
   }
 
