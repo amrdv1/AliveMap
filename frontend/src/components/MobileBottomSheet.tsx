@@ -28,7 +28,7 @@ const THREAT_COLORS: Record<string, string> = {
   'KH101': '#ea580c', 'KALIBR': '#e11d48', 'BALLISTIC_MISSILE': '#a855f7',
   'ISKANDER': '#d946ef', 'KINZHAL': '#dc2626', 'MISSILE': '#f97316',
   'KAB': '#eab308', 'AIRCRAFT': '#3b82f6', 'ZIRCON': '#dc2626',
-  'RECON': '#6b7280', 'UNKNOWN': '#71717a', 'PPO': '#22c55e',
+  'RECON': '#9ca3af', 'UNKNOWN': '#9ca3af', 'PPO': '#22c55e',
 };
 
 export default function MobileBottomSheet() {
