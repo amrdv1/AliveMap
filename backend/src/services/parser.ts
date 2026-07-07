@@ -630,7 +630,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
         const matchIndex = match.index as number;
         const prefix = chunk.substring(Math.max(0, matchIndex - 20), matchIndex);
         
-        if (prefix.match(/(?:на|напрямку|напрямок|курсом на|до)\s*$/)) {
+        if (prefix.match(/(?:на|напрямку|напрямок|курсом на|до|над|біля|поблизу)\s*$/)) {
           // If there's already a targetLoc, we push the current built threat and start a new one!
           // This handles cases like "на Київ, Суми" where commas were missing
           if (targetLoc) {
@@ -647,7 +647,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
             });
           }
           targetLoc = { lat: coords.lat, lng: coords.lng, name: cityKey };
-        } else if (prefix.match(/(?:з|від|через)\s*$/)) {
+        } else if (prefix.match(/(?:з|від|через|повз)\s*$/)) {
           originLoc = { lat: coords.lat, lng: coords.lng, name: cityKey };
         } else {
           // It's a current loc. Same logic, if already have one, push the previous
@@ -679,7 +679,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
     // If no location found in dictionaries, try to extract unknown city names from text
     // This allows the geocoder in telegramWorker to resolve them dynamically
     if (!currentLoc && !targetLoc) {
-      const targetMatch = chunk.match(/(?:на|курсом на|напрямку|до)\s+([А-ЯІЇЄҐа-яіїєґ''`\-]{3,}(?:\s+[А-ЯІЇЄҐа-яіїєґ''`\-]{3,}){0,2})/);
+      const targetMatch = chunk.match(/(?:на|курсом на|напрямку|до|над|біля|поблизу)\s+([А-ЯІЇЄҐа-яіїєґ''`\-]{3,}(?:\s+[А-ЯІЇЄҐа-яіїєґ''`\-]{3,}){0,2})/);
       if (targetMatch) {
         const extractedName = targetMatch[1].trim();
         // Skip common false positives (prepositions, generic words)
@@ -691,7 +691,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
       }
       
       if (!targetLoc) {
-        const fromMatch = chunk.match(/(?:з|від|через|район[уі]?)\s+([А-ЯІЇЄҐа-яіїєґ''`\-]{3,}(?:\s+[А-ЯІЇЄҐа-яіїєґ''`\-]{3,}){0,2})/);
+        const fromMatch = chunk.match(/(?:з|від|через|повз|район[уі]?)\s+([А-ЯІЇЄҐа-яіїєґ''`\-]{3,}(?:\s+[А-ЯІЇЄҐа-яіїєґ''`\-]{3,}){0,2})/);
         if (fromMatch) {
           const extractedName = fromMatch[1].trim();
           const skipWords = ['також', 'шахед', 'дрон', 'бпла', 'ракет', 'район', 'область', 'типу', 'невідом', 'ударний', 'реактивний'];
@@ -747,10 +747,11 @@ function legacyFallback(lowerText: string, type: ParsedThreat['type']): ParsedTh
   const qty = parseQuantity(lowerText);
   const dir = parseDirection(lowerText);
 
-  // Never spawn FPVs, Recons, or small decoys in random generic locations if we don't know where they are,
-  // BUT return the threat with null coordinates so the AI parser still gets a chance to extract the location!
+  // For FPV/RECON/MOLNIYA/DECOY: try to extract a location name for geocoding, otherwise return null coords
   if (type === 'FPV' || type === 'RECON' || type === 'MOLNIYA' || type === 'DECOY') {
-    return [{ type, lat: null, lng: null, confidence: 50, direction: dir, quantity: qty }];
+    const locMatch = lowerText.match(/(?:на|над|біля|повз|поблизу|до|курсом на)\s+([А-ЯІЇЄҐа-яіїєґ''`\-]{3,}(?:\s+[А-ЯІЇЄҐа-яіїєґ''`\-]{3,}){0,2})/i);
+    const extractedName = locMatch ? locMatch[1].trim() : null;
+    return [{ type, lat: null, lng: null, confidence: 50, direction: dir, quantity: qty, targetName: extractedName }];
   }
   
   let spawn = GENERIC_SPAWN.DRONE_SOUTH;

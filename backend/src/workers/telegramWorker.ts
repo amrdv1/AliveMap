@@ -21,83 +21,34 @@ export async function stopTelegramWorker() {
 }
 
 const CHANNELS = [
-  // OLD CHANNELS
+  // ─── Working Monitoring Channels ───
   'vanek_nikolaev', 'monitor', 'kievreal1', 'operativnoZSU', 'insiderUKR', 'smolii_ukraine', 
-  'kyiv_golovne', 'war_monitor', 'monitor_ukraine', 'radar_ua_top', 'kyiv_vanek', 'nebo_raketa', 
-  'sectorv666', 'deraketaua', 'eradarrrua', 'kherson_non_drone', 'rozvidkaneba', 'kudy_letyt', 
+  'kyiv_golovne', 'war_monitor', 'monitor_ukraine', 'kyiv_vanek', 'nebo_raketa', 
+  'sectorv666', 'deraketaua', 'kherson_non_drone', 'rozvidkaneba', 'kudy_letyt', 
   'nablydatel_dozor', 'krolevetsnews', 'place_kharkiv', 'ukraineradar_24_7', 'kievmap', 
-  'truexanewsua', 'kpszsu', 'veselyy_pivden', 'mykolaivska_oda', 'kharkivoda', 'odessa_typical', 
+  'truexanewsua', 'kpszsu', 'veselyy_pivden', 'kharkivoda', 'odessa_typical', 
   'realwar_ukraine', 'ukraine_now',
-  // NEW CHANNELS
-  'pivden_varta', 'radar_top_ua', 'povitryanatrivogaaaa', 'odessa_inform', 'monitor1654', 
+
+  // ─── New Channels ───
+  'pivden_varta', 'radar_top_ua', 'odessa_inform', 'monitor1654', 
   'ukrainealarmsignal', 'eyes_everywhere_ua', 'vibuxaviasia', 'renihub', 'odessaveter', 
   'kharkov_media', 'pivden_fpv', 'tlknewsua', 'temporis_odesa', 'kherson_monitoring', 
   'shahedradar', 'operatyvnohlep', 'poltavaranger', 'raketa_trevoga',
-  // SCREENSHOT CHANNELS
-  'rynda_monitor', 'roman_romanchuk', 'kyivoda', 'povitr_prostir', 'vartovi_pivdnya',
-  'suspilne_news',
-  'ukraine_online',
-  'ukraine_radar',
-  'pivden_radar',
-  // --- Official / OVA Channels ---
-  'kpszsu', // Повітряні Сили ЗСУ
-  'kyivoda', // Київська ОВА
-  'maksymkozytskyy', // Львівська ОВА
-  'volynskaODA', // Волинська ОВА
-  'rivne_oda', // Рівненська ОВА
-  'zhytomyrskaODA', // Житомирська ОВА
-  'ternopilskaODA', // Тернопільська ОВА
-  'khmelnytskaODA', // Хмельницька ОВА
-  'vinnytskaODA', // Вінницька ОВА
-  'chernivetskaODA', // Чернівецька ОВА
-  'ifoda', // Івано-Франківська ОВА
-  'zakarpatskaODA', // Закарпатська ОВА
-  'cherkaskaODA', // Черкаська ОВА
-  'kirovohradskaODA', // Кіровоградська ОВА
-  'poltavskaODA', // Полтавська ОВА
-  'sumy_oda', // Сумська ОВА
-  'chernihivskaODA', // Чернігівська ОВА
-  'synegubov', // Харківська ОВА
-  'dnipropetrovskaODA', // Дніпропетровська ОВА
-  'zoda_gov_ua', // Запорізька ОВА
-  'mykolaivskaODA', // Миколаївська ОВА
-  'odeskaODA', // Одеська ОВА
-  'khersonskaODA', // Херсонська ОВА
-  'pavlokyrylenko_donoda', // Донецька ОВА
-  'luhanskaVTSA', // Луганська ОВА
-  'VA_Kyiv', // Київська МВА
-  
-  // --- Monitoring Channels (Requested) ---
-  'sectorv666',
-  'korabeli', // КОРАБЕЛІ
-  'monitor',
-  'monitorwar',
-  'monitor_ua',
-  'monitor_map',
-  'war_monitor',
-  'monitoring_ukraine',
+  'roman_romanchuk', 'kyivoda', 'suspilne_news', 'ukraine_radar',
 
-  // --- Additional Air Monitoring Channels ---
-  'air_alert_ua',        // Повітряна тривога Україна
-  'zahyst_ua',           // Захист UA
-  'operativno_kharkiv',  // Оперативно Харків
-  'radar_dnepr',         // Радар Дніпро
-  'kharkiv_1654',        // Харків 1654
-  'zsu_insider',         // ЗСУ інсайдер
-  'air_alarm_ua',        // Air Alarm UA
-  'ua_drones',           // UA Дрони
-  'operativno_zp',       // Оперативно Запоріжжя
-  'operativno_dnipro',   // Оперативно Дніпро
-  'mykolaiv_online',     // Миколаїв Онлайн
-  'kherson_life',        // Херсон Life
-  'poltava_monitoring',  // Полтава Моніторинг
-  'cherkasy_today',      // Черкаси Today
-  'zhytomyr_online',     // Житомир Онлайн
-  'sumy_today',          // Суми Today
-  'chernihiv_info',      // Чернігів Інфо
-  'vinnytsia_info',      // Вінниця Інфо
-  'uaradar',             // UA Радар
-  'raketna_zagroza'      // Ракетна загроза
+  // ─── Official / OVA Channels ───
+  'volynskaODA', 'zhytomyrskaODA', 'ternopilskaODA', 'khmelnytskaODA',
+  'vinnytskaODA', 'chernivetskaODA', 'ifoda', 'zakarpatskaODA',
+  'cherkaskaODA', 'kirovohradskaODA', 'poltavskaODA', 'sumy_oda',
+  'synegubov', 'dnipropetrovskaODA', 'zoda_gov_ua', 'mykolaivskaODA',
+  'odeskaODA', 'khersonskaODA', 'pavlokyrylenko_donoda', 'luhanskaVTSA', 'VA_Kyiv',
+
+  // ─── Additional ───
+  'korabeli', 'monitorwar', 'monitoring_ukraine',
+  'air_alert_ua', 'zahyst_ua', 'radar_dnepr', 'kharkiv_1654',
+  'zsu_insider', 'air_alarm_ua', 'ua_drones', 'mykolaiv_online',
+  'poltava_monitoring', 'cherkasy_today', 'sumy_today',
+  'uaradar', 'raketna_zagroza'
 ];
 
 const PRIVATE_TITLES = [
@@ -327,7 +278,7 @@ export async function startTelegramWorker(io: Server) {
                   finalLat,
                   finalLng,
                   new Date(message.date * 1000),
-                  channelDisplay,
+                  sourceId,
                   finalSpeed,
                   courseToUse,
                   confidence,
