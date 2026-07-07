@@ -1,1 +1,0 @@
-require(ts-node).register(); const p = require(./src/services/parser.ts); const text = авіація заходить на повторні пуски каб в напрямку вовчанськ; for (const [cityKey, coords] of Object.entries(p.CITY_COORDS)) { const regex = new RegExp((?:^|[^а-яіїєґ\'-])( + cityKey + ), i); const match = text.match(regex); if (match) console.log(Matched:, cityKey, at, match.index); }
