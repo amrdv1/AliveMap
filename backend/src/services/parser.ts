@@ -585,7 +585,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
               lat: (currentLoc || targetLoc).lat + jitter(),
               lng: (currentLoc || targetLoc).lng + jitter(),
               confidence: currentLoc ? 80 : 40,
-              direction: dir ?? Math.floor(Math.random() * 360),
+              direction: dir,
               quantity: qty,
               targetName: targetLoc.name,
               targetLat: targetLoc.lat,
@@ -603,7 +603,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
               lat: (currentLoc || targetLoc || {lat:0}).lat + jitter(),
               lng: (currentLoc || targetLoc || {lng:0}).lng + jitter(),
               confidence: currentLoc ? 80 : 40,
-              direction: dir ?? Math.floor(Math.random() * 360),
+              direction: dir,
               quantity: qty,
               targetName: targetLoc ? targetLoc.name : null,
               targetLat: targetLoc ? targetLoc.lat : null,
@@ -635,7 +635,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
         lat: plotLoc.lat + jitter(),
         lng: plotLoc.lng + jitter(),
         confidence: conf,
-        direction: dir ?? Math.floor(Math.random() * 360),
+        direction: dir,
         quantity: qty,
         targetName: targetLoc ? targetLoc.name : null,
         targetLat: targetLoc ? targetLoc.lat : null,
@@ -662,7 +662,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
 
 function legacyFallback(lowerText: string, type: ParsedThreat['type']): ParsedThreat[] {
   const qty = parseQuantity(lowerText);
-  const dir = parseDirection(lowerText) ?? Math.floor(Math.random() * 360);
+  const dir = parseDirection(lowerText);
   
   let spawn = GENERIC_SPAWN.DRONE_SOUTH;
   if (type === 'CRUISE_MISSILE' || type === 'MISSILE' || type === 'KH101' || type === 'KALIBR') spawn = GENERIC_SPAWN.CASPIAN_SEA;
