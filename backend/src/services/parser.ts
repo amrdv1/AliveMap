@@ -514,7 +514,7 @@ function parseTarget(text: string): { targetName: string | null, targetLat: numb
 
 function detectThreatType(text: string): ParsedThreat['type'] | null {
   const t = text.toLowerCase();
-  if (t.match(/(збит[оіа]|знищен[оіа]|перехоплен[оіа]|мінус|відбит[оіа]|ліквідован[оіа]|ппо\s*спрацюва|зенітн|вибух|влучанн|приліт|попав)/)) {
+  if (t.match(/(збит[оіа]|знищен[оіа]|перехоплен[оіа]|мінус|відбит[оіа]|ліквідован[оіа]|ппо\s*спрацюва|зенітн|вибух|влучанн|приліт|попав|зник|втрачен)/)) {
     if (!t.match(/(за добу|за ніч|за тиждень|підсумки|загалом|втрати)/)) return 'PPO';
   }
   if (t.match(/(циркон|3м22)/)) return 'ZIRCON';
@@ -550,7 +550,16 @@ export function parseTelegramText(text: string): ParsedThreat[] {
 
   // Filter out "all clear"
   if (lowerText.match(/(відбій|чисто\s+по|наразі\s+чисто|немає\s+загроз|спокійно|не\s+зафіксован|загроз\s+немає|поки\s+чисто)/)) {
-    return [{ type: 'INFO', lat: null, lng: null, confidence: 100, direction: null }];
+    let regionLat = null;
+    let regionLng = null;
+    for (const [key, coords] of Object.entries(CITY_COORDS)) {
+      if (lowerText.includes(key)) {
+        regionLat = coords.lat;
+        regionLng = coords.lng;
+        break;
+      }
+    }
+    return [{ type: 'INFO', lat: regionLat, lng: regionLng, confidence: 100, direction: null }];
   }
 
   const type = detectThreatType(text);

@@ -150,6 +150,8 @@ model MonitoringMessage {
   channelName String
   timestamp   DateTime
   tags        String[]
+  lat         Float?
+  lng         Float?
   createdAt   DateTime @default(now())
 }
 

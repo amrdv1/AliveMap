@@ -33,6 +33,8 @@ export interface MonitoringMessage {
   channelName: string;
   timestamp: string;
   tags: string[];
+  lat?: number | null;
+  lng?: number | null;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,6 +56,7 @@ export interface AppState {
   mapMode: 'dark' | 'satellite';
   is3D: boolean;
   showHeatmap: boolean;
+  flyToLocation: { lat: number, lng: number } | null;
   setThreats: (threats: ThreatObject[]) => void;
   updateThreat: (threat: ThreatObject) => void;
   setAlerts: (alerts: AlertsData) => void;
@@ -65,6 +68,7 @@ export interface AppState {
   setMapMode: (mode: 'dark' | 'satellite') => void;
   setIs3D: (val: boolean) => void;
   setShowHeatmap: (val: boolean) => void;
+  setFlyToLocation: (loc: { lat: number, lng: number } | null) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -76,6 +80,7 @@ export const useStore = create<AppState>((set) => ({
   mapMode: 'dark',
   is3D: false,
   showHeatmap: false,
+  flyToLocation: null,
   filters: {
     types: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KAB', 'AIRCRAFT', 'ALERT', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR', 'PPO', 'RECON', 'FPV', 'UNKNOWN'],
     showArchived: false,
@@ -102,4 +107,5 @@ export const useStore = create<AppState>((set) => ({
   setMapMode: (mode) => set({ mapMode: mode }),
   setIs3D: (val) => set({ is3D: val }),
   setShowHeatmap: (val) => set({ showHeatmap: val }),
+  setFlyToLocation: (loc) => set({ flyToLocation: loc }),
 }));

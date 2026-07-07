@@ -209,7 +209,7 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
 };
 
 export default function UkraineMap() {
-  const { alerts, threats, mapMode, is3D, showHeatmap, setIs3D } = useStore();
+  const { alerts, threats, mapMode, is3D, showHeatmap, setIs3D, flyToLocation, setFlyToLocation } = useStore();
   const [geoData, setGeoData] = useState<any>(null); // Districts
   const [geoDataStates, setGeoDataStates] = useState<any>(null); // States
   const mapRef = React.useRef<any>(null);
@@ -226,6 +226,19 @@ export default function UkraineMap() {
       .then((data) => setGeoDataStates(data))
       .catch((e) => console.error("Failed to load state regions", e));
   }, []);
+
+  useEffect(() => {
+    if (flyToLocation && mapRef.current) {
+      mapRef.current.flyTo({
+        center: [flyToLocation.lng, flyToLocation.lat],
+        zoom: 8,
+        duration: 1500,
+        essential: true
+      });
+      const timer = setTimeout(() => setFlyToLocation(null), 1600);
+      return () => clearTimeout(timer);
+    }
+  }, [flyToLocation, setFlyToLocation]);
 
   // Compute active alert region names
   const activeAlertRegionNames = useMemo(() => {

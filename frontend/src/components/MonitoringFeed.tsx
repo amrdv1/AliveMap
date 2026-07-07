@@ -45,6 +45,36 @@ export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ delay: index < 20 ? index * 0.03 : 0, duration: 0.3 }}
+              onClick={() => {
+                if (msg.lat && msg.lng) {
+                   useStore.getState().setFlyToLocation({ lat: msg.lat, lng: msg.lng });
+                   useStore.getState().setActiveTab('MAP');
+                   return;
+                }
+                // Fallback: search frontend threats
+                const state = useStore.getState();
+                const possibleThreats = state.threats.filter(t => msg.tags.includes(t.type));
+                if (possibleThreats.length > 0) {
+                  // Find the one closest in time
+                  const msgTime = new Date(msg.timestamp).getTime();
+                  let closest = possibleThreats[0];
+                  let minDiff = Math.abs(new Date(closest.updatedAt).getTime() - msgTime);
+                  for (const t of possibleThreats) {
+                    const diff = Math.abs(new Date(t.updatedAt).getTime() - msgTime);
+                    if (diff < minDiff) {
+                      minDiff = diff;
+                      closest = t;
+                    }
+                  }
+                  if (closest.locations.length > 0) {
+                    state.setFlyToLocation({ lat: closest.locations[0].lat, lng: closest.locations[0].lng });
+                    state.setActiveTab('MAP');
+                  } else if (closest.targetLat && closest.targetLng) {
+                    state.setFlyToLocation({ lat: closest.targetLat, lng: closest.targetLng });
+                    state.setActiveTab('MAP');
+                  }
+                }
+              }}
               className="p-4 bg-white/5 hover:bg-white/10 rounded-2xl transition-all cursor-pointer border border-white/5 hover:border-white/10 group"
             >
             <div className="flex justify-between items-center mb-3">

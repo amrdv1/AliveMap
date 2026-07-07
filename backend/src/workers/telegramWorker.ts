@@ -156,8 +156,9 @@ export async function startTelegramWorker(io: Server) {
         const channelDisplay = username || title || 'Monitoring';
         const threatType = parsedThreats[0].type;
 
-        // Only save to monitoring feed if it's actual target movement
-        if (MOVEMENT_TYPES.has(threatType)) {
+        // Save to monitoring feed if it's actual target movement or info/summary/ppo
+        const shouldSaveToFeed = MOVEMENT_TYPES.has(threatType) || ['INFO', 'SUMMARY', 'PPO'].includes(threatType);
+        if (shouldSaveToFeed) {
           const tags = [threatType];
           try {
             const savedMsg = await prisma.monitoringMessage.create({
@@ -165,7 +166,9 @@ export async function startTelegramWorker(io: Server) {
                 text,
                 channelName: channelDisplay,
                 timestamp: new Date(message.date * 1000),
-                tags
+                tags,
+                lat: parsedThreats[0].lat ?? null,
+                lng: parsedThreats[0].lng ?? null
               }
             });
             io.emit('monitoring:new_message', savedMsg);
@@ -174,8 +177,11 @@ export async function startTelegramWorker(io: Server) {
           }
         }
 
-        // Run AI extraction ONCE per message
-        const aiData = await extractWithAI(text);
+        // Run AI extraction ONCE per message (skip for INFO/SUMMARY)
+        let aiData = null;
+        if (threatType !== 'INFO' && threatType !== 'SUMMARY') {
+            aiData = await extractWithAI(text);
+        }
         const finalSpeed = aiData?.speed || null;
         const finalCourse = aiData?.course || null;
         const finalTarget = aiData?.predictedTarget || null;
@@ -221,6 +227,11 @@ export async function startTelegramWorker(io: Server) {
         // Add all matched targets to map (including PPO)
         for (const parsed of threatsToProcess) {
           if (parsed.lat !== null && parsed.lng !== null) {
+              if (parsed.type === 'INFO' || parsed.type === 'SUMMARY') {
+                  const { archiveThreatsNear } = require('../services/aggregatorService');
+                  await archiveThreatsNear(parsed.lat, parsed.lng, 150, io);
+                  continue;
+              }
               const confidence = (parsed.confidence || 80) / 100;
               const courseToUse = finalCourse ?? parsed.direction;
               const targetToUse = finalTarget ?? parsed.targetName;
@@ -283,7 +294,8 @@ export async function startTelegramWorker(io: Server) {
                         // Only save to monitoring if it's actual target movement and fresh (<2h)
                         const isFreshMonitoring = (Date.now() - msgTime) < 2 * 60 * 60 * 1000;
 
-                        if (isFreshMonitoring && MOVEMENT_TYPES.has(threatType)) {
+                        const shouldSaveToFeedHistory = MOVEMENT_TYPES.has(threatType) || ['INFO', 'SUMMARY', 'PPO'].includes(threatType);
+                        if (isFreshMonitoring && shouldSaveToFeedHistory) {
                             const tags = [threatType];
                             try {
                                 const existing = await prisma.monitoringMessage.findFirst({
@@ -299,7 +311,9 @@ export async function startTelegramWorker(io: Server) {
                                             text: message.message,
                                             channelName: channelDisplay,
                                             timestamp: new Date(message.date * 1000),
-                                            tags
+                                            tags,
+                                            lat: parsedThreats[0].lat ?? null,
+                                            lng: parsedThreats[0].lng ?? null
                                         }
                                     });
                                     io.emit('monitoring:new_message', savedMsg);
@@ -315,6 +329,11 @@ export async function startTelegramWorker(io: Server) {
                         if (isFresh) {
                             for (const parsed of parsedThreats) {
                                 if (parsed.lat !== null && parsed.lng !== null) {
+                                    if (parsed.type === 'INFO' || parsed.type === 'SUMMARY') {
+                                        const { archiveThreatsNear } = require('../services/aggregatorService');
+                                        await archiveThreatsNear(parsed.lat, parsed.lng, 150, io);
+                                        continue;
+                                    }
                                     const savedThreat = await processExternalThreat(
                                         null, parsed.type as any, parsed.lat, parsed.lng,
                                         new Date(msgTime),
@@ -339,13 +358,24 @@ export async function startTelegramWorker(io: Server) {
     // ─── CLEANUP: Delete old messages every minute ────────────────────────
     const cleanupOldMessages = async () => {
         try {
-            // Delete messages older than 2 hours
+            // Delete monitoring messages older than 2 hours
             const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
             const deleted = await prisma.monitoringMessage.deleteMany({
                 where: { timestamp: { lt: twoHoursAgo } }
             });
             if (deleted.count > 0) {
                 console.log(`[Cleanup] Deleted ${deleted.count} old monitoring messages.`);
+            }
+
+            // Archive old active threats (10 minutes)
+            const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
+            const archived = await prisma.threatObject.updateMany({
+                where: { status: 'ACTIVE', updatedAt: { lt: tenMinsAgo } },
+                data: { status: 'ARCHIVED' }
+            });
+            if (archived.count > 0) {
+                console.log(`[Cleanup] Archived ${archived.count} inactive threats (>10m).`);
+                io.emit('threats:refresh');
             }
 
             // Also cap total messages to latest 150
@@ -380,14 +410,14 @@ export async function startTelegramWorker(io: Server) {
         }
     };
 
-    // Archive only threats older than 2 hours (keep recent ones alive across restarts)
+    // Archive only threats older than 10 minutes (keep recent ones alive across restarts)
     try {
-        const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+        const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
         const archived = await prisma.threatObject.updateMany({
-            where: { status: 'ACTIVE', updatedAt: { lt: twoHoursAgo } },
+            where: { status: 'ACTIVE', updatedAt: { lt: tenMinsAgo } },
             data: { status: 'ARCHIVED' }
         });
-        console.log(`[Startup] Archived ${archived.count} old threats (>2h).`);
+        console.log(`[Startup] Archived ${archived.count} old threats (>10m).`);
     } catch(e) {}
 
     // Run initial cleanup
