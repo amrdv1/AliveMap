@@ -1,1 +1,0 @@
-const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { const threats = await prisma.threatObject.findMany({ where: { status: 'ACTIVE' } }); console.log(threats); } main().catch(e = 
