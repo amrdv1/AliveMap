@@ -180,8 +180,13 @@ export async function startTelegramWorker(io: Server) {
       const username = 'username' in chat && chat.username ? chat.username.toLowerCase() : null;
       const title = 'title' in chat && chat.title ? chat.title : null;
       
-      // Allow any chat/channel to be parsed. The NLP parser will automatically ignore non-military messages.
-      if (true) {
+      // Only process messages from our monitored channels, ignore personal chats
+      const channelsLower = CHANNELS.map(c => c.toLowerCase());
+      const isMonitoredChannel = (username && channelsLower.includes(username)) || 
+                                  (title && channelsLower.some(c => title.toLowerCase().includes(c)));
+      if (!isMonitoredChannel) return;
+
+      {
         const text = message.message;
         const parsedThreats = parseTelegramText(text);
         if (!parsedThreats || parsedThreats.length === 0) return;
