@@ -355,7 +355,7 @@ export async function startTelegramWorker(io: Server) {
                                           continue;
                                       }
                                       const savedThreat = await processExternalThreat(
-                                        null, parsed.type as any, parsed.lat, parsed.lng,
+                                        null, parsed.type as any, finalLat, finalLng,
                                         new Date(msgTime),
                                         sourceId, null, parsed.direction, parsed.confidence / 100,
                                         parsed.quantity, parsed.targetName ?? null, parsed.targetLat ?? null, parsed.targetLng ?? null
