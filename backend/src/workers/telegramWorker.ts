@@ -270,7 +270,7 @@ export async function startTelegramWorker(io: Server) {
                 // Smart Notification
                 if (savedThreat.speed && savedThreat.course != null) {
                     const { sendSmartThreatNotification } = require('./botWorker');
-                    sendSmartThreatNotification(savedThreat.type, savedThreat.lat, savedThreat.lng, savedThreat.speed, savedThreat.course);
+                    sendSmartThreatNotification(savedThreat.type, finalLat, finalLng, savedThreat.speed, savedThreat.course);
                 }
             }
           }
