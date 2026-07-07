@@ -53,20 +53,31 @@ export async function startMapaWorker(io: Server) {
         });
 
         let matchedThreat = null;
+        let minDistance = Infinity;
+        
         for (const t of recentThreats) {
+          let dist = Infinity;
           if (t.locations.length > 0) {
             const loc = t.locations[0];
-            const dist = getDistanceFromLatLonInKm(lat, lon, loc.lat, loc.lng);
-            // If within 50km, assume it's the same object being tracked by Telegram
-            if (dist < 50) { 
-              matchedThreat = t;
-              break;
-            }
+            dist = getDistanceFromLatLonInKm(lat, lon, loc.lat, loc.lng);
+          }
+
+          // Increased radius to 150km because Telegram geocoding can be off by region centers, 
+          // and missiles travel fast between MAPA polls
+          if (dist < 150 && dist < minDistance) { 
+            matchedThreat = t;
+            minDistance = dist;
           }
         }
 
-        // ONLY UPDATE if we found a match (Telegram already reported it)
-        // DO NOT create new threats blindly!
+        // If no location match, but there's a threat of the SAME TYPE with NO locations, link it
+        if (!matchedThreat) {
+           const locationlessThreat = recentThreats.find(t => t.locations.length === 0);
+           if (locationlessThreat) {
+               matchedThreat = locationlessThreat;
+           }
+        }
+
         if (matchedThreat) {
           // Check if we already have this exact timestamp from MAPA to avoid spamming
           const lastMapaLoc = await prisma.threatLocation.findFirst({
@@ -80,6 +91,7 @@ export async function startMapaWorker(io: Server) {
                 data: {
                   speed: speed ?? matchedThreat.speed,
                   course: course ?? matchedThreat.course,
+                  confidence: 1.0, // MAPA is high confidence
                   locations: {
                     create: {
                       lat,
@@ -92,9 +104,31 @@ export async function startMapaWorker(io: Server) {
                 include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
               });
               
-              // Broadcast the refined coordinates and speed/course
               io.emit('threat:update', updatedThreat);
           }
+        } else {
+           // CREATE NEW THREAT FROM MAPA
+           const newThreat = await prisma.threatObject.create({
+              data: {
+                 type: threatType,
+                 status: ReportStatus.ACTIVE,
+                 confidence: 1.0,
+                 speed: speed,
+                 course: course,
+                 firstSeen: timestamp,
+                 locations: {
+                    create: {
+                       lat,
+                       lng: lon,
+                       time: timestamp,
+                       sourceId: source!.id
+                    }
+                 }
+              },
+              include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
+           });
+           
+           io.emit('threat:new', newThreat);
         }
       }
     } catch (error: any) {
@@ -103,7 +137,7 @@ export async function startMapaWorker(io: Server) {
   };
 
   fetchMapaData();
-  setInterval(fetchMapaData, 15000); // Poll every 15 seconds
+  setInterval(fetchMapaData, 20000); // Poll every 20 seconds
 }
 
 function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
