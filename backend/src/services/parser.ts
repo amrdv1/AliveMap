@@ -21,6 +21,8 @@ export const CITY_COORDS: Record<string, {lat: number, lng: number}> = {
   "дніпр": { lat: 48.4647, lng: 35.0462 },
   "миколаїв": { lat: 46.9750, lng: 31.9946 },
   "запоріжж": { lat: 47.8388, lng: 35.1396 },
+  "балабин": { lat: 47.747, lng: 35.215 },
+  "балабине": { lat: 47.747, lng: 35.215 },
   "херсон": { lat: 46.6354, lng: 32.6169 },
   "черніг": { lat: 51.4982, lng: 31.2893 },
   "сум": { lat: 50.9077, lng: 34.7981 },
@@ -513,7 +515,7 @@ function detectThreatType(text: string): ParsedThreat['type'] | null {
   if (t.match(/(каб|фаб|авіабомб|бомб)/)) return 'KAB';
   if (t.match(/(fpv|фпв|фпві)/)) return 'FPV';
   if (t.match(/(розвідник|орлан|zala|зала|supercam|суперкам|recon)/)) return 'RECON';
-  if (t.match(/(шахед|бпла|дрон|мопед|геран|drone|shahed)/)) return 'DRONE';
+  if (t.match(/(шахед|бпла|\bдрон\b|\bдрони\b|мопед|геран|\bdrone\b|shahed)/)) return 'DRONE';
   if (t.match(/(авіація|су-3|су-2|міг|ту-9|ту-2|літак|борти)/)) return 'AIRCRAFT';
   
   if (t.match(/(невідома ціль|невідомі цілі|невідомий об\.єкт|невідомі об\.єкти|ціль|об\.єкт)/) && !t.match(/невідомо/)) return 'UNKNOWN';
