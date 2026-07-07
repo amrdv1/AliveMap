@@ -161,16 +161,21 @@ router.get('/api-logs', async (req, res) => {
 
 // Get Change Logs
 router.get('/change-logs', async (req, res) => {
-  try {
-    const logs = await prisma.changeLog.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 100,
-      include: { user: { select: { email: true } } }
-    });
-    res.json(logs);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch logs' });
-  }
+    try {
+      const logs = await prisma.changeLog.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+        include: { user: { select: { email: true } } }
+      });
+      res.json(logs);
+    } catch (e) {
+      res.status(500).json({ error: "Failed to fetch change logs" });
+    }
+});
+
+router.get('/server-logs', async (req, res) => {
+    const { memoryLogs } = require('../logCatcher');
+    res.json({ logs: memoryLogs });
 });
 
 export default router;
