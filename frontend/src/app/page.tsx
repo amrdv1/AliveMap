@@ -160,9 +160,9 @@ export default function Home() {
                   useStore.getState().setActiveTab('MAP');
                 }
               }}
-              className="fixed inset-0 pt-16 pb-20 z-50 bg-black/95 backdrop-blur-3xl overflow-hidden shadow-[0_-10px_40px_rgba(0,0,0,0.8)] rounded-t-3xl border-t border-white/10"
+              className="fixed inset-0 pt-14 pb-[76px] z-50 bg-black/95 backdrop-blur-3xl overflow-hidden"
             >
-              <div className="w-16 h-1.5 bg-gray-600 rounded-full mx-auto mb-2 opacity-50 cursor-grab active:cursor-grabbing" />
+              <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-2 mb-1 cursor-grab active:cursor-grabbing" />
               <MonitoringFeed isMobile />
             </motion.div>
           )}

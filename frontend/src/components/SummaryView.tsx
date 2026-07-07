@@ -25,13 +25,13 @@ export default function SummaryView() {
   const unknowns = activeThreats.filter(t => t.type === 'UNKNOWN').length;
 
   return (
-    <div className="absolute inset-0 z-20 bg-black/40 backdrop-blur-md pt-24 px-4 pb-24 overflow-y-auto custom-scrollbar flex justify-center">
+    <div className="absolute inset-0 z-20 bg-black/40 backdrop-blur-md pt-16 md:pt-24 px-4 pb-20 md:pb-24 overflow-y-auto custom-scrollbar flex justify-center">
       <div className="w-full max-w-4xl flex flex-col gap-6">
         
         {/* Header */}
         <div className="bg-gradient-to-r from-white/[0.05] to-transparent backdrop-blur-3xl border border-white/10 rounded-3xl p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
           <div>
-            <h1 className="text-3xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
+            <h1 className="text-xl md:text-3xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
               <ShieldAlert className="text-red-500 w-8 h-8" />
               Оперативне Зведення
             </h1>

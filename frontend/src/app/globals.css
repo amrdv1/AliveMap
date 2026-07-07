@@ -8,6 +8,30 @@
 body {
   background: var(--color-background);
   color: var(--color-foreground);
+  /* Mobile: prevent rubber-band overscroll */
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  /* Support iPhone safe areas */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* Prevent text selection on interactive elements (mobile UX) */
+button, [role="button"], nav {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Prevent iOS 300ms tap delay */
+html {
+  touch-action: manipulation;
+}
+
+/* Fix mobile 100vh issue */
+@supports (height: 100dvh) {
+  .h-screen, .min-h-screen {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+  }
 }
 
 .leaflet-container {

@@ -16,6 +16,19 @@ export const metadata: Metadata = {
   title: "AliveMap — Карта повітряних загроз України в реальному часі",
   description: "Моніторинг повітряного простору України у реальному часі. Відстеження шахедів, ракет, балістики, авіації та повітряних тривог.",
   keywords: ["AliveMap", "карта тривог", "повітряна тривога", "Україна", "шахеди", "ракети", "моніторинг"],
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: 'cover',
+  },
+  themeColor: '#000000',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'AliveMap',
+  },
 };
 
 export default function RootLayout({
