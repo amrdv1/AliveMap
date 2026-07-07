@@ -182,8 +182,22 @@ export async function startTelegramWorker(io: Server) {
 
         let overrideParsedThreats: any[] = [];
         
-        // If AI found specific locations, geocode them!
-        if (aiData?.locationNames && aiData.locationNames.length > 0) {
+        // If AI found exact coordinates, use them directly!
+        if (aiData?.targetLat && aiData?.targetLng) {
+           overrideParsedThreats.push({
+               type: parsedThreats[0].type,
+               lat: aiData.targetLat,
+               lng: aiData.targetLng,
+               confidence: 95,
+               direction: finalCourse ?? parsedThreats[0].direction,
+               quantity: parsedThreats[0].quantity,
+               targetName: finalTarget ?? parsedThreats[0].targetName,
+               targetLat: null,
+               targetLng: null
+           });
+        }
+        // Otherwise, if AI found specific locations, geocode them!
+        else if (aiData?.locationNames && aiData.locationNames.length > 0) {
            for (const locName of aiData.locationNames) {
               const coords = await geocodeLocation(locName);
               if (coords) {
