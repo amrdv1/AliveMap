@@ -127,9 +127,9 @@ server.listen(PORT, async () => {
   // Cleanup old monitoring messages (>24h) and archived threats (>6h)
   setInterval(async () => {
     try {
-      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const fortyMinsAgo = new Date(Date.now() - 40 * 60 * 1000);
       const deletedMsgs = await prisma.monitoringMessage.deleteMany({
-        where: { timestamp: { lt: twentyFourHoursAgo } }
+        where: { timestamp: { lt: fortyMinsAgo } }
       });
       if (deletedMsgs.count > 0) {
         console.log(`[Cleanup] Deleted ${deletedMsgs.count} old monitoring messages.`);
