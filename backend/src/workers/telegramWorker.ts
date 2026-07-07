@@ -280,8 +280,8 @@ export async function startTelegramWorker(io: Server) {
                         const channelDisplay = channel;
                         const threatType = parsedThreats[0].type;
 
-                        // Only save to monitoring if it's actual target movement and fresh (<12h)
-                        const isFreshMonitoring = (Date.now() - msgTime) < 12 * 60 * 60 * 1000;
+                        // Only save to monitoring if it's actual target movement and fresh (<2h)
+                        const isFreshMonitoring = (Date.now() - msgTime) < 2 * 60 * 60 * 1000;
 
                         if (isFreshMonitoring && MOVEMENT_TYPES.has(threatType)) {
                             const tags = [threatType];
@@ -339,19 +339,19 @@ export async function startTelegramWorker(io: Server) {
     // ─── CLEANUP: Delete old messages every minute ────────────────────────
     const cleanupOldMessages = async () => {
         try {
-            // Delete messages older than 6 hours
-            const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
+            // Delete messages older than 2 hours
+            const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
             const deleted = await prisma.monitoringMessage.deleteMany({
-                where: { timestamp: { lt: sixHoursAgo } }
+                where: { timestamp: { lt: twoHoursAgo } }
             });
             if (deleted.count > 0) {
                 console.log(`[Cleanup] Deleted ${deleted.count} old monitoring messages.`);
             }
 
-            // Also cap total messages to latest 500
+            // Also cap total messages to latest 150
             const totalCount = await prisma.monitoringMessage.count();
-            if (totalCount > 500) {
-                const toDelete = totalCount - 500;
+            if (totalCount > 150) {
+                const toDelete = totalCount - 150;
                 const oldest = await prisma.monitoringMessage.findMany({
                     orderBy: { timestamp: 'asc' },
                     take: toDelete,
