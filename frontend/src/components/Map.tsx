@@ -221,7 +221,7 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
 };
 
 export default function UkraineMap() {
-  const { alerts, threats, mapMode, is3D, showHeatmap, setIs3D, flyToLocation, setFlyToLocation } = useStore();
+  const { alerts, threats, filters, mapMode, is3D, showHeatmap, setIs3D, flyToLocation, setFlyToLocation } = useStore();
   const [geoData, setGeoData] = useState<any>(null); // Districts
   const [geoDataStates, setGeoDataStates] = useState<any>(null); // States
   const mapRef = React.useRef<any>(null);
@@ -306,6 +306,11 @@ export default function UkraineMap() {
       }))
     };
   }, [threats]);
+
+  const filteredThreats = useMemo(() => {
+    if (filters.types.length === 0) return []; // If no filters, show nothing, or maybe show everything? User expects to uncheck to hide. So if empty, show nothing.
+    return threats.filter(t => filters.types.includes(t.type));
+  }, [threats, filters.types]);
 
   const [selectedThreat, setSelectedThreat] = useState<ThreatObject | null>(null);
 
@@ -485,7 +490,7 @@ export default function UkraineMap() {
           )}
 
           {/* Threats */}
-          {threats.map(t => (
+          {filteredThreats.map(t => (
             <ThreatMarker 
                key={t.id} 
                threat={t} 
