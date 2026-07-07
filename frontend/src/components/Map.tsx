@@ -133,7 +133,24 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
 
        const distance = speedKmh * Math.max(0, elapsedHours);
        const dest = turf.destination(startPt, distance, bearing, { units: 'kilometers' });
-       setCurrentLoc({ lng: dest.geometry.coordinates[0], lat: dest.geometry.coordinates[1] });
+       const newLng = dest.geometry.coordinates[0];
+       const newLat = dest.geometry.coordinates[1];
+
+       // Stop extrapolating if target has reached or passed its destination
+       if (threat.targetLat && threat.targetLng) {
+         const distToTarget = turf.distance(
+           turf.point([loc.lng, loc.lat]),
+           turf.point([threat.targetLng, threat.targetLat]),
+           { units: 'kilometers' }
+         );
+         if (distance >= distToTarget) {
+           // Target has arrived at destination — clamp to target position
+           setCurrentLoc({ lng: threat.targetLng, lat: threat.targetLat });
+           return;
+         }
+       }
+
+       setCurrentLoc({ lng: newLng, lat: newLat });
     };
 
     updatePosition();
