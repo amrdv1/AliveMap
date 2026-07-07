@@ -512,7 +512,7 @@ function detectThreatType(text: string): ParsedThreat['type'] | null {
   if (t.match(/(х-101|х-55|kh-101|крилат)/)) return 'KH101';
   if (t.match(/(балістик|баллистик)/)) return 'BALLISTIC_MISSILE';
   if (t.match(/(ракет|missile)/)) return 'MISSILE';
-  if (t.match(/(каб|фаб|авіабомб|бомб)/)) return 'KAB';
+  if (t.match(/(\bкаб\b|\bкаби\b|\bкабів\b|\bфаб\b|\bфаби\b|авіабомб|\bбомб\b|\bбомби\b|\bбомбу\b)/)) return 'KAB';
   if (t.match(/(fpv|фпв|фпві)/)) return 'FPV';
   if (t.match(/(розвідник|орлан|zala|зала|supercam|суперкам|recon)/)) return 'RECON';
   if (t.match(/(шахед|бпла|\bдрон\b|\bдрони\b|мопед|геран|\bdrone\b|shahed)/)) return 'DRONE';
