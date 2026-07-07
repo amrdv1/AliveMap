@@ -199,7 +199,7 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
                  {threat.targetName ? ` курсом на ${threat.targetName}` : (threat.course != null ? `, курс ${getCourseText(threat.course).toLowerCase()}` : '')}.
                  <br/>
                  Підтверджень: {Math.max(1, Math.round(threat.confidence * 5) - 1)}.
-                 {threat.speed ? ` Швидкість: ${threat.speed} км/год.` : ''}
+                 {threat.speed ? ` Швидкість: ${Math.round(threat.speed)} км/год.` : ''}
               </div>
               <div className="text-[12px] text-orange-400/90 mb-4 flex items-center gap-2">
                  ⚠️ Розташування приблизне
