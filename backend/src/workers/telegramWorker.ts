@@ -75,7 +75,29 @@ const CHANNELS = [
   'monitor_ua',
   'monitor_map',
   'war_monitor',
-  'monitoring_ukraine'
+  'monitoring_ukraine',
+
+  // --- Additional Air Monitoring Channels ---
+  'air_alert_ua',        // Повітряна тривога Україна
+  'zahyst_ua',           // Захист UA
+  'operativno_kharkiv',  // Оперативно Харків
+  'radar_dnepr',         // Радар Дніпро
+  'kharkiv_1654',        // Харків 1654
+  'zsu_insider',         // ЗСУ інсайдер
+  'air_alarm_ua',        // Air Alarm UA
+  'ua_drones',           // UA Дрони
+  'operativno_zp',       // Оперативно Запоріжжя
+  'operativno_dnipro',   // Оперативно Дніпро
+  'mykolaiv_online',     // Миколаїв Онлайн
+  'kherson_life',        // Херсон Life
+  'poltava_monitoring',  // Полтава Моніторинг
+  'cherkasy_today',      // Черкаси Today
+  'zhytomyr_online',     // Житомир Онлайн
+  'sumy_today',          // Суми Today
+  'chernihiv_info',      // Чернігів Інфо
+  'vinnytsia_info',      // Вінниця Інфо
+  'uaradar',             // UA Радар
+  'raketna_zagroza'      // Ракетна загроза
 ];
 
 const PRIVATE_TITLES = [
@@ -338,7 +360,7 @@ export async function startTelegramWorker(io: Server) {
             const pollChannels = [...CHANNELS];
             for (const channel of pollChannels) {
                 try {
-                    await new Promise(r => setTimeout(r, 3000)); // 3s delay to prevent FloodWait
+                    await new Promise(r => setTimeout(r, 1500)); // 1.5s delay to prevent FloodWait
                     const messages = await client.getMessages(channel, { limit: 10 });
                     
                     for (const message of messages.reverse()) {
