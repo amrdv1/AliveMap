@@ -95,7 +95,6 @@ router.delete('/threats/clear-all', async (req, res) => {
   try {
     await prisma.threatLocation.deleteMany({});
     await prisma.threatObject.deleteMany({});
-    await prisma.monitoringMessage.deleteMany({});
     
     await prisma.changeLog.create({
       data: {
@@ -103,7 +102,7 @@ router.delete('/threats/clear-all', async (req, res) => {
         entity: 'ThreatObject',
         entityId: 'ALL',
         action: 'DELETE',
-        oldData: 'Deleted all threats and messages'
+        oldData: 'Deleted all threats'
       }
     });
 
@@ -118,7 +117,6 @@ router.get('/clear-all-now', async (req, res) => {
   try {
     await prisma.threatLocation.deleteMany({});
     await prisma.threatObject.deleteMany({});
-    await prisma.monitoringMessage.deleteMany({});
     
     res.json({ success: true, message: "Database completely cleared! All old messages and targets deleted." });
   } catch (error: any) {
