@@ -103,9 +103,16 @@ export async function startTelegramWorker(io: Server) {
   while (!connected && retries < 15) {
     try {
       await client.connect();
+      // Use a timeout for getMe() to prevent hanging on AUTH_KEY_DUPLICATED during zero-downtime deploys
+      const me = await Promise.race([
+        client.getMe(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout getting user info (GramJS hung)")), 10000))
+      ]) as any;
+      console.log(`Logged in as: ${me.username || me.id}`);
       connected = true;
     } catch (error: any) {
       console.error(`Error connecting Telegram worker (Attempt ${retries + 1}/15):`, error.message);
+      try { await client.disconnect(); } catch(e) {}
       retries++;
       await new Promise(resolve => setTimeout(resolve, 5000));
     }
@@ -117,15 +124,6 @@ export async function startTelegramWorker(io: Server) {
   }
 
   try {
-    console.log("Connected to Telegram using string session.");
-
-    // Use a timeout for getMe() to prevent hanging on AUTH_KEY_DUPLICATED during zero-downtime deploys
-    const me = await Promise.race([
-        client.getMe(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout getting user info (GramJS hung)")), 10000))
-    ]) as any;
-    console.log(`Logged in as: ${me.username || me.id}`);
-
     let source = await prisma.source.findFirst({ where: { name: 'Telegram Worker' } });
     if (!source) {
       source = await prisma.source.create({
