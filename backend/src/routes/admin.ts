@@ -90,11 +90,12 @@ router.put('/threats/:id', async (req, res) => {
   }
 });
 
-// Delete ALL threats (Clear DB)
+// Delete ALL threats (Clear DB) via DELETE
 router.delete('/threats/clear-all', async (req, res) => {
   try {
     await prisma.threatLocation.deleteMany({});
     await prisma.threatObject.deleteMany({});
+    await prisma.monitoringMessage.deleteMany({});
     
     await prisma.changeLog.create({
       data: {
@@ -102,11 +103,24 @@ router.delete('/threats/clear-all', async (req, res) => {
         entity: 'ThreatObject',
         entityId: 'ALL',
         action: 'DELETE',
-        oldData: 'Deleted all threats'
+        oldData: 'Deleted all threats and messages'
       }
     });
 
     res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete ALL threats (Clear DB) via GET for easy browser access
+router.get('/clear-all-now', async (req, res) => {
+  try {
+    await prisma.threatLocation.deleteMany({});
+    await prisma.threatObject.deleteMany({});
+    await prisma.monitoringMessage.deleteMany({});
+    
+    res.json({ success: true, message: "Database completely cleared! All old messages and targets deleted." });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
