@@ -227,7 +227,8 @@ export async function startTelegramWorker(io: Server) {
           if (parsed.lat !== null && parsed.lng !== null) {
               if (parsed.type === 'INFO' || parsed.type === 'SUMMARY') {
                   const { archiveThreatsNear } = require('../services/aggregatorService');
-                  await archiveThreatsNear(parsed.lat, parsed.lng, 150, io);
+                  const radius = parsed.confidence === 50 ? 2000 : 150;
+                  await archiveThreatsNear(parsed.lat, parsed.lng, radius, io);
                   continue;
               }
               const confidence = (parsed.confidence || 80) / 100;
@@ -328,7 +329,8 @@ export async function startTelegramWorker(io: Server) {
                                 if (parsed.lat !== null && parsed.lng !== null) {
                                     if (parsed.type === 'INFO' || parsed.type === 'SUMMARY') {
                                         const { archiveThreatsNear } = require('../services/aggregatorService');
-                                        await archiveThreatsNear(parsed.lat, parsed.lng, 150, io);
+                                        const radius = parsed.confidence === 50 ? 2000 : 150;
+                                        await archiveThreatsNear(parsed.lat, parsed.lng, radius, io);
                                         continue;
                                     }
                                     const savedThreat = await processExternalThreat(
