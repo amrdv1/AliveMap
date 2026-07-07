@@ -113,6 +113,10 @@ export const useStore = create<AppState>((set) => ({
   setAlerts: (alerts) => set({ alerts }),
   setMessages: (messages) => set({ messages }),
   addMessage: (message) => set((state) => ({ messages: [message, ...state.messages].slice(0, 500) })),
+  cleanupMessages: () => set((state) => {
+    const threshold = Date.now() - 30 * 60 * 1000;
+    return { messages: state.messages.filter(m => new Date(m.timestamp).getTime() >= threshold) };
+  }),
   setFilter: (key, value) => set((state) => ({
     filters: { ...state.filters, [key]: value }
   })),
