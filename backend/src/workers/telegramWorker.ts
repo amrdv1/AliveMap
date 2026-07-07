@@ -95,7 +95,7 @@ export async function startTelegramWorker(io: Server) {
 
   const stringSession = new StringSession(sessionString);
   const client = new TelegramClient(stringSession, apiId, apiHash, {
-    connectionRetries: 5,
+    connectionRetries: 0,
   });
 
   let connected = false;
