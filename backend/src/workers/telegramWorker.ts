@@ -186,35 +186,35 @@ export async function startTelegramWorker(io: Server) {
 
         let overrideParsedThreats: any[] = [];
         
-        // If AI found exact coordinates, use them directly!
+        // If AI found exact coordinates, use them for the target!
         if (aiData?.targetLat && aiData?.targetLng) {
            overrideParsedThreats.push({
                type: parsedThreats[0].type,
-               lat: aiData.targetLat,
-               lng: aiData.targetLng,
+               lat: parsedThreats[0].lat,
+               lng: parsedThreats[0].lng,
                confidence: 95,
                direction: finalCourse ?? parsedThreats[0].direction,
                quantity: parsedThreats[0].quantity,
                targetName: finalTarget ?? parsedThreats[0].targetName,
-               targetLat: null,
-               targetLng: null
+               targetLat: aiData.targetLat,
+               targetLng: aiData.targetLng
            });
         }
-        // Otherwise, if AI found specific locations, geocode them!
+        // Otherwise, if AI found specific locations, geocode them and use as target!
         else if (aiData?.locationNames && aiData.locationNames.length > 0) {
            for (const locName of aiData.locationNames) {
               const coords = await geocodeLocation(locName);
               if (coords) {
                  overrideParsedThreats.push({
                     type: parsedThreats[0].type,
-                    lat: coords.lat,
-                    lng: coords.lng,
+                    lat: parsedThreats[0].lat,
+                    lng: parsedThreats[0].lng,
                     confidence: 95,
                     direction: finalCourse ?? parsedThreats[0].direction,
                     quantity: parsedThreats[0].quantity,
                     targetName: finalTarget ?? parsedThreats[0].targetName,
-                    targetLat: null,
-                    targetLng: null
+                    targetLat: coords.lat,
+                    targetLng: coords.lng
                  });
               }
            }
@@ -224,18 +224,21 @@ export async function startTelegramWorker(io: Server) {
 
         // Add all matched targets to map (including PPO)
         for (const parsed of threatsToProcess) {
-          if (parsed.lat !== null && parsed.lng !== null) {
+          const finalLat = parsed.lat ?? parsed.targetLat;
+          const finalLng = parsed.lng ?? parsed.targetLng;
+
+          if (finalLat !== null && finalLng !== null) {
               if (parsed.type === 'INFO' || parsed.type === 'SUMMARY') {
                   const { archiveThreatsNear } = require('../services/aggregatorService');
                   const radius = parsed.confidence === 50 ? 2000 : 150;
-                  await archiveThreatsNear(parsed.lat, parsed.lng, radius, io);
+                  await archiveThreatsNear(finalLat, finalLng, radius, io);
                   continue;
               }
               
               if (parsed.type === 'PPO') {
-                  io.emit('explosion:new', { id: Math.random().toString(36).substring(7), lat: parsed.lat, lng: parsed.lng, timestamp: Date.now() });
+                  io.emit('explosion:new', { id: Math.random().toString(36).substring(7), lat: finalLat, lng: finalLng, timestamp: Date.now() });
                   const { archiveThreatsNear } = require('../services/aggregatorService');
-                  await archiveThreatsNear(parsed.lat, parsed.lng, 30, io);
+                  await archiveThreatsNear(finalLat, finalLng, 30, io);
                   continue;
               }
 
@@ -248,17 +251,17 @@ export async function startTelegramWorker(io: Server) {
               const savedThreat = await processExternalThreat(
                   null,
                   parsed.type as any,
-                  parsed.lat,
-                  parsed.lng,
-                  new Date(),
-                  sourceId,
+                  finalLat,
+                  finalLng,
+                  new Date(message.date * 1000),
+                  channelDisplay,
                   finalSpeed,
                   courseToUse,
                   confidence,
-                  parsed.quantity ?? 1,
+                  parsed.quantity || 1,
                   targetToUse,
-                  parsed.targetLat ?? null,
-                  parsed.targetLng ?? null
+                  parsed.targetLat || null,
+                  parsed.targetLng || null
               );
               
             if (savedThreat) {
@@ -334,17 +337,21 @@ export async function startTelegramWorker(io: Server) {
                         
                         if (isFreshMap) {
                             for (const parsed of parsedThreats) {
-                                if (parsed.lat !== null && parsed.lng !== null) {
+                                // Fallback lat/lng to targetLat/targetLng for map spawning
+                                const finalLat = parsed.lat ?? parsed.targetLat;
+                                const finalLng = parsed.lng ?? parsed.targetLng;
+
+                                if (finalLat !== null && finalLng !== null) {
                                       if (parsed.type === 'INFO' || parsed.type === 'SUMMARY') {
                                           const { archiveThreatsNear } = require('../services/aggregatorService');
                                           const radius = parsed.confidence === 50 ? 2000 : 150;
-                                          await archiveThreatsNear(parsed.lat, parsed.lng, radius, io);
+                                          await archiveThreatsNear(finalLat, finalLng, radius, io);
                                           continue;
                                       }
                                       if (parsed.type === 'PPO') {
-                                          io.emit('explosion:new', { id: Math.random().toString(36).substring(7), lat: parsed.lat, lng: parsed.lng, timestamp: Date.now() });
+                                          io.emit('explosion:new', { id: Math.random().toString(36).substring(7), lat: finalLat, lng: finalLng, timestamp: Date.now() });
                                           const { archiveThreatsNear } = require('../services/aggregatorService');
-                                          await archiveThreatsNear(parsed.lat, parsed.lng, 30, io);
+                                          await archiveThreatsNear(finalLat, finalLng, 30, io);
                                           continue;
                                       }
                                       const savedThreat = await processExternalThreat(
