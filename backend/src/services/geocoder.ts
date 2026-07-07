@@ -36,7 +36,7 @@ export async function geocodeLocation(locationName: string): Promise<GeocodeResu
     // Nominatim strictly requires a valid User-Agent
     const response = await axios.get(url, {
       headers: {
-        'User-Agent': 'AliveMap-Target-Parser/1.0 (alivemap@example.com)'
+        'User-Agent': 'AliveMap-Target-Parser/1.0 (contact@' + Math.random().toString(36).substring(7) + '.com)'
       }
     });
 
