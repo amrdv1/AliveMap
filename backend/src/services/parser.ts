@@ -468,7 +468,9 @@ export const CITY_COORDS: Record<string, {lat: number, lng: number}> = {
   "острів": { lat: 46.61, lng: 32.59 },
   "остров": { lat: 46.61, lng: 32.59 },
   "кізомис": { lat: 46.58, lng: 32.32 },
-  "кизомыс": { lat: 46.58, lng: 32.32 }
+  "кизомыс": { lat: 46.58, lng: 32.32 },
+  "піски-радьківські": { lat: 49.26, lng: 37.61 },
+  "пески-радьковские": { lat: 49.26, lng: 37.61 }
 };
 
 export const AIRBASE_COORDS: Record<string, {lat: number, lng: number}> = {
