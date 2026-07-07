@@ -271,8 +271,13 @@ function deg2rad(deg: number) {
 }
 
 export async function archiveThreatsNear(lat: number, lng: number, radiusKm: number, io: Server): Promise<void> {
+  const fiveMinsAgo = new Date(Date.now() - 5 * 60 * 1000);
   const activeThreats = await prisma.threatObject.findMany({
-    where: { status: 'ACTIVE' },
+    where: { 
+      status: 'ACTIVE',
+      // Don't archive threats updated within the last 5 minutes — they may still be active
+      updatedAt: { lt: fiveMinsAgo }
+    },
     include: { locations: { orderBy: { time: 'desc' }, take: 1, include: { source: true } } }
   });
 
