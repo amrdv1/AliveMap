@@ -714,11 +714,14 @@ export function parseTelegramText(text: string): ParsedThreat[] {
 }
 
 function legacyFallback(lowerText: string, type: ParsedThreat['type']): ParsedThreat[] {
-  // Never spawn FPVs, Recons, or small decoys in random generic locations if we don't know where they are
-  if (type === 'FPV' || type === 'RECON' || type === 'MOLNIYA' || type === 'DECOY') return [];
-
   const qty = parseQuantity(lowerText);
   const dir = parseDirection(lowerText);
+
+  // Never spawn FPVs, Recons, or small decoys in random generic locations if we don't know where they are,
+  // BUT return the threat with null coordinates so the AI parser still gets a chance to extract the location!
+  if (type === 'FPV' || type === 'RECON' || type === 'MOLNIYA' || type === 'DECOY') {
+    return [{ type, lat: null, lng: null, confidence: 50, direction: dir, quantity: qty }];
+  }
   
   let spawn = GENERIC_SPAWN.DRONE_SOUTH;
   if (type === 'CRUISE_MISSILE' || type === 'MISSILE' || type === 'KH101' || type === 'KALIBR') spawn = GENERIC_SPAWN.CASPIAN_SEA;
