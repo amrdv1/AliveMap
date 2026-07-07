@@ -80,6 +80,13 @@ export default function Home() {
       }
     });
 
+    socket.on('explosion:new', (exp) => {
+      useStore.getState().addExplosion(exp);
+      setTimeout(() => {
+        useStore.getState().removeExplosion(exp.id);
+      }, 5000);
+    });
+
     socket.on('threats:refresh', () => {
       fetchThreats();
     });
@@ -91,6 +98,7 @@ export default function Home() {
       socket.disconnect();
       socket.off('monitoring:new_message');
       socket.off('threat:update');
+      socket.off('explosion:new');
       socket.off('threats:refresh');
     };
   }, [setMessages]);

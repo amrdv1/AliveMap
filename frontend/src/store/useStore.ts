@@ -11,6 +11,13 @@ export interface ThreatLocation {
   time: string;
 }
 
+export interface ExplosionEvent {
+  id: string;
+  lat: number;
+  lng: number;
+  timestamp: number;
+}
+
 export interface ThreatObject {
   id: string;
   type: ReportType | 'SUMMARY' | 'INFO' | 'ZIRCON' | 'PPO' | 'RECON' | 'ALERT';
@@ -48,6 +55,7 @@ export interface FilterState {
 
 export interface AppState {
   threats: ThreatObject[];
+  explosions: ExplosionEvent[];
   alerts: AlertsData;
   messages: MonitoringMessage[];
   filters: FilterState;
@@ -59,6 +67,8 @@ export interface AppState {
   flyToLocation: { lat: number, lng: number } | null;
   setThreats: (threats: ThreatObject[]) => void;
   updateThreat: (threat: ThreatObject) => void;
+  addExplosion: (exp: ExplosionEvent) => void;
+  removeExplosion: (id: string) => void;
   setAlerts: (alerts: AlertsData) => void;
   setMessages: (messages: MonitoringMessage[]) => void;
   addMessage: (message: MonitoringMessage) => void;
@@ -73,6 +83,7 @@ export interface AppState {
 
 export const useStore = create<AppState>((set) => ({
   threats: [],
+  explosions: [],
   alerts: {},
   messages: [],
   isAboutOpen: false,
@@ -96,6 +107,8 @@ export const useStore = create<AppState>((set) => ({
     }
     return { threats: [...state.threats, newThreat] };
   }),
+  addExplosion: (exp) => set((state) => ({ explosions: [...state.explosions, exp] })),
+  removeExplosion: (id) => set((state) => ({ explosions: state.explosions.filter(e => e.id !== id) })),
   setAlerts: (alerts) => set({ alerts }),
   setMessages: (messages) => set({ messages }),
   addMessage: (message) => set((state) => ({ messages: [message, ...state.messages].slice(0, 500) })),

@@ -1,0 +1,1 @@
+const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function run() { const subs = await prisma.telegramSubscriber.findMany({ where: { chatId: '5426145328' } }); console.log(subs); } run();  

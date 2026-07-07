@@ -231,6 +231,14 @@ export async function startTelegramWorker(io: Server) {
                   await archiveThreatsNear(parsed.lat, parsed.lng, radius, io);
                   continue;
               }
+              
+              if (parsed.type === 'PPO') {
+                  io.emit('explosion:new', { id: Math.random().toString(36).substring(7), lat: parsed.lat, lng: parsed.lng, timestamp: Date.now() });
+                  const { archiveThreatsNear } = require('../services/aggregatorService');
+                  await archiveThreatsNear(parsed.lat, parsed.lng, 30, io);
+                  continue;
+              }
+
               const confidence = (parsed.confidence || 80) / 100;
               const courseToUse = finalCourse ?? parsed.direction;
               const targetToUse = finalTarget ?? parsed.targetName;
@@ -327,13 +335,19 @@ export async function startTelegramWorker(io: Server) {
                         if (isFreshMap) {
                             for (const parsed of parsedThreats) {
                                 if (parsed.lat !== null && parsed.lng !== null) {
-                                    if (parsed.type === 'INFO' || parsed.type === 'SUMMARY') {
-                                        const { archiveThreatsNear } = require('../services/aggregatorService');
-                                        const radius = parsed.confidence === 50 ? 2000 : 150;
-                                        await archiveThreatsNear(parsed.lat, parsed.lng, radius, io);
-                                        continue;
-                                    }
-                                    const savedThreat = await processExternalThreat(
+                                      if (parsed.type === 'INFO' || parsed.type === 'SUMMARY') {
+                                          const { archiveThreatsNear } = require('../services/aggregatorService');
+                                          const radius = parsed.confidence === 50 ? 2000 : 150;
+                                          await archiveThreatsNear(parsed.lat, parsed.lng, radius, io);
+                                          continue;
+                                      }
+                                      if (parsed.type === 'PPO') {
+                                          io.emit('explosion:new', { id: Math.random().toString(36).substring(7), lat: parsed.lat, lng: parsed.lng, timestamp: Date.now() });
+                                          const { archiveThreatsNear } = require('../services/aggregatorService');
+                                          await archiveThreatsNear(parsed.lat, parsed.lng, 30, io);
+                                          continue;
+                                      }
+                                      const savedThreat = await processExternalThreat(
                                         null, parsed.type as any, parsed.lat, parsed.lng,
                                         new Date(msgTime),
                                         sourceId, null, parsed.direction, parsed.confidence / 100,

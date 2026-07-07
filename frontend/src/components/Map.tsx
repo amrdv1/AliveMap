@@ -221,7 +221,7 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
 };
 
 export default function UkraineMap() {
-  const { alerts, threats, filters, mapMode, is3D, showHeatmap, setIs3D, flyToLocation, setFlyToLocation } = useStore();
+  const { alerts, threats, explosions, filters, mapMode, is3D, showHeatmap, setIs3D, flyToLocation, setFlyToLocation } = useStore();
   const [geoData, setGeoData] = useState<any>(null); // Districts
   const [geoDataStates, setGeoDataStates] = useState<any>(null); // States
   const mapRef = React.useRef<any>(null);
@@ -498,6 +498,13 @@ export default function UkraineMap() {
                isSelected={selectedThreat?.id === t.id}
                onClosePopup={closePopup}
             />
+          ))}
+
+          {/* Explosions */}
+          {explosions.map(exp => (
+            <Marker key={exp.id} longitude={exp.lng} latitude={exp.lat} anchor="center">
+              <div className="explosion-circle z-50"></div>
+            </Marker>
           ))}
 
 
