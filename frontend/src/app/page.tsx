@@ -62,6 +62,7 @@ export default function Home() {
     const intervalMessages = setInterval(fetchMessages, 60000); // Refresh every 60 seconds
     const intervalThreats = setInterval(fetchThreats, 60000); // Refresh threats every 60 seconds
     const intervalAlerts = setInterval(fetchAlerts, 15000); // Refresh alerts every 15s
+    const cleanupInterval = setInterval(() => useStore.getState().cleanupMessages(), 60000);
 
     // Connect socket for real-time updates
     socket.connect();
@@ -95,6 +96,7 @@ export default function Home() {
       clearInterval(intervalMessages);
       clearInterval(intervalThreats);
       clearInterval(intervalAlerts);
+      clearInterval(cleanupInterval);
       socket.disconnect();
       socket.off('monitoring:new_message');
       socket.off('threat:update');
