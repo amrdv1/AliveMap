@@ -186,7 +186,7 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
                  {threat.type === 'DRONE' ? 'Ударний БпЛА' : threat.type === 'RECON' ? 'Розвідувальний БпЛА' : threat.type === 'MISSILE' ? 'Ракета' : 'Повітряна ціль'} 
                  {threat.targetName ? ` курсом на ${threat.targetName}` : ''}.
                  <br/>
-                 Підтверджень: {Math.max(1, Math.floor(threat.confidence / 10))}.
+                 Підтверджень: {Math.max(1, Math.round(threat.confidence * 5) - 1)}.
                  {threat.speed ? ` Швидкість: ${threat.speed} км/год.` : ''}
               </div>
               <div className="text-[12px] text-orange-400/90 mb-4 flex items-center gap-2">
@@ -194,11 +194,11 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
               </div>
               <div className="flex items-center gap-2">
                  <div className={`px-3 py-1 rounded-full text-[11px] font-semibold ${
-                    threat.confidence > 80 ? 'bg-green-500/20 text-green-400' : 
-                    threat.confidence > 50 ? 'bg-orange-500/20 text-orange-400' : 
+                    threat.confidence >= 0.8 ? 'bg-green-500/20 text-green-400' : 
+                    threat.confidence >= 0.6 ? 'bg-orange-500/20 text-orange-400' : 
                     'bg-red-500/20 text-red-400'
                  }`}>
-                    Достовірність: {threat.confidence > 80 ? 'Висока' : threat.confidence > 50 ? 'Середня' : 'Низька'}
+                    Достовірність: {threat.confidence >= 0.8 ? 'Висока' : threat.confidence >= 0.6 ? 'Середня' : 'Низька'}
                  </div>
               </div>
            </div>
