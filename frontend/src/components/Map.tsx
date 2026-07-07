@@ -144,8 +144,8 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
 
   return (
     <Marker  
-       longitude={loc.lng} 
-       latitude={loc.lat} 
+       longitude={currentLoc?.lng || loc.lng} 
+       latitude={currentLoc?.lat || loc.lat} 
        anchor="center"
        onClick={(e) => {
          e.originalEvent.stopPropagation();
@@ -503,7 +503,9 @@ export default function UkraineMap() {
           {/* Explosions */}
           {explosions.map(exp => (
             <Marker key={exp.id} longitude={exp.lng} latitude={exp.lat} anchor="center">
-              <div className="explosion-circle z-50"></div>
+              <div className="explosion-circle z-50 flex items-center justify-center text-orange-500 bg-orange-500/20 rounded-full border border-orange-500/50 shadow-[0_0_15px_rgba(249,115,22,0.8)]" style={{ width: '40px', height: '40px' }}>
+                <Flame size={24} className="animate-pulse" />
+              </div>
             </Marker>
           ))}
 

@@ -85,7 +85,7 @@ export default function Home() {
       useStore.getState().addExplosion(exp);
       setTimeout(() => {
         useStore.getState().removeExplosion(exp.id);
-      }, 5000);
+      }, 60000);
     });
 
     socket.on('threats:refresh', () => {
