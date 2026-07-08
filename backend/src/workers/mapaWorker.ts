@@ -1,24 +1,25 @@
 import axios from 'axios';
 import { Server } from 'socket.io';
 import prisma from '../db';
+import { ReportType, ReportStatus, SourceType } from '@prisma/client';
 
 const MAPA_API_URL = 'https://mapa.ua/api/v1/current';
 
 // Maps MAPA kind -> our ReportType
-const KIND_MAPPING: Record<string, string> = {
-  'drone_piston': 'DRONE',
-  'drone_jet': 'DRONE',
-  'missile_cruise': 'CRUISE_MISSILE',
-  'missile_ballistic': 'BALLISTIC_MISSILE',
-  'bomb': 'KAB',
-  'default': 'DRONE'
+const KIND_MAPPING: Record<string, ReportType> = {
+  'drone_piston': ReportType.DRONE,
+  'drone_jet': ReportType.DRONE,
+  'missile_cruise': ReportType.CRUISE_MISSILE,
+  'missile_ballistic': ReportType.BALLISTIC_MISSILE,
+  'bomb': ReportType.KAB,
+  'default': ReportType.DRONE
 };
 
 export async function startMapaWorker(io: Server) {
   let source = await prisma.source.findFirst({ where: { name: 'MAPA.UA API' } });
   if (!source) {
     source = await prisma.source.create({
-      data: { name: 'MAPA.UA API', type: 'API' }
+      data: { name: 'MAPA.UA API', type: SourceType.API }
     });
   }
 
@@ -46,7 +47,7 @@ export async function startMapaWorker(io: Server) {
         const course = heading || obj.heading || null;
 
         // First, try to find the exact threat by externalId
-        let matchedThreat = await prisma.threatObject.findUnique({
+        let matchedThreat: any = await prisma.threatObject.findUnique({
            where: { externalId: String(obj.id) },
            include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
         });
@@ -54,7 +55,7 @@ export async function startMapaWorker(io: Server) {
         // If not found by externalId, search for ACTIVE threats of the same type
         if (!matchedThreat) {
            const recentThreats = await prisma.threatObject.findMany({
-             where: { status: 'ACTIVE', type: threatType },
+             where: { status: ReportStatus.ACTIVE, type: threatType },
              include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
            });
 
@@ -118,7 +119,7 @@ export async function startMapaWorker(io: Server) {
               data: {
                  externalId: String(obj.id),
                  type: threatType,
-                 status: 'ACTIVE',
+                 status: ReportStatus.ACTIVE,
                  confidence: 1.0,
                  speed: speed,
                  course: course,
