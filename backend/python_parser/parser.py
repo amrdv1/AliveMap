@@ -91,12 +91,17 @@ def lemmatize_word(word: str) -> str:
     return word.capitalize()
 
 def parse_telegram_text(text: str) -> List[ParsedThreat]:
-    lower_text = text.lower().replace('a', 'а').replace('o', 'о').replace('e', 'е').replace('i', 'і').replace('p', 'р').replace('c', 'с').replace('x', 'х').replace('y', 'у')
+    # Fix mixed english/cyrillic letters while preserving case
+    text = text.replace('a', 'а').replace('o', 'о').replace('e', 'е').replace('i', 'і').replace('p', 'р').replace('c', 'с').replace('x', 'х').replace('y', 'у')
+    text = text.replace('A', 'А').replace('O', 'О').replace('E', 'Е').replace('I', 'І').replace('P', 'Р').replace('C', 'С').replace('X', 'Х').replace('Y', 'У')
+    
+    lower_text = text.lower()
     
     if re.search(r'(озер|нафтопродукт|рятувальник|дтп|аварі|пожеж|забруднення|економік|засідання|президент|крадіжк|ремонт|комунальн|клімат|наслідок|наслідки|депутат|санкці|врятував|врятувала|на жаль|помер|загинув|постражда|фото|відео|наживо|пишуть|повідомляє|заявив|інтерв.ю|стаття|новина|деталі|читайте|джерело|коментар|підписав|впк|виробництво|комплектуючих|російського|зведення|брифінг|поранений|евакуація|смерт|колишнього|нардеп|закупівл|розкрадання|бюджетн|слідств|вартість|фіктивн|фоп|готівк|розслідують|расследуют|хищение|закупке|производителе|стоимость|средств|заволодіння|розслідує|гроші|мільярд|млрд|обмін|валют|obmin|реклама|знижка|розіграш|магазин|ціна|грн|гривень|клієнт|підпишись|канал|працюємо|vpn|crypto|крипта|одяг|спорядження|промокод|акція|бонус|казино|slots)', lower_text):
         return []
 
     lower_text = re.sub(r'[.!?;:]', ' ', lower_text)
+    text = re.sub(r'[.!?;:]', ' ', text)
     base_type = detect_threat_type(lower_text)
     
     if not base_type:
@@ -105,26 +110,27 @@ def parse_telegram_text(text: str) -> List[ParsedThreat]:
     if base_type in ['INFO', 'SUMMARY', 'PPO']:
         return [ParsedThreat(type=base_type, confidence=100)]
         
-    chunks = [c for c in re.split(r'(?:\n|,|(?:а|і|та)\s+також\s+|\s+та\s+)', lower_text) if len(c.strip()) > 3]
+    chunks = [c for c in re.split(r'(?i)(?:\n|,|(?:а|і|та)\s+також\s+|\s+та\s+)', text) if len(c.strip()) > 3]
     results = []
     
     for chunk in chunks:
-        chunk_type = detect_threat_type(chunk) or base_type
+        chunk_lower = chunk.lower()
+        chunk_type = detect_threat_type(chunk_lower) or base_type
         if chunk_type in ['INFO', 'SUMMARY', 'PPO']:
             continue
             
-        qty = parse_quantity(chunk)
+        qty = parse_quantity(chunk_lower)
         
         # Search for targets using PyMorphy3 to get proper Nominative case!
-        target_match = re.search(r'(?:на|курсом на|напрямку|до|над|біля|поблизу|район|в районі|у|в|зпр:|через)\s+([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}(?:\s+[А-ЯІЇЄҐа-яіїєґ\'\`\-]{2,}){0,2})', chunk, re.IGNORECASE)
+        target_match = re.search(r'(?:на|курсом на|напрямку|до|над|біля|поблизу|район|в районі|у|в|зпр:|через)\s+([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}(?:\s+[А-ЯІЇЄҐа-яіїєґ\'\`\-]{2,}){0,2})', chunk)
         
         if not target_match:
             # Fallback: time followed by a Capitalized word (e.g. "19:22 Марганецька ТГ")
-            target_match = re.search(r'(?:\d{1,2}:\d{2})\s+([а-яіїєґ\'\`\-]{3,}(?:\s+[а-яіїєґ\'\`\-]{2,}){0,2})', chunk, re.IGNORECASE)
+            target_match = re.search(r'(?:\d{1,2}:\d{2})\s+([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}(?:\s+[А-ЯІЇЄҐа-яіїєґ\'\`\-]{2,}){0,2})', chunk)
             
         if not target_match:
-            # Fallback: "Загроза ФПВ Марганецька" -> Just look for a capitalized word that isn't at the very start
-            target_match = re.search(r'(?:\s+|-)([а-яіїєґ\'\`\-]{4,}(?:\s+[а-яіїєґ\'\`\-]{3,}){0,1})', chunk, re.IGNORECASE)
+            # Fallback: Just look for a capitalized word that isn't at the very start
+            target_match = re.search(r'(?:\s+|-)([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{3,}(?:\s+[А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}){0,1})', chunk)
 
         target_name = None
         if target_match:

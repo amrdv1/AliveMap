@@ -123,12 +123,21 @@ export async function geocodeLocation(locationName: string, dropIfQuiet: boolean
 
   // 3. Starts-with matches
   if (matches.length === 0) {
-      matches = citiesCache.filter(c => c.names.some((n: string) => cleanQuery.startsWith(n) || n.startsWith(cleanQuery)));
+      matches = citiesCache.filter(c => c.names.some((n: string) => cleanQuery.startsWith(n + ' ') || cleanQuery === n));
   }
 
-  // 4. Substring matches
-  if (matches.length === 0 && cleanQuery.length >= 5) {
-      matches = citiesCache.filter(c => c.names.some((n: string) => cleanQuery.includes(n) || n.includes(cleanQuery)));
+  // Helper to escape regex
+  const escapeRegExp = (string: string) => {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  };
+
+  // 4. Substring matches (ensure word boundaries so 'огромный' doesnt match 'ромны')
+  if (matches.length === 0 && cleanQuery.length >= 4) {
+      matches = citiesCache.filter(c => c.names.some((n: string) => {
+          if (n.length < 3) return false; // Prevent tiny 2-letter villages from matching inside sentences
+          const regex = new RegExp(`(^|\\s|-)${escapeRegExp(n)}(\\s|-|$)`, 'i');
+          return regex.test(cleanQuery) || cleanQuery.includes(n + ' область') || cleanQuery.includes(n + ' район');
+      }));
   }
 
   if (matches.length === 0) {
