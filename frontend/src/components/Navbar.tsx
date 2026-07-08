@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { Target, Info, ShieldAlert, Cpu, Map as MapIcon, Radar } from 'lucide-react';
+import { Target, Info, ShieldAlert, Cpu, Map as MapIcon, Radar, Maximize } from 'lucide-react';
 
 import CitySearch from './CitySearch';
 
@@ -15,6 +15,18 @@ export default function Navbar() {
     return () => clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.log(`Error attempting to enable fullscreen: ${err.message} (${err.name})`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
 
   return (
     <div className="absolute top-4 left-4 right-4 h-16 bg-black/30 backdrop-blur-2xl rounded-3xl flex items-center justify-between px-6 z-30 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
@@ -60,6 +72,13 @@ export default function Navbar() {
 
       {/* Search & Time & Live Indicator */}
       <div className="flex items-center gap-4">
+        <button 
+          onClick={toggleFullScreen}
+          className="p-2 text-white/40 hover:text-white/80 transition-colors"
+          title="Fullscreen"
+        >
+          <Maximize className="w-5 h-5" />
+        </button>
         <div className="hidden lg:block">
           <CitySearch />
         </div>

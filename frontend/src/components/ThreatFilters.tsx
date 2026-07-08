@@ -35,7 +35,7 @@ export default function ThreatFilters() {
   return (
     <div className="absolute left-0 top-[var(--mobile-top)] md:top-28 md:left-6 z-20 flex md:flex-col overflow-x-auto md:overflow-visible w-full px-3 md:w-auto md:px-0 scrollbar-hide"
          style={{ '--mobile-top': 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 126px)' } as React.CSSProperties}>
-      <div className="flex md:flex-col gap-2 min-w-max pb-2">
+      <div className="flex md:flex-col gap-2 min-w-max pb-2 md:items-stretch md:w-48">
         {filterOptions.map(opt => {
           const active = isSelected(opt.type);
           return (
