@@ -1,3 +1,4 @@
+import 'dotenv/config'; // Trigger restart 2
 import './logCatcher';
 import express from 'express';
 import http from 'http';
@@ -11,9 +12,9 @@ import threatRoutes from './routes/threats';
 import messageRoutes from './routes/messages';
 import adminRoutes from './routes/admin';
 import webhookRoutes from './routes/webhooks';
+import internalRoutes from './routes/internal';
 
 import { startAlertsWorker } from './workers/alertsWorker';
-import { startTelegramWorker, stopTelegramWorker } from './workers/telegramWorker';
 import { startMapaWorker } from './workers/mapaWorker';
 import { startBotWorker } from './workers/botWorker';
 
@@ -39,6 +40,7 @@ app.use('/api/threats', threatRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/internal', internalRoutes);
 
 app.get('/api/alerts', async (req, res) => {
   try {
@@ -83,7 +85,6 @@ server.listen(PORT, async () => {
   
   // Start remaining background workers
   startAlertsWorker(io);
-  startTelegramWorker(io); // Integrated telegram parser
   startMapaWorker(io); // Selective Mapa.ua integration
   startBotWorker(); // Telegram Notification Bot
   
@@ -149,13 +150,13 @@ server.listen(PORT, async () => {
 });
 
 // --- GRACEFUL SHUTDOWN ---
-// Required for Railway Zero-Downtime Deploys to release the Telegram Auth Key cleanly
+// Required for Railway Zero-Downtime Deploys to release resources cleanly
 async function gracefulShutdown(signal: string) {
     console.log(`\n[Server] Received ${signal}, starting graceful shutdown...`);
     
-    // Stop Telegram Worker first to release the session instantly
-    await stopTelegramWorker();
-
+    // Stop other services if needed
+    console.log("Disconnecting Prisma...");
+    
     // Close Express Server
     server.close(() => {
         console.log("[Server] HTTP server closed.");
