@@ -21,15 +21,17 @@ def detect_threat_type(text: str) -> Optional[str]:
     t = text.lower().replace('a', 'а').replace('o', 'о').replace('e', 'е').replace('i', 'і').replace('p', 'р').replace('c', 'с').replace('x', 'х').replace('y', 'у')
     t_padded = f" {re.sub(r'[^а-яіїєґa-z0-9]', ' ', t)} "
     
+    if re.search(r'(збито|знищено|мінус|ppo|рро|ппо|робота ппо|вибух|відпрацю|збиття|гучно|не фіксує|не фиксиру|впав|відбилися)', t):
+        if not re.search(r'(загроза|увага|політ|рух|вектор)', t):
+            return 'PPO'
+            
     if re.search(r'(відбій|немає загроз|загрози немає|немає загрози|не активні|тихої ночі|без цілей|спокійно|поки чисто|не фіксується|локаційно втрачено)', t) or re.search(r' (реб|рєб|чисто|зник) ', t_padded):
         return 'INFO'
+        
     if re.search(r'(результат|підсумок|зведення|залишилося|продовжують|по шахедах)', t) and re.search(r'(атак|напад|бпла|ракет|шахед|дрон|ціл|збит|відбит|перехопл|мопед)', t):
         return 'SUMMARY'
     if re.search(r'по шахедах', t):
         return 'SUMMARY'
-    if re.search(r'(збито|знищено|мінус|ppo|рро|ппо|робота ппо|вибух|відпрацю|збиття|гучно|не фіксує|не фиксиру|впав|відбилися)', t) or re.search(r' (зник|чисто|локаційно втрачено) ', t_padded):
-        if not re.search(r'(загроза|увага|політ|рух|вектор)', t):
-            return 'PPO'
             
     if re.search(r'(циркон|3м22)', t): return 'ZIRCON'
     if re.search(r'(кинджал|кинжал|х-47)', t): return 'KINZHAL'

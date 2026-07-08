@@ -69,7 +69,7 @@ router.post('/telegram-message', async (req, res) => {
                    targetLng: aiData.targetLng
                });
             } else if (aiData.locationNames && aiData.locationNames.length > 0) {
-               const dropIfQuiet = !['FPV', 'KAB', 'AIRCRAFT', 'RECON', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KINZHAL', 'ZIRCON', 'KALIBR', 'ISKANDER', 'KH101'].includes(threatType);
+               const dropIfQuiet = !['FPV', 'KAB', 'AIRCRAFT', 'RECON', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KINZHAL', 'ZIRCON', 'KALIBR', 'ISKANDER', 'KH101', 'PPO', 'INFO', 'SUMMARY'].includes(threatType);
                for (const locName of aiData.locationNames) {
                   const coords = await geocodeLocation(locName, dropIfQuiet);
                   if (coords) {
@@ -99,7 +99,7 @@ router.post('/telegram-message', async (req, res) => {
             let finalLng = parsed.lng ?? parsed.targetLng;
 
             if (!parsed.targetLat && !parsed.targetLng && parsed.targetName) {
-                const dropIfQuiet = !['FPV', 'KAB', 'AIRCRAFT', 'RECON', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KINZHAL', 'ZIRCON', 'KALIBR', 'ISKANDER', 'KH101'].includes(parsed.type);
+                const dropIfQuiet = !['FPV', 'KAB', 'AIRCRAFT', 'RECON', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KINZHAL', 'ZIRCON', 'KALIBR', 'ISKANDER', 'KH101', 'PPO', 'INFO', 'SUMMARY'].includes(parsed.type);
                 const geoResult = await geocodeLocation(parsed.targetName, dropIfQuiet);
                 if (geoResult) {
                     parsed.targetLat = geoResult.lat;
