@@ -126,7 +126,7 @@ def parse_telegram_text(text: str) -> List[ParsedThreat]:
         qty = parse_quantity(chunk_lower)
         
         # Search for targets using PyMorphy3 to get proper Nominative case!
-        target_match = re.search(r'(?i:на|курсом на|напрямку|до|над|біля|поблизу|район|в районі|у районі|у|в|зпр:|через)\s+(?:[а-яіїєґА-ЯІЇЄҐa-zA-Z\.\-]{1,15}\s+){0,2}([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}(?:\s+[А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}){0,2})', chunk)
+        target_match = re.search(r'(?i:на|курсом на|напрямку|в напрямку|у напрямку|до|над|біля|поблизу|район|в районі|у районі|у бік|в бік|у|в|зпр:|через)\s+(?:[а-яіїєґА-ЯІЇЄҐa-zA-Z\.\-]{1,15}\s+){0,2}([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}(?:\s+[А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}){0,2})', chunk)
         
         if not target_match:
             # Fallback: time followed by any word (e.g. "19:22 Марганецька ТГ" or "19:56 кладовище")
