@@ -422,14 +422,13 @@ export async function startTelegramWorker(io: Server) {
                 console.log(`[Cleanup] Deleted ${deleted.count} old monitoring messages.`);
             }
 
-            // Archive old active threats (10 minutes)
-            const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
-            const archived = await prisma.threatObject.updateMany({
-                where: { status: 'ACTIVE', updatedAt: { lt: tenMinsAgo } },
-                data: { status: 'ARCHIVED' }
+            // Delete old threats (30 minutes)
+            const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
+            const deletedThreats = await prisma.threatObject.deleteMany({
+                where: { updatedAt: { lt: thirtyMinsAgo } }
             });
-            if (archived.count > 0) {
-                console.log(`[Cleanup] Archived ${archived.count} inactive threats (>10m).`);
+            if (deletedThreats.count > 0) {
+                console.log(`[Cleanup] Deleted ${deletedThreats.count} inactive threats (>30m).`);
                 io.emit('threats:refresh');
             }
 
@@ -453,14 +452,13 @@ export async function startTelegramWorker(io: Server) {
         }
     };
 
-    // Archive only threats older than 10 minutes (keep recent ones alive across restarts)
+    // Delete threats older than 30 minutes
     try {
-        const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
-        const archived = await prisma.threatObject.updateMany({
-            where: { status: 'ACTIVE', updatedAt: { lt: tenMinsAgo } },
-            data: { status: 'ARCHIVED' }
+        const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
+        const deleted = await prisma.threatObject.deleteMany({
+            where: { updatedAt: { lt: thirtyMinsAgo } }
         });
-        console.log(`[Startup] Archived ${archived.count} old threats (>10m).`);
+        console.log(`[Startup] Deleted ${deleted.count} old threats (>30m).`);
     } catch(e) {}
 
     // Run initial cleanup
