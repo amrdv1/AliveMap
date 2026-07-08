@@ -60,6 +60,24 @@ async def main():
     me = await client.get_me()
     logger.info(f"Logged in as {me.username or me.id}")
     
+    def wait_for_node():
+        import time
+        logger.info(f"Waiting for Node.js API to start at port {node_port}...")
+        for _ in range(30):
+            try:
+                res = requests.get(f"http://127.0.0.1:{node_port}/api/health")
+                if res.status_code == 200:
+                    logger.info("Node.js API is ready!")
+                    return True
+            except:
+                pass
+            time.sleep(1)
+        logger.error("Node.js API did not start in time!")
+        return False
+        
+    if not wait_for_node():
+        return
+        
     async def poll_history():
         import time
         logger.info("Fetching recent Telegram history (polling top channels)...")
@@ -164,11 +182,14 @@ async def main():
                 "threats": [t.model_dump() for t in threats]
             }
             
-            res = requests.post(NODE_API_URL, json=payload)
-            if res.status_code == 200:
-                logger.info(f"Forwarded {len(threats)} threats from {channel_display}")
-            else:
-                logger.error(f"Failed to forward threats: {res.status_code} {res.text}")
+            try:
+                res = requests.post(NODE_API_URL, json=payload)
+                if res.status_code == 200:
+                    logger.info(f"Forwarded {len(threats)} threats from {channel_display}")
+                else:
+                    logger.error(f"Failed to forward threats: {res.status_code} {res.text}")
+            except Exception as e:
+                logger.error(f"Request Error: {e}")
             
         except Exception as e:
             logger.error(f"Error processing message: {e}")
