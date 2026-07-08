@@ -128,6 +128,14 @@ router.post('/telegram-message', async (req, res) => {
                 finalLat = parsed.targetLat;
                 finalLng = parsed.targetLng;
             }
+            if (finalLat === null || finalLng === null) {
+                if ((parsed.type === 'PPO' || parsed.type === 'INFO') && sourceId) {
+                    // Source posted a clear/explosion message but provided no coordinates.
+                    // Assume it means "clear all threats I previously reported"
+                    const { archiveThreatsBySource } = require('../services/aggregatorService');
+                    await archiveThreatsBySource(sourceId, io);
+                }
+            }
 
             if (finalLat !== null && finalLng !== null) {
                 if (bestMessageLat == null) {

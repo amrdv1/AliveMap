@@ -307,4 +307,28 @@ export async function archiveThreatsNear(lat: number, lng: number, radiusKm: num
   }
 }
 
+export async function archiveThreatsBySource(sourceId: string, io: Server): Promise<void> {
+  const activeThreats = await prisma.threatObject.findMany({
+    where: { status: 'ACTIVE' },
+    include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
+  });
+
+  for (const t of activeThreats) {
+    if (t.locations.length > 0) {
+      const uniqueSources = new Set(t.locations.map(l => l.sourceId).filter(Boolean));
+      if (uniqueSources.has(sourceId) || t.locations[0].sourceId === sourceId) {
+        console.log(`[All-Clear] Archiving threat ${t.id} (${t.type}) because source ${sourceId} reported clear.`);
+        const archived = await prisma.threatObject.update({
+          where: { id: t.id },
+          data: { status: 'ARCHIVED' },
+          include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
+        });
+        io.emit('threat:update', archived);
+        const { sendSmartAllClear } = require('../workers/botWorker');
+        sendSmartAllClear(t.id);
+      }
+    }
+  }
+}
+
 function rad2deg(rad: number) { return rad * (180/Math.PI); }
