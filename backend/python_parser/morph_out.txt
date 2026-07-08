@@ -1,8 +1,6 @@
-Городні: городній - ADJF plur,nomn
-Городні: городній - ADJF plur,accs
-Городні: городній - ADJF plur,voct
-Городні: городній - NOUN,Surn,anim plur,nomn
-Городні: городній - NOUN,Surn,anim plur,voct
+Сумщині: сумщина
+  сумщина - NOUN,femn,inan datv
+  сумщина - NOUN,femn,inan loct
 Городня: городній - ADJF femn,nomn
 Городня: городній - ADJF femn,voct
 Городня: городня - NOUN,Surn,femn,anim nomn

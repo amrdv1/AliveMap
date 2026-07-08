@@ -84,6 +84,10 @@ export default function Home() {
       useStore.getState().addMessage(msg);
     });
 
+    socket.on('threat:new', (threat) => {
+      useStore.getState().setThreats([...useStore.getState().threats, threat]);
+    });
+
     socket.on('threat:update', (threat) => {
       const state = useStore.getState();
       const exists = state.threats.find(t => t.id === threat.id);
@@ -112,6 +116,7 @@ export default function Home() {
       clearInterval(cleanupInterval);
       socket.disconnect();
       socket.off('monitoring:new_message');
+      socket.off('threat:new');
       socket.off('threat:update');
       socket.off('explosion:new');
       socket.off('threats:refresh');
@@ -119,7 +124,7 @@ export default function Home() {
   }, [setMessages]);
 
   return (
-    <main className="relative h-[100dvh] w-screen overflow-hidden font-sans text-white bg-black">
+    <main className="relative w-full h-[100dvh] bg-black text-white overflow-hidden">
       {/* Background Map Layer */}
       <div className={`absolute inset-0 z-0 ${activeTab !== 'MAP' && 'hidden md:block'}`}>
         <Map />
