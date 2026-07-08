@@ -2,6 +2,9 @@ import os
 import asyncio
 from telethon.sync import TelegramClient
 from telethon.sessions import StringSession
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 api_id = os.environ.get('TELEGRAM_API_ID')
 api_hash = os.environ.get('TELEGRAM_API_HASH')

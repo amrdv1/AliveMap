@@ -5,6 +5,10 @@ import requests
 from telethon import TelegramClient, events
 from telethon.sessions import StringSession
 from parser import parse_telegram_text
+from dotenv import load_dotenv
+from datetime import datetime
+
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -12,8 +16,9 @@ logger = logging.getLogger(__name__)
 api_id = os.environ.get('TELEGRAM_API_ID')
 api_hash = os.environ.get('TELEGRAM_API_HASH')
 session_string = os.environ.get('TELEGRAM_SESSION')
+node_port = os.environ.get('PORT', '3001')
 
-NODE_API_URL = "http://127.0.0.1:3001/api/internal/telegram-message"
+NODE_API_URL = f"http://127.0.0.1:{node_port}/api/internal/telegram-message"
 
 CHANNELS = [
   'vanek_nikolaev', 'monitor', 'kievreal1', 'operativnoZSU', 'insiderUKR', 'smolii_ukraine', 
@@ -54,6 +59,62 @@ async def main():
         
     me = await client.get_me()
     logger.info(f"Logged in as {me.username or me.id}")
+    
+    async def poll_history():
+        import time
+        logger.info("Fetching recent Telegram history (polling top channels)...")
+        now = time.time()
+        
+        for channel in CHANNELS:
+            try:
+                await asyncio.sleep(1.5) # Prevent FloodWait
+                messages = await client.get_messages(channel, limit=10)
+                for message in reversed(messages):
+                    if not message.message or not message.date:
+                        continue
+                        
+                    msg_time = message.date.timestamp()
+                    is_fresh = (now - msg_time) < 30 * 60 # Fresh if < 30 min old
+                    if not is_fresh:
+                        continue
+                        
+                    text = message.message
+                    
+                    if message.reply_to_msg_id:
+                        try:
+                            parent_msg = await client.get_messages(channel, ids=message.reply_to_msg_id)
+                            if parent_msg and parent_msg.message:
+                                text = parent_msg.message + '\\n---\\n' + text
+                        except Exception as e:
+                            pass
+                            
+                    try:
+                        threats = parse_telegram_text(text)
+                        if not threats:
+                            continue
+                            
+                        payload = {
+                            "text": text,
+                            "channelName": channel,
+                            "timestamp": int(msg_time * 1000),
+                            "threats": [t.model_dump() for t in threats]
+                        }
+                        
+                        res = requests.post(NODE_API_URL, json=payload)
+                        if res.status_code == 200:
+                            logger.info(f"Poll: Forwarded {len(threats)} threats from {channel}")
+                        else:
+                            logger.error(f"Poll: Failed to forward: {res.status_code} {res.text}")
+                    except Exception as e:
+                        logger.error(f"Poll Exception: {e}")
+                        
+            except Exception as e:
+                logger.error(f"Failed to fetch history for {channel}: {e}")
+                
+        logger.info("Finished polling history.")
+        
+    # Start polling in background
+    asyncio.create_task(poll_history())
     
     @client.on(events.NewMessage)
     async def handler(event):

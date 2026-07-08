@@ -28,6 +28,7 @@ app.use(helmet());
 app.use(express.json());
 
 const io = initSocket(server);
+app.set('io', io);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', time: new Date() });
