@@ -49,13 +49,11 @@ export default function MobileTopBar() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Search (condensed) */}
-            <div className="w-32 sm:w-48">
-               <CitySearch />
-            </div>
-            
-            <div className={`flex items-center gap-1 ml-1 ${isOnline ? 'text-emerald-400' : 'text-red-400'}`}>
+            <div className={`flex items-center gap-1.5 ml-1 ${isOnline ? 'text-emerald-400' : 'text-red-400'}`}>
               {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />}
+              <span className="text-[11px] font-black tracking-wider text-white">
+                {time.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}
+              </span>
             </div>
 
             <button 
