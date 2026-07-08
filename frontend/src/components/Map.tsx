@@ -303,8 +303,8 @@ export default function UkraineMap() {
   const [geoData, setGeoData] = useState<any>(null); // Districts
   const [geoDataStates, setGeoDataStates] = useState<any>(null); // States
   const mapRef = React.useRef<any>(null);
-  const [hoverInfo, setHoverInfo] = useState<any>(null);
-
+  const mapRef = React.useRef<any>(null);
+  const [clickedRegion, setClickedRegion] = useState<any>(null);
   useEffect(() => {
     fetch('/ukraine-districts.geojson')
       .then((res) => res.json())
@@ -410,26 +410,27 @@ export default function UkraineMap() {
     });
   };
 
-  const onHover = useCallback((event: any) => {
-    const { features, point } = event;
+  const onRegionClick = useCallback((event: any) => {
+    const { features, point, lngLat } = event;
     const topFeature = features && features[0];
 
     if (topFeature && topFeature.properties) {
       const regionName = topFeature.properties.rayon || topFeature.properties.region;
       if (regionName) {
-        setHoverInfo({
+        setClickedRegion({
           features: features, // Store all intersected features
           x: point.x,
-          y: point.y
+          y: point.y,
+          lngLat: lngLat
         });
         return;
       }
     }
-    setHoverInfo(null);
+    setClickedRegion(null);
   }, []);
 
-  const hoveredRegionName = hoverInfo ? (hoverInfo.features.find((f:any) => f.properties.region)?.properties.region || '') : '';
-  const hoveredRayonName = hoverInfo ? (hoverInfo.features.find((f:any) => f.properties.rayon)?.properties.rayon || '') : '';
+  const clickedRegionName = clickedRegion ? (clickedRegion.features.find((f:any) => f.properties.region)?.properties.region || '') : '';
+  const clickedRayonName = clickedRegion ? (clickedRegion.features.find((f:any) => f.properties.rayon)?.properties.rayon || '') : '';
 
   const getAlertInfo = (featuresList: any[]) => {
     if (!featuresList || featuresList.length === 0) return null;
@@ -495,8 +496,7 @@ export default function UkraineMap() {
         <Map
           ref={mapRef}
           interactiveLayerIds={['regions-states-fill', 'regions-districts-fill']}
-          onMouseMove={onHover}
-          onMouseLeave={() => setHoverInfo(null)}
+          onClick={onRegionClick}
           initialViewState={{
             longitude: 31.1656,
             latitude: 48.3794,
@@ -518,15 +518,15 @@ export default function UkraineMap() {
                     'fill-color': [
                         'case',
                         ['==', ['get', 'hasAlert'], 1],
-                        ['case', ['==', ['get', 'region'], hoveredRegionName], 'rgba(239, 68, 68, 0.65)', 'rgba(239, 68, 68, 0.45)'],
-                        ['==', ['get', 'region'], hoveredRegionName], 'rgba(255, 255, 255, 0.08)',
+                        ['case', ['==', ['get', 'region'], clickedRegionName], 'rgba(239, 68, 68, 0.65)', 'rgba(239, 68, 68, 0.45)'],
+                        ['==', ['get', 'region'], clickedRegionName], 'rgba(255, 255, 255, 0.08)',
                         'rgba(0, 0, 0, 0)'
                     ],
                     'fill-outline-color': [
                         'case',
                         ['==', ['get', 'hasAlert'], 1],
-                        ['case', ['==', ['get', 'region'], hoveredRegionName], 'rgba(255, 255, 255, 0.9)', 'rgba(239, 68, 68, 0.6)'],
-                        ['case', ['==', ['get', 'region'], hoveredRegionName], 'rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.15)']
+                        ['case', ['==', ['get', 'region'], clickedRegionName], 'rgba(255, 255, 255, 0.9)', 'rgba(239, 68, 68, 0.6)'],
+                        ['case', ['==', ['get', 'region'], clickedRegionName], 'rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.15)']
                     ]
                 }} 
               />
@@ -543,15 +543,15 @@ export default function UkraineMap() {
                     'fill-color': [
                         'case',
                         ['==', ['get', 'hasAlert'], 1],
-                        ['case', ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(239, 68, 68, 0.65)', 'rgba(239, 68, 68, 0.45)'],
-                        ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(255, 255, 255, 0.08)',
+                        ['case', ['==', ['get', 'rayon'], clickedRayonName], 'rgba(239, 68, 68, 0.65)', 'rgba(239, 68, 68, 0.45)'],
+                        ['==', ['get', 'rayon'], clickedRayonName], 'rgba(255, 255, 255, 0.08)',
                         'rgba(0, 0, 0, 0)'
                     ],
                     'fill-outline-color': [
                         'case',
                         ['==', ['get', 'hasAlert'], 1],
-                        ['case', ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(255, 255, 255, 0.9)', 'rgba(239, 68, 68, 0.6)'],
-                        ['case', ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.12)']
+                        ['case', ['==', ['get', 'rayon'], clickedRayonName], 'rgba(255, 255, 255, 0.9)', 'rgba(239, 68, 68, 0.6)'],
+                        ['case', ['==', ['get', 'rayon'], clickedRayonName], 'rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.12)']
                     ]
                 }} 
               />
@@ -601,34 +601,46 @@ export default function UkraineMap() {
           }
         `}} />
 
-        {/* Hover Custom Tooltip */}
-        {hoverInfo && (() => {
-          const alertInfo = getAlertInfo(hoverInfo.features);
+        {/* Click Custom Popup */}
+        {clickedRegion && (() => {
+          const alertInfo = getAlertInfo(clickedRegion.features);
           if (!alertInfo) return null;
           
           return (
-            <div 
-              className="hidden md:block absolute z-[100] pointer-events-none bg-black/80 backdrop-blur-xl border border-white/10 text-white rounded-2xl p-4 shadow-2xl transition-all duration-75 min-w-[200px]"
-              style={{ left: hoverInfo.x + 15, top: hoverInfo.y + 15 }}
+            <Popup
+              longitude={clickedRegion.lngLat.lng}
+              latitude={clickedRegion.lngLat.lat}
+              anchor="bottom"
+              onClose={() => setClickedRegion(null)}
+              closeButton={false}
+              closeOnClick={false}
+              className="custom-threat-popup z-[100]"
+              maxWidth="260px"
+              offset={10}
             >
-              <div className="font-bold text-lg mb-1 drop-shadow-md">{alertInfo.name}</div>
-              <div className={alertInfo.active ? 'text-red-500 font-bold' : 'text-gray-400 font-medium'}>
-                {alertInfo.active ? '🚨 ПОВІТРЯНА ТРИВОГА' : '✅ Немає тривоги'}
-              </div>
-              
-              {alertInfo.active && alertInfo.durationStr && (
-                <div className="mt-3 bg-red-500/10 p-2 rounded-lg border border-red-500/20">
-                  <div className="text-gray-300 text-sm flex items-center justify-between">
-                    <span>Триває:</span>
-                    <span className="text-white font-mono font-bold bg-black/40 px-2 py-0.5 rounded">{alertInfo.durationStr}</span>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-2 flex justify-between">
-                    <span>Початок:</span>
-                    <span>{alertInfo.startStr}</span>
-                  </div>
+              <div className="bg-[#1a1a1a] text-white p-4 rounded-xl border border-white/10 shadow-2xl relative w-[240px]">
+                <button onClick={(e) => { e.stopPropagation(); setClickedRegion(null); }} className="absolute top-3 right-3 text-white/50 hover:text-white transition">
+                   <X size={16} />
+                </button>
+                <div className="font-bold text-lg mb-1 drop-shadow-md pr-6 leading-tight">{alertInfo.name}</div>
+                <div className={alertInfo.active ? 'text-red-500 font-bold text-sm mb-2' : 'text-gray-400 font-medium text-sm mb-2'}>
+                  {alertInfo.active ? '🚨 ПОВІТРЯНА ТРИВОГА' : '✅ Немає тривоги'}
                 </div>
-              )}
-            </div>
+                
+                {alertInfo.active && alertInfo.durationStr && (
+                  <div className="mt-3 bg-red-500/10 p-2.5 rounded-lg border border-red-500/20">
+                    <div className="text-gray-300 text-xs flex items-center justify-between mb-1.5">
+                      <span>Триває:</span>
+                      <span className="text-white font-mono font-bold bg-black/40 px-2 py-0.5 rounded">{alertInfo.durationStr}</span>
+                    </div>
+                    <div className="text-[11px] text-gray-500 flex justify-between">
+                      <span>Початок:</span>
+                      <span>{alertInfo.startStr}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Popup>
           );
         })()}
       </div>

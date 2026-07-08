@@ -131,7 +131,19 @@ export default function Home() {
       </div>
 
       {/* Global Overlays */}
-      {activeTab === 'SUMMARY' && <SummaryView />}
+      <AnimatePresence>
+        {activeTab === 'SUMMARY' && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="absolute inset-0 z-10"
+          >
+            <SummaryView />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Floating Desktop UI */}
       <div className="hidden md:block">
@@ -139,20 +151,36 @@ export default function Home() {
         {activeTab === 'MAP' && <ThreatFilters />}
         
         {/* Monitoring side panel */}
-        {activeTab === 'MONITORING' && (
-          <div className="absolute top-24 left-6 bottom-24 z-20 flex flex-col gap-4 w-80 lg:w-[400px]">
-             <MonitoringFeed />
-          </div>
-        )}
+        <AnimatePresence>
+          {activeTab === 'MONITORING' && (
+            <motion.div 
+              initial={{ x: -400, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -400, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="absolute top-24 left-6 bottom-24 z-20 flex flex-col gap-4 w-80 lg:w-[400px]"
+            >
+               <MonitoringFeed />
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         {/* Right Side Panels */}
-        {activeTab === 'MAP' && (
-          <div className="absolute top-28 right-6 bottom-24 z-20 flex flex-col gap-4 w-80">
-            <div className="bg-gradient-to-b from-black/40 to-black/10 backdrop-blur-xl rounded-3xl border border-white/10 flex-1 min-h-[150px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
-              <Sidebar />
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {activeTab === 'MAP' && (
+            <motion.div 
+              initial={{ x: 400, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 400, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="absolute top-28 right-6 bottom-24 z-20 flex flex-col gap-4 w-80"
+            >
+              <div className="bg-gradient-to-b from-black/40 to-black/10 backdrop-blur-xl rounded-3xl border border-white/10 flex-1 min-h-[150px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+                <Sidebar />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <StatsBottomPanel />
       </div>
@@ -180,6 +208,8 @@ export default function Home() {
         </AnimatePresence>
         
         {activeTab === 'MAP' && <MobileBottomSheet />}
+        
+        <MobileBottomNav />
       </div>
 
       {/* Global About Modal */}
