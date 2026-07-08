@@ -31,5 +31,25 @@ def detect_threat_type(text):
         return 'PPO'
     return None
 
-print(detect_threat_type('Загроза ФПВ\n19:22 Марганецька ТГ'))
-print(detect_threat_type('🎯 Зпр: Біленьке ФПВ'))
+import re
+
+texts = [
+    "19:58 Дрон 🪕 впав з 💥 детонацією",
+    "19:56 кладовище",
+    "19:55 ⛲ Насосна",
+    "19:53 Стара 🏡 Частина",
+    "🪖 ⛔ Загроза ФПВ"
+]
+
+with open('output.txt', 'w', encoding='utf-8') as f:
+    for text in texts:
+        clean_text = re.sub(r'[^\w\s.,:;!?\'\`\-]', ' ', text, flags=re.UNICODE)
+        # Remove multiple spaces
+        clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+        
+        match = re.search(r'(?:\d{1,2}:\d{2})\s+([а-яіїєґА-ЯІЇЄҐ\'\`\-]{3,}(?:\s+[а-яіїєґА-ЯІЇЄҐ\'\`\-]{2,}){0,2})', clean_text)
+        
+        f.write(f"Original: {text}\n")
+        f.write(f"Cleaned: {clean_text}\n")
+        f.write(f"Match: {match.group(1) if match else None}\n")
+        f.write("---\n")

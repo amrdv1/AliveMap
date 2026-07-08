@@ -95,13 +95,17 @@ def parse_telegram_text(text: str) -> List[ParsedThreat]:
     text = text.replace('a', 'а').replace('o', 'о').replace('e', 'е').replace('i', 'і').replace('p', 'р').replace('c', 'с').replace('x', 'х').replace('y', 'у')
     text = text.replace('A', 'А').replace('O', 'О').replace('E', 'Е').replace('I', 'І').replace('P', 'Р').replace('C', 'С').replace('X', 'Х').replace('Y', 'У')
     
+    # Strip emojis and special characters to allow clean regex matching
+    text = re.sub(r'[^\w\s.,:;!?\'\`\-]', ' ', text, flags=re.UNICODE)
+    text = re.sub(r'\s+', ' ', text).strip()
+    
     lower_text = text.lower()
     
     if re.search(r'(озер|нафтопродукт|рятувальник|дтп|аварі|пожеж|забруднення|економік|засідання|президент|крадіжк|ремонт|комунальн|клімат|наслідок|наслідки|депутат|санкці|врятував|врятувала|на жаль|помер|загинув|постражда|фото|відео|наживо|пишуть|повідомляє|заявив|інтерв.ю|стаття|новина|деталі|читайте|джерело|коментар|підписав|впк|виробництво|комплектуючих|російського|зведення|брифінг|поранений|евакуація|смерт|колишнього|нардеп|закупівл|розкрадання|бюджетн|слідств|вартість|фіктивн|фоп|готівк|розслідують|расследуют|хищение|закупке|производителе|стоимость|средств|заволодіння|розслідує|гроші|мільярд|млрд|обмін|валют|obmin|реклама|знижка|розіграш|магазин|ціна|грн|гривень|клієнт|підпишись|канал|працюємо|vpn|crypto|крипта|одяг|спорядження|промокод|акція|бонус|казино|slots|не исключен|не виключен|можливий|очікується|развед|розвід|імовірніст|ймовірніст|готуєть|готовит|застосування|применение|загроза застосування)', lower_text):
         return []
 
-    lower_text = re.sub(r'[.!?;:]', ' ', lower_text)
-    text = re.sub(r'[.!?;:]', ' ', text)
+    lower_text = re.sub(r'[.!?;]', ' ', lower_text)
+    text = re.sub(r'[.!?;]', ' ', text)
     base_type = detect_threat_type(lower_text)
     
     if not base_type:
@@ -125,8 +129,8 @@ def parse_telegram_text(text: str) -> List[ParsedThreat]:
         target_match = re.search(r'(?:на|курсом на|напрямку|до|над|біля|поблизу|район|в районі|у|в|зпр:|через)\s+([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}(?:\s+[А-ЯІЇЄҐа-яіїєґ\'\`\-]{2,}){0,2})', chunk)
         
         if not target_match:
-            # Fallback: time followed by a Capitalized word (e.g. "19:22 Марганецька ТГ")
-            target_match = re.search(r'(?:\d{1,2}:\d{2})\s+([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}(?:\s+[А-ЯІЇЄҐа-яіїєґ\'\`\-]{2,}){0,2})', chunk)
+            # Fallback: time followed by any word (e.g. "19:22 Марганецька ТГ" or "19:56 кладовище")
+            target_match = re.search(r'(?:\d{1,2}:\d{2})\s+([а-яіїєґА-ЯІЇЄҐ\'\`\-]{3,}(?:\s+[а-яіїєґА-ЯІЇЄҐ\'\`\-]{2,}){0,2})', chunk)
 
         target_name = None
         if target_match:
