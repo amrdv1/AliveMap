@@ -579,10 +579,10 @@ function detectThreatType(text: string): ParsedThreat['type'] | null {
   if (t.match(/(балістик|баллистик)/)) return 'BALLISTIC_MISSILE';
   if (t.match(/(ракет|missile)/)) return 'MISSILE';
   if (t.match(/авіабомб/) || tPadded.match(/ (каб|каби|кабів|фаб|фаби|бомб|бомби|бомбу) /)) return 'KAB';
-  if (t.match(/(fpv|фпв|фпві)/)) return 'FPV';
+  if (t.match(/(fpv|fрv|фпв|фпві)/)) return 'FPV';
   if (t.match(/(молнія|блискавка|molniya)/)) return 'MOLNIYA';
   if (t.match(/(гербер|імітатор|пародія|decoy|parodi|gerbera)/)) return 'DECOY';
-  if (t.match(/(розвідник|орлан|zala|зала|supercam|суперкам|recon)/)) return 'RECON';
+  if (t.match(/(розвідник|орлан|zala|зала|supercam|suрercam|суперкам|recon)/)) return 'RECON';
   if (t.match(/(реактивн|шахед|бпла|мопед|геран|shahed|италмас|італмас)/) || tPadded.match(/ (дрон|дрони|drone) /)) return 'DRONE';
   if (t.match(/(авіація|су-3|су-2|міг|ту-9|ту-2|літак|борти)/)) return 'AIRCRAFT';
   
@@ -745,11 +745,14 @@ export function parseTelegramText(text: string): ParsedThreat[] {
   // Deduplicate
   const uniqueResults: ParsedThreat[] = [];
   for (const res of results) {
-    const isDuplicate = uniqueResults.some(u => 
-      u.type === res.type && 
-      Math.abs(u.lat! - res.lat!) < 0.5 && 
-      Math.abs(u.lng! - res.lng!) < 0.5
-    );
+    const isDuplicate = uniqueResults.some(u => {
+      if (u.type !== res.type) return false;
+      // If either lat is null, don't consider them duplicates unless they share the same targetName
+      if (u.lat === null || res.lat === null) {
+          return u.targetName === res.targetName && u.targetName !== null;
+      }
+      return Math.abs(u.lat - res.lat) < 0.5 && Math.abs(u.lng! - res.lng!) < 0.5;
+    });
     if (!isDuplicate) uniqueResults.push(res);
   }
 
