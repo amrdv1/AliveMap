@@ -142,7 +142,10 @@ export async function processExternalThreat(
 
   let finalCourse = course;
   if (finalCourse == null && targetLat != null && targetLng != null) {
-      finalCourse = calculateBearing(lat, lng, targetLat, targetLng);
+      const distToTarget = getDistanceFromLatLonInKm(lat, lng, targetLat, targetLng);
+      if (distToTarget > 1.0) {
+          finalCourse = calculateBearing(lat, lng, targetLat, targetLng);
+      }
   }
 
   const initialConfidence = 0.4;
@@ -230,7 +233,12 @@ async function updateThreat(
   if (finalCourse == null) {
       if (targetLat != null && targetLng != null) {
           // New explicit target destination parsed. Recalculate route!
-          finalCourse = calculateBearing(lat, lng, targetLat, targetLng);
+          const distToTarget = getDistanceFromLatLonInKm(lat, lng, targetLat, targetLng);
+          if (distToTarget > 1.0) {
+              finalCourse = calculateBearing(lat, lng, targetLat, targetLng);
+          } else {
+              finalCourse = existingThreat.course;
+          }
       } else {
           finalCourse = existingThreat.course;
       }

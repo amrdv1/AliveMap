@@ -211,57 +211,53 @@ export async function startTelegramWorker(io: Server) {
         const finalCourse = aiData?.course || null;
         const finalTarget = aiData?.predictedTarget || null;
 
-        let overrideParsedThreats: any[] = [];
-        
-        // If AI found exact coordinates, use them for the target!
-        if (aiData?.targetLat && aiData?.targetLng) {
-           overrideParsedThreats.push({
-               type: parsedThreats[0].type,
-               lat: parsedThreats[0].lat,
-               lng: parsedThreats[0].lng,
-               confidence: 95,
-               direction: finalCourse ?? parsedThreats[0].direction,
-               quantity: parsedThreats[0].quantity,
-               targetName: finalTarget ?? parsedThreats[0].targetName,
-               targetLat: aiData.targetLat,
-               targetLng: aiData.targetLng
-           });
+        let threatsToProcess = parsedThreats;
+        const hasGeocodedLocs = parsedThreats.some(p => p.lat || p.targetLat);
+
+        if (!hasGeocodedLocs && aiData) {
+            // Only use AI override for locations if regex parser completely failed to find any coordinates
+            let overrideParsedThreats: any[] = [];
+            if (aiData.targetLat && aiData.targetLng) {
+               overrideParsedThreats.push({
+                   ...parsedThreats[0],
+                   confidence: 95,
+                   targetLat: aiData.targetLat,
+                   targetLng: aiData.targetLng
+               });
+            } else if (aiData.locationNames && aiData.locationNames.length > 0) {
+               for (const locName of aiData.locationNames) {
+                  const coords = await geocodeLocation(locName);
+                  if (coords) {
+                     overrideParsedThreats.push({
+                        ...parsedThreats[0],
+                        confidence: 95,
+                        targetName: locName,
+                        targetLat: coords.lat,
+                        targetLng: coords.lng
+                     });
+                  }
+               }
+            }
+            if (overrideParsedThreats.length > 0) {
+                threatsToProcess = overrideParsedThreats;
+            }
         }
-        // Otherwise, if AI found specific locations, geocode them and use as target!
-        else if (aiData?.locationNames && aiData.locationNames.length > 0) {
-           for (const locName of aiData.locationNames) {
-              const coords = await geocodeLocation(locName);
-              if (coords) {
-                 overrideParsedThreats.push({
-                    type: parsedThreats[0].type,
-                    lat: parsedThreats[0].lat,
-                    lng: parsedThreats[0].lng,
-                    confidence: 95,
-                    direction: finalCourse ?? parsedThreats[0].direction,
-                    quantity: parsedThreats[0].quantity,
-                    targetName: finalTarget ?? parsedThreats[0].targetName,
-                    targetLat: coords.lat,
-                    targetLng: coords.lng
-                 });
-              }
-           }
-        }
-        
-        const threatsToProcess = overrideParsedThreats.length > 0 ? overrideParsedThreats : parsedThreats;
 
         // Add all matched targets to map (including PPO)
         for (const parsed of threatsToProcess) {
           let finalLat = parsed.lat ?? parsed.targetLat;
           let finalLng = parsed.lng ?? parsed.targetLng;
 
-          // If no coordinates but we have a location name, geocode it
-          if (finalLat == null && finalLng == null && parsed.targetName) {
+          // Always try to geocode the targetName if it's missing coordinates
+          if (!parsed.targetLat && !parsed.targetLng && parsed.targetName) {
             const geoResult = await geocodeLocation(parsed.targetName);
             if (geoResult) {
-              finalLat = geoResult.lat;
-              finalLng = geoResult.lng;
               parsed.targetLat = geoResult.lat;
               parsed.targetLng = geoResult.lng;
+              if (finalLat == null && finalLng == null) {
+                  finalLat = geoResult.lat;
+                  finalLng = geoResult.lng;
+              }
             }
           }
 
@@ -289,8 +285,8 @@ export async function startTelegramWorker(io: Server) {
               const savedThreat = await processExternalThreat(
                   null,
                   parsed.type as any,
-                  finalLat,
-                  finalLng,
+                  finalLat as number,
+                  finalLng as number,
                   new Date(message.date * 1000),
                   sourceId,
                   finalSpeed,
@@ -403,14 +399,16 @@ export async function startTelegramWorker(io: Server) {
                                 let finalLat = parsed.lat ?? parsed.targetLat;
                                 let finalLng = parsed.lng ?? parsed.targetLng;
 
-                                // If no coordinates but we have a location name, geocode it
-                                if (finalLat == null && finalLng == null && parsed.targetName) {
+                                // Always try to geocode the targetName if it's provided
+                                if (parsed.targetName) {
                                     const geoResult = await geocodeLocation(parsed.targetName);
                                     if (geoResult) {
-                                        finalLat = geoResult.lat;
-                                        finalLng = geoResult.lng;
                                         parsed.targetLat = geoResult.lat;
                                         parsed.targetLng = geoResult.lng;
+                                        if (finalLat == null && finalLng == null) {
+                                            finalLat = geoResult.lat;
+                                            finalLng = geoResult.lng;
+                                        }
                                     }
                                 }
 
