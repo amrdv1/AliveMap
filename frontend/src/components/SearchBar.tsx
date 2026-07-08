@@ -54,7 +54,7 @@ export default function SearchBar() {
   }, [query]);
 
   const handleSelect = (result: SearchResult) => {
-    setFlyToLocation({ lat: result.lat, lng: result.lng, zoom: 11 });
+    setFlyToLocation({ lat: result.lat, lng: result.lng });
     setIsOpen(false);
     setQuery('');
   };
