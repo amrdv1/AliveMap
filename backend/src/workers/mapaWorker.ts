@@ -45,35 +45,41 @@ export async function startMapaWorker(io: Server) {
         const speed = obj.speed_kmh || null;
         const course = heading || obj.heading || null;
 
-        // ONLY search for ACTIVE threats of the same type
-        const recentThreats = await prisma.threatObject.findMany({
-          where: { status: 'ACTIVE', type: threatType },
-          include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
+        // First, try to find the exact threat by externalId
+        let matchedThreat = await prisma.threatObject.findUnique({
+           where: { externalId: String(obj.id) },
+           include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
         });
 
-        let matchedThreat = null;
-        let minDistance = Infinity;
-        
-        for (const t of recentThreats) {
-          let dist = Infinity;
-          if (t.locations.length > 0) {
-            const loc = t.locations[0];
-            dist = getDistanceFromLatLonInKm(lat, lon, loc.lat, loc.lng);
-          }
-
-          // Increased radius to 150km because Telegram geocoding can be off by region centers, 
-          // and missiles travel fast between MAPA polls
-          if (dist < 150 && dist < minDistance) { 
-            matchedThreat = t;
-            minDistance = dist;
-          }
-        }
-
-        // If no location match, but there's a threat of the SAME TYPE with NO locations, link it
+        // If not found by externalId, search for ACTIVE threats of the same type
         if (!matchedThreat) {
-           const locationlessThreat = recentThreats.find((t: any) => t.locations.length === 0);
-           if (locationlessThreat) {
-               matchedThreat = locationlessThreat;
+           const recentThreats = await prisma.threatObject.findMany({
+             where: { status: 'ACTIVE', type: threatType },
+             include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
+           });
+
+           let minDistance = Infinity;
+           
+           for (const t of recentThreats) {
+             let dist = Infinity;
+             if (t.locations.length > 0) {
+               const loc = t.locations[0];
+               dist = getDistanceFromLatLonInKm(lat, lon, loc.lat, loc.lng);
+             }
+
+             // Increased radius to 150km because Telegram geocoding can be off by region centers
+             if (dist < 150 && dist < minDistance) { 
+               matchedThreat = t;
+               minDistance = dist;
+             }
+           }
+
+           // If no location match, but there's a threat of the SAME TYPE with NO locations, link it
+           if (!matchedThreat) {
+              const locationlessThreat = recentThreats.find((t: any) => t.locations.length === 0);
+              if (locationlessThreat) {
+                  matchedThreat = locationlessThreat;
+              }
            }
         }
 
@@ -88,6 +94,7 @@ export async function startMapaWorker(io: Server) {
              const updatedThreat = await prisma.threatObject.update({
                 where: { id: matchedThreat.id },
                 data: {
+                  externalId: String(obj.id),
                   speed: speed ?? matchedThreat.speed,
                   course: course ?? matchedThreat.course,
                   confidence: 1.0, // MAPA is high confidence
@@ -109,6 +116,7 @@ export async function startMapaWorker(io: Server) {
            // CREATE NEW THREAT FROM MAPA
            const newThreat = await prisma.threatObject.create({
               data: {
+                 externalId: String(obj.id),
                  type: threatType,
                  status: 'ACTIVE',
                  confidence: 1.0,
