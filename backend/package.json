@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "telegram:login": "ts-node src/scripts/telegram-login.ts",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
+    "dev:node": "nodemon --watch src/**/*.ts --exec ts-node src/index.ts",
+    "dev:python": "cd python_parser && venv\\Scripts\\uvicorn main:app --reload",
+    "dev": "concurrently \"npm run dev:node\" \"npm run dev:python\"",
     "build": "npx prisma generate && tsc",
     "start": "npx prisma db push --accept-data-loss && node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -43,6 +45,7 @@
     "@types/node-fetch": "^2.6.13",
     "@types/node-telegram-bot-api": "^0.64.15",
     "@types/turf": "^3.5.32",
+    "concurrently": "^10.0.3",
     "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"

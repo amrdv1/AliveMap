@@ -175,7 +175,14 @@ export async function startTelegramWorker(io: Server) {
             }
         }
 
-        const parsedThreats = parseTelegramText(text);
+        let parsedThreats: any[] = [];
+        try {
+            const axios = require('axios');
+            const response = await axios.post('http://localhost:8000/parse', { text });
+            parsedThreats = response.data.threats;
+        } catch (e) {
+            console.error("Failed to parse text via Python API", e);
+        }
         if (!parsedThreats || parsedThreats.length === 0) return;
         
         const channelDisplay = username || title || 'Monitoring';
@@ -352,7 +359,14 @@ export async function startTelegramWorker(io: Server) {
                             }
                         }
 
-                        const parsedThreats = parseTelegramText(text);
+                        let parsedThreats: any[] = [];
+                        try {
+                            const axios = require('axios');
+                            const response = await axios.post('http://localhost:8000/parse', { text });
+                            parsedThreats = response.data.threats;
+                        } catch (e) {
+                            console.error("Failed to parse text via Python API in pollHistory", e);
+                        }
                         if (!parsedThreats || parsedThreats.length === 0) continue;
                         
                         const channelDisplay = channel;

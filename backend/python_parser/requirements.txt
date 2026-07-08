@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pymorphy3
+pymorphy3-dicts-uk
+pymorphy3-dicts-ru
+pydantic
