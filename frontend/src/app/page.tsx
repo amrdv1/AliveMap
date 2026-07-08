@@ -143,7 +143,12 @@ export default function Home() {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="absolute inset-0 z-10"
           >
-            <SummaryView />
+            <div className="hidden md:block w-full h-full">
+              <SummaryView />
+            </div>
+            <div className="block md:hidden w-full h-full">
+              <SummaryView isMobile={true} />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
