@@ -96,7 +96,7 @@ const SLANG_MAP: Record<string, string> = {
   'коберо': 'миколаїв', 'варварівка': 'миколаїв'
 };
 
-export async function geocodeLocation(locationName: string, dropIfQuiet: boolean = true): Promise<GeocodeResult | null> {
+export async function geocodeLocation(locationName: string, dropIfQuiet: boolean = true, contextChannel?: string): Promise<GeocodeResult | null> {
   if (citiesCache.length === 0) return null;
 
   let cleanQuery = locationName.trim().toLowerCase()
@@ -141,6 +141,18 @@ export async function geocodeLocation(locationName: string, dropIfQuiet: boolean
           const regex = new RegExp(`(^|\\s|-)${escapeRegExp(n)}(\\s|-|$)`, 'i');
           return regex.test(cleanQuery) || cleanQuery.includes(n + ' область') || cleanQuery.includes(n + ' район');
       }));
+  }
+  
+  if (contextChannel && contextChannel.toLowerCase().includes('nikalert')) {
+      const originalMatchesCount = matches.length;
+      matches = matches.filter(m => m.region === 'Дніпропетровська область' || m.region === 'Запорізька область');
+      if (matches.length === 0) {
+          let nikopol = citiesCache.find(c => c.names.includes('нікополь'));
+          if (nikopol) {
+              console.log(`[Geocoder] Fallback to Nikopol for query: ${cleanQuery} (dropped ${originalMatchesCount} out of bounds matches) due to @nikalert context`);
+              return { lat: nikopol.lat, lng: nikopol.lng, region: nikopol.region };
+          }
+      }
   }
 
   if (matches.length === 0) {
