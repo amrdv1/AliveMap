@@ -129,15 +129,30 @@ router.post('/telegram-message', async (req, res) => {
                 finalLng = parsed.targetLng;
             }
             if (finalLat === null || finalLng === null) {
-                if ((parsed.type === 'PPO' || parsed.type === 'INFO') && sourceId) {
-                    // Source posted a clear/explosion message but provided no coordinates.
-                    // Assume it means "clear all threats I previously reported"
-                    const { archiveThreatsBySource } = require('../services/aggregatorService');
-                    await archiveThreatsBySource(sourceId, io);
+                if (parsed.type === 'PPO' || parsed.type === 'INFO') {
+                    const isNationalChannel = ['war_monitor', 'vanek_nikolaev', 'monitor_ukraine', 'radarrua', 'eradarr'].some(c => channelName?.toLowerCase().includes(c));
+                    if (isNationalChannel && parsed.type === 'INFO') {
+                        const { archiveAllThreats } = require('../services/aggregatorService');
+                        await archiveAllThreats(io);
+                    } else if (sourceId) {
+                        // Source posted a clear/explosion message but provided no coordinates.
+                        // Assume it means "clear all threats I previously reported"
+                        const { archiveThreatsBySource } = require('../services/aggregatorService');
+                        await archiveThreatsBySource(sourceId, io);
+                    }
                 }
             }
 
             if (finalLat !== null && finalLng !== null) {
+                if (parsed.type === 'INFO' && parsed.targetName === 'Україна') {
+                    const isNationalChannel = ['war_monitor', 'vanek_nikolaev', 'monitor_ukraine', 'radarrua', 'eradarr'].some(c => channelName?.toLowerCase().includes(c));
+                    if (isNationalChannel) {
+                        const { archiveAllThreats } = require('../services/aggregatorService');
+                        await archiveAllThreats(io);
+                        continue;
+                    }
+                }
+
                 if (bestMessageLat == null) {
                     bestMessageLat = parsed.targetLat ?? finalLat;
                     bestMessageLng = parsed.targetLng ?? finalLng;
