@@ -587,6 +587,48 @@ export default function UkraineMap() {
 
 
 
+          {/* Click Custom Popup */}
+          {clickedRegion && (() => {
+            const alertInfo = getAlertInfo(clickedRegion.features);
+            if (!alertInfo) return null;
+            
+            return (
+              <Popup
+                longitude={clickedRegion.lngLat.lng}
+                latitude={clickedRegion.lngLat.lat}
+                anchor="bottom"
+                onClose={() => setClickedRegion(null)}
+                closeButton={false}
+                closeOnClick={false}
+                className="custom-threat-popup z-[100]"
+                maxWidth="260px"
+                offset={10}
+              >
+                <div className="bg-[#1a1a1a] text-white p-4 rounded-xl border border-white/10 shadow-2xl relative w-[240px]">
+                  <button onClick={(e) => { e.stopPropagation(); setClickedRegion(null); }} className="absolute top-3 right-3 text-white/50 hover:text-white transition">
+                     <X size={16} />
+                  </button>
+                  <div className="font-bold text-lg mb-1 drop-shadow-md pr-6 leading-tight">{alertInfo.name}</div>
+                  <div className={alertInfo.active ? 'text-red-500 font-bold text-sm mb-2' : 'text-gray-400 font-medium text-sm mb-2'}>
+                    {alertInfo.active ? '🚨 ПОВІТРЯНА ТРИВОГА' : '✅ Немає тривоги'}
+                  </div>
+                  
+                  {alertInfo.active && alertInfo.durationStr && (
+                    <div className="mt-3 bg-red-500/10 p-2.5 rounded-lg border border-red-500/20">
+                      <div className="text-gray-300 text-xs flex items-center justify-between mb-1.5">
+                        <span>Триває:</span>
+                        <span className="text-white font-mono font-bold bg-black/40 px-2 py-0.5 rounded">{alertInfo.durationStr}</span>
+                      </div>
+                      <div className="text-[11px] text-gray-500 flex justify-between">
+                        <span>Початок:</span>
+                        <span>{alertInfo.startStr}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Popup>
+            );
+          })()}
         </Map>
         
         {/* CSS Override for Maplibre popup background */}
@@ -601,48 +643,7 @@ export default function UkraineMap() {
           }
         `}} />
 
-        {/* Click Custom Popup */}
-        {clickedRegion && (() => {
-          const alertInfo = getAlertInfo(clickedRegion.features);
-          if (!alertInfo) return null;
-          
-          return (
-            <Popup
-              longitude={clickedRegion.lngLat.lng}
-              latitude={clickedRegion.lngLat.lat}
-              anchor="bottom"
-              onClose={() => setClickedRegion(null)}
-              closeButton={false}
-              closeOnClick={false}
-              className="custom-threat-popup z-[100]"
-              maxWidth="260px"
-              offset={10}
-            >
-              <div className="bg-[#1a1a1a] text-white p-4 rounded-xl border border-white/10 shadow-2xl relative w-[240px]">
-                <button onClick={(e) => { e.stopPropagation(); setClickedRegion(null); }} className="absolute top-3 right-3 text-white/50 hover:text-white transition">
-                   <X size={16} />
-                </button>
-                <div className="font-bold text-lg mb-1 drop-shadow-md pr-6 leading-tight">{alertInfo.name}</div>
-                <div className={alertInfo.active ? 'text-red-500 font-bold text-sm mb-2' : 'text-gray-400 font-medium text-sm mb-2'}>
-                  {alertInfo.active ? '🚨 ПОВІТРЯНА ТРИВОГА' : '✅ Немає тривоги'}
-                </div>
-                
-                {alertInfo.active && alertInfo.durationStr && (
-                  <div className="mt-3 bg-red-500/10 p-2.5 rounded-lg border border-red-500/20">
-                    <div className="text-gray-300 text-xs flex items-center justify-between mb-1.5">
-                      <span>Триває:</span>
-                      <span className="text-white font-mono font-bold bg-black/40 px-2 py-0.5 rounded">{alertInfo.durationStr}</span>
-                    </div>
-                    <div className="text-[11px] text-gray-500 flex justify-between">
-                      <span>Початок:</span>
-                      <span>{alertInfo.startStr}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </Popup>
-          );
-        })()}
+
       </div>
   );
 }
