@@ -103,7 +103,14 @@ export async function processExternalThreat(
     let finalCourse = course;
     if (finalCourse == null && matchedThreat.locations.length > 0) {
       const prevLoc = matchedThreat.locations[0];
+      const dist = getDistanceFromLatLonInKm(lat, lng, prevLoc.lat, prevLoc.lng);
+      if (dist > 1.0) {
+          finalCourse = calculateBearing(prevLoc.lat, prevLoc.lng, lat, lng);
       }
+    }
+
+    if (finalSpeed == null) {
+        finalSpeed = matchedThreat.speed;
     }
 
     return await updateThreat(matchedThreat, lat, lng, time, sourceId, finalSpeed, finalCourse, trailLocations, confidence, quantity, targetName, targetLat, targetLng);
