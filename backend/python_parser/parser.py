@@ -52,10 +52,13 @@ def detect_threat_type(text: str) -> Optional[str]:
     return None
 
 def parse_quantity(text: str) -> int:
-    num_match = re.search(r'(?:[^\d]|^)(\d{1,2})\s*(?:шахед|ракет|бпла|каб|дрон|ціл)', text, re.IGNORECASE)
+    # Remove times like 16:13 so they aren't parsed as quantities
+    text_no_time = re.sub(r'\b\d{1,2}:\d{2}\b', '', text)
+    
+    num_match = re.search(r'(?:[^\d]|^)(\d{1,2})\s*(?:шахед|ракет|бпла|каб|дрон|ціл)', text_no_time, re.IGNORECASE)
     if num_match: return min(int(num_match.group(1)), 30)
     
-    num_match_reverse = re.search(r'(?:шахед|ракет|бпла|каб|дрон|ціл)[^\d]{0,20}(\d{1,2})(?![a-zа-яіїєґ])', text, re.IGNORECASE)
+    num_match_reverse = re.search(r'(?:шахед|ракет|бпла|каб|дрон|ціл)[^\d]{0,20}(\d{1,2})(?![a-zа-яіїєґ])', text_no_time, re.IGNORECASE)
     if num_match_reverse: return min(int(num_match_reverse.group(1)), 30)
     
     t_padded = f" {re.sub(r'[^а-яіїєґa-z0-9]', ' ', text.lower())} "

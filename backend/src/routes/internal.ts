@@ -69,8 +69,9 @@ router.post('/telegram-message', async (req, res) => {
                    targetLng: aiData.targetLng
                });
             } else if (aiData.locationNames && aiData.locationNames.length > 0) {
+               const dropIfQuiet = !['FPV', 'KAB', 'AIRCRAFT', 'RECON'].includes(threatType);
                for (const locName of aiData.locationNames) {
-                  const coords = await geocodeLocation(locName);
+                  const coords = await geocodeLocation(locName, dropIfQuiet);
                   if (coords) {
                      overrideParsedThreats.push({
                         ...threats[0],
@@ -98,7 +99,8 @@ router.post('/telegram-message', async (req, res) => {
             let finalLng = parsed.lng ?? parsed.targetLng;
 
             if (!parsed.targetLat && !parsed.targetLng && parsed.targetName) {
-                const geoResult = await geocodeLocation(parsed.targetName);
+                const dropIfQuiet = !['FPV', 'KAB', 'AIRCRAFT', 'RECON'].includes(parsed.type);
+                const geoResult = await geocodeLocation(parsed.targetName, dropIfQuiet);
                 if (geoResult) {
                     parsed.targetLat = geoResult.lat;
                     parsed.targetLng = geoResult.lng;
