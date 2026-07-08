@@ -30,26 +30,26 @@ export default function SummaryView() {
   const totalActiveQuantity = activeThreats.reduce((acc, t) => acc + (t.quantity || 1), 0);
 
   return (
-    <div className="absolute inset-0 z-20 bg-[#050505]/80 backdrop-blur-2xl pt-20 md:pt-28 px-4 pb-20 md:pb-24 overflow-y-auto custom-scrollbar flex justify-center">
-      <div className="w-full max-w-5xl flex flex-col gap-8">
+    <div className="absolute inset-0 z-20 bg-[#050505]/95 md:bg-[#050505]/80 backdrop-blur-2xl pt-20 md:pt-28 px-3 md:px-4 pb-20 md:pb-24 overflow-y-auto custom-scrollbar flex justify-center">
+      <div className="w-full max-w-5xl flex flex-col gap-4 md:gap-8">
         
         {/* Header */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-red-900/20 via-black/40 to-black/40 backdrop-blur-3xl border border-white/5 rounded-[32px] p-8 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-[0_16px_40px_rgba(0,0,0,0.5)]">
+        <div className="relative overflow-hidden bg-gradient-to-r from-red-900/20 via-black/40 to-black/40 backdrop-blur-3xl border border-white/5 rounded-[24px] md:rounded-[32px] p-5 md:p-10 flex flex-col md:flex-row justify-between items-center gap-4 shadow-[0_16px_40px_rgba(0,0,0,0.5)]">
           <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 rounded-full blur-[80px] pointer-events-none" />
-          <div className="relative z-10">
-            <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-widest mb-3 flex items-center gap-4">
-              <div className="p-2.5 bg-red-500/10 rounded-2xl border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
-                <ShieldAlert className="text-red-500 w-8 h-8" strokeWidth={2.5} />
+          <div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left w-full md:w-auto">
+            <h1 className="text-xl md:text-3xl font-black text-white uppercase tracking-widest mb-1 md:mb-3 flex flex-col md:flex-row items-center gap-2 md:gap-4">
+              <div className="p-2 md:p-2.5 bg-red-500/10 rounded-xl md:rounded-2xl border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.2)] hidden md:block">
+                <ShieldAlert className="text-red-500 w-6 h-6 md:w-8 md:h-8" strokeWidth={2.5} />
               </div>
-              ОПЕРАТИВНЕ ЗВЕДЕННЯ
+              <span className="truncate w-full">ОПЕРАТИВНЕ ЗВЕДЕННЯ</span>
             </h1>
-            <p className="text-white/40 font-medium tracking-wider text-sm pl-2">
+            <p className="text-white/40 font-bold tracking-wider text-[11px] md:text-sm">
               Станом на {new Date().toLocaleTimeString('uk-UA')}
             </p>
           </div>
-          <div className="relative z-10 bg-red-500/10 border border-red-500/20 px-8 py-5 rounded-[24px] text-center min-w-[180px] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_32px_rgba(239,68,68,0.2)]">
-            <div className="text-5xl font-black text-red-500 mb-2 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)] tracking-tighter">{totalActiveQuantity}</div>
-            <div className="text-[11px] font-black text-red-400/90 uppercase tracking-[0.2em]">Активних цілей</div>
+          <div className="relative z-10 bg-red-500/10 border border-red-500/20 px-6 py-3 md:px-8 md:py-5 rounded-[20px] md:rounded-[24px] text-center min-w-[140px] md:min-w-[180px] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_32px_rgba(239,68,68,0.2)]">
+            <div className="text-3xl md:text-5xl font-black text-red-500 mb-1 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)] tracking-tighter">{totalActiveQuantity}</div>
+            <div className="text-[10px] md:text-[11px] font-black text-red-400/90 uppercase tracking-[0.2em]">Активних цілей</div>
           </div>
         </div>
 
@@ -143,17 +143,17 @@ function StatCard({ title, count, color, icon }: { title: string, count: number,
   return (
     <motion.div 
       whileHover={{ scale: 1.02 }} 
-      className={`relative overflow-hidden ${isActive ? style.bg : 'bg-[#0a0a0a]/60'} backdrop-blur-2xl border ${isActive ? style.border : 'border-white/5'} rounded-[24px] p-6 flex flex-col items-center justify-center gap-4 transition-all duration-300 cursor-pointer ${isActive ? style.glow : 'shadow-lg'}`}
+      className={`relative overflow-hidden ${isActive ? style.bg : 'bg-[#0a0a0a]/40'} backdrop-blur-2xl border ${isActive ? style.border : 'border-white-[0.02]'} rounded-[20px] md:rounded-[24px] p-4 md:p-6 flex flex-col items-center justify-center gap-2 md:gap-4 transition-all duration-300 cursor-pointer ${isActive ? style.glow : 'shadow-sm'}`}
     >
       {isActive && <div className={`absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none`} />}
       
-      <div className={`relative z-10 w-12 h-12 rounded-[16px] flex items-center justify-center text-2xl ${isActive ? style.bg : 'bg-white/5'} border ${isActive ? style.border : 'border-transparent'} shadow-inner transition-transform duration-500 hover:scale-110`}>
-        <span className={isActive ? 'drop-shadow-lg' : 'opacity-50 grayscale'}>{icon}</span>
+      <div className={`relative z-10 w-10 h-10 md:w-12 md:h-12 rounded-[12px] md:rounded-[16px] flex items-center justify-center text-xl md:text-2xl ${isActive ? style.bg : 'bg-transparent'} border ${isActive ? style.border : 'border-transparent'} shadow-inner transition-transform duration-500 hover:scale-110`}>
+        <span className={isActive ? 'drop-shadow-lg' : 'opacity-40 grayscale-0 brightness-75'}>{icon}</span>
       </div>
       
       <div className="relative z-10 text-center">
-        <div className={`text-4xl font-black tracking-tighter mb-1.5 ${isActive ? style.text : 'text-white/20'}`}>{count}</div>
-        <div className={`text-[11px] font-black uppercase tracking-[0.2em] ${isActive ? 'text-white/80' : 'text-white/30'}`}>{title}</div>
+        <div className={`text-2xl md:text-4xl font-black tracking-tighter mb-1 ${isActive ? style.text : 'text-white/40'}`}>{count}</div>
+        <div className={`text-[9px] md:text-[11px] font-black uppercase tracking-[0.1em] md:tracking-[0.2em] ${isActive ? 'text-white/80' : 'text-white/50'}`}>{title}</div>
       </div>
     </motion.div>
   );

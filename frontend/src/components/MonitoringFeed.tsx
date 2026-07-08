@@ -13,27 +13,27 @@ export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
         : 'w-full h-full bg-[#050505]/80 backdrop-blur-2xl border border-white/[0.05] rounded-[32px] shadow-[0_16px_40px_rgba(0,0,0,0.5)]'
     }`}>
       {/* Header */}
-      <div className={`p-6 flex items-center justify-between ${isMobile ? 'pt-24 pb-4' : 'border-b border-white/[0.05] bg-black/20'}`}>
-        <h2 className="text-xl font-black text-white uppercase tracking-widest flex items-center gap-3">
-          <Activity className="text-red-500 w-6 h-6" strokeWidth={2.5} />
+      <div className={`flex items-center justify-between ${isMobile ? 'px-4 pt-[90px] pb-3' : 'p-6 border-b border-white/[0.05] bg-black/20'}`}>
+        <h2 className="text-lg md:text-xl font-black text-white uppercase tracking-widest flex items-center gap-3">
+          <Activity className="text-red-500 w-5 h-5 md:w-6 md:h-6" strokeWidth={2.5} />
           Моніторинг
-          <span className="bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-black px-2.5 py-1 rounded-lg shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+          <span className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] md:text-xs font-black px-2 md:px-2.5 py-0.5 md:py-1 rounded-lg shadow-[0_0_15px_rgba(239,68,68,0.2)]">
             {messages.length}
           </span>
         </h2>
       </div>
 
       {/* Search and Filters */}
-      <div className="px-6 py-4 border-b border-white/[0.05] space-y-4 bg-black/10">
+      <div className={`px-4 md:px-6 py-3 md:py-4 border-b border-white/[0.05] space-y-3 bg-black/10`}>
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 w-4 h-4" />
           <input type="text" placeholder="Пошук повідомлень..." 
-                 className="w-full bg-[#111]/80 text-white text-[13px] rounded-xl pl-11 pr-4 py-3.5 outline-none border border-white/5 focus:border-red-500/30 focus:bg-[#1a1a1a]/80 transition-all placeholder:text-white/30 font-medium" />
+                 className="w-full bg-[#111]/80 text-white text-xs md:text-[13px] rounded-xl pl-11 pr-4 py-3 outline-none border border-white/5 focus:border-red-500/30 focus:bg-[#1a1a1a]/80 transition-all placeholder:text-white/30 font-medium" />
         </div>
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-          <button className="bg-red-500/15 text-red-500 shadow-sm border border-transparent text-xs font-black px-5 py-2.5 rounded-xl transition-all tracking-widest uppercase">Усі</button>
-          <button className="bg-white/5 text-white/30 hover:bg-white/10 hover:text-white/60 text-xs font-black px-5 py-2.5 rounded-xl transition-colors tracking-widest uppercase">Важливе</button>
-          <button className="bg-white/5 text-white/30 hover:bg-white/10 hover:text-white/60 text-xs font-black px-5 py-2.5 rounded-xl transition-colors tracking-widest uppercase">Збиття</button>
+          <button className="bg-red-500/15 text-red-500 shadow-sm border border-transparent text-[10px] md:text-xs font-black px-4 py-2 md:px-5 md:py-2.5 rounded-lg md:rounded-xl transition-all tracking-widest uppercase">Усі</button>
+          <button className="bg-white/5 text-white/30 hover:bg-white/10 hover:text-white/60 text-[10px] md:text-xs font-black px-4 py-2 md:px-5 md:py-2.5 rounded-lg md:rounded-xl transition-colors tracking-widest uppercase">Важливе</button>
+          <button className="bg-white/5 text-white/30 hover:bg-white/10 hover:text-white/60 text-[10px] md:text-xs font-black px-4 py-2 md:px-5 md:py-2.5 rounded-lg md:rounded-xl transition-colors tracking-widest uppercase">Збиття</button>
         </div>
       </div>
 
@@ -118,7 +118,7 @@ export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
                 </div>
               )}
 
-              <p className="text-[14px] text-white/80 leading-relaxed font-medium whitespace-pre-wrap">
+              <p className="text-xs md:text-[14px] text-white/80 leading-relaxed font-medium whitespace-pre-wrap pt-1">
                 {msg.text}
               </p>
               </div>
