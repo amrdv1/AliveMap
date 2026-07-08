@@ -54,6 +54,30 @@ const REGION_CENTERS: Record<string, {lat: number, lng: number, region: string}>
   'луганщина': { lat: 48.5740, lng: 39.3078, region: 'Луганська область' }
 };
 
+const SLANG_MAP: Record<string, string> = {
+  'троя': 'київ',
+  'троящина': 'київ',
+  'троєщина': 'київ',
+  'оболонь': 'київ',
+  'позняки': 'київ',
+  'печерськ': 'київ',
+  'поділ': 'київ',
+  'дарниця': 'київ',
+  'салтівка': 'харків',
+  'хтз': 'харків',
+  'олексіївка': 'харків',
+  'таїрова': 'одеса',
+  'котовського': 'одеса',
+  'черемушки': 'одеса',
+  'пересип': 'одеса',
+  'бабурка': 'запоріжжя',
+  'космос': 'запоріжжя',
+  'сихів': 'львів',
+  'тополь': 'дніпро',
+  'перемога': 'дніпро',
+  'парус': 'дніпро'
+};
+
 export async function geocodeLocation(locationName: string, dropIfQuiet: boolean = true): Promise<GeocodeResult | null> {
   if (citiesCache.length === 0) return null;
 
@@ -63,6 +87,10 @@ export async function geocodeLocation(locationName: string, dropIfQuiet: boolean
     .replace(/^(м\.|село|смт|місто)\s+/g, '')
     .trim();
 
+  if (SLANG_MAP[cleanQuery]) {
+      cleanQuery = SLANG_MAP[cleanQuery];
+  }
+
   if (cleanQuery.length < 2) return null;
 
   let matches = citiesCache.filter(c => c.names.includes(cleanQuery));
@@ -71,7 +99,7 @@ export async function geocodeLocation(locationName: string, dropIfQuiet: boolean
       matches = citiesCache.filter(c => c.names.some((n: string) => cleanQuery.startsWith(n) || n.startsWith(cleanQuery)));
   }
 
-  if (matches.length === 0) {
+  if (matches.length === 0 && cleanQuery.length >= 5) {
       matches = citiesCache.filter(c => c.names.some((n: string) => cleanQuery.includes(n) || n.includes(cleanQuery)));
   }
 
