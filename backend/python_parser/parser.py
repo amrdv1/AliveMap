@@ -127,10 +127,6 @@ def parse_telegram_text(text: str) -> List[ParsedThreat]:
         if not target_match:
             # Fallback: time followed by a Capitalized word (e.g. "19:22 Марганецька ТГ")
             target_match = re.search(r'(?:\d{1,2}:\d{2})\s+([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}(?:\s+[А-ЯІЇЄҐа-яіїєґ\'\`\-]{2,}){0,2})', chunk)
-            
-        if not target_match:
-            # Fallback: Just look for a capitalized word that isn't at the very start
-            target_match = re.search(r'(?:\s+|-)([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{3,}(?:\s+[А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}){0,1})', chunk)
 
         target_name = None
         if target_match:
