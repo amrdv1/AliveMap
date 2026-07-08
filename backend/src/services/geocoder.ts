@@ -112,11 +112,9 @@ export async function geocodeLocation(locationName: string, dropIfQuiet: boolean
   let matchedRegionKey = Object.keys(REGION_CENTERS).find(key => cleanQuery.includes(key));
   if (matchedRegionKey) {
       return {
-          names: [cleanQuery],
           lat: REGION_CENTERS[matchedRegionKey].lat,
           lng: REGION_CENTERS[matchedRegionKey].lng,
-          region: REGION_CENTERS[matchedRegionKey].region,
-          pop: 1000000
+          region: REGION_CENTERS[matchedRegionKey].region
       };
   }
 
