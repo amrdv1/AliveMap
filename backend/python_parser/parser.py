@@ -116,11 +116,20 @@ def parse_telegram_text(text: str) -> List[ParsedThreat]:
         qty = parse_quantity(chunk)
         
         # Search for targets using PyMorphy3 to get proper Nominative case!
-        target_match = re.search(r'(?:на|курсом на|напрямку|до|над|біля|поблизу)\s+([А-ЯІЇЄҐа-яіїєґ\'\`\-]{3,}(?:\s+[А-ЯІЇЄҐа-яіїєґ\'\`\-]{3,}){0,2})', chunk, re.IGNORECASE)
+        target_match = re.search(r'(?:на|курсом на|напрямку|до|над|біля|поблизу|район|в районі|у|в|зпр:|через)\s+([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}(?:\s+[А-ЯІЇЄҐа-яіїєґ\'\`\-]{2,}){0,2})', chunk, re.IGNORECASE)
+        
+        if not target_match:
+            # Fallback: time followed by a Capitalized word (e.g. "19:22 Марганецька ТГ")
+            target_match = re.search(r'(?:\d{1,2}:\d{2})\s+([а-яіїєґ\'\`\-]{3,}(?:\s+[а-яіїєґ\'\`\-]{2,}){0,2})', chunk, re.IGNORECASE)
+            
+        if not target_match:
+            # Fallback: "Загроза ФПВ Марганецька" -> Just look for a capitalized word that isn't at the very start
+            target_match = re.search(r'(?:\s+|-)([а-яіїєґ\'\`\-]{4,}(?:\s+[а-яіїєґ\'\`\-]{3,}){0,1})', chunk, re.IGNORECASE)
+
         target_name = None
         if target_match:
             extracted_name = target_match.group(1).strip()
-            skip_words = ['також', 'шахед', 'дрон', 'бпла', 'ракет', 'район', 'область', 'типу', 'невідом', 'ударний', 'реактивний']
+            skip_words = ['також', 'шахед', 'дрон', 'бпла', 'ракет', 'район', 'область', 'типу', 'невідом', 'ударний', 'реактивний', 'загроза', 'увага', 'відбій']
             if not any(extracted_name.lower().startswith(w) for w in skip_words):
                 # Split by space and lemmatize each word
                 parts = extracted_name.split()
