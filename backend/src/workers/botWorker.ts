@@ -39,7 +39,8 @@ export async function startBotWorker() {
       keyboard.push(row);
     }
 
-    bot!.sendMessage(chatId, "Привіт! Оберіть свій регіон для отримання загальних сповіщень. \n\nАБО надішліть боту свою геолокацію (скріпкою 📎 -> Розташування) для активації **Розумних Сповіщень** (бот попередить, якщо загроза летить саме до вас).", {
+    bot!.sendMessage(chatId, "👋 **Привіт! Я — твій персональний радар-помічник.** 📡\n\n🎯 **Обери свій регіон** нижче для отримання сповіщень про повітряні тривоги.\n\n🔥 **СУПЕР-ФІЧА: Розумні Сповіщення** 🔥\nНадішли мені свою геолокацію (скріпкою 📎 -> Розташування), і я попереджатиму тебе **ТІЛЬКИ ТОДІ**, коли ракета чи шахед летить **ПРЯМО НА ТЕБЕ** (навіть якщо вони зараз в іншій області)!", {
+      parse_mode: 'Markdown',
       reply_markup: {
         inline_keyboard: keyboard
       }
@@ -59,9 +60,9 @@ export async function startBotWorker() {
                 update: { lat, lng, smartPush: true },
                 create: { chatId, region: "SMART", lat, lng, smartPush: true }
             });
-            bot!.sendMessage(chatId, `✅ **Розумні сповіщення активовано!**\nВаші координати збережено. Бот повідомить вас, якщо ракета чи дрон рухатиметься у вашому напрямку (радіус 20 км).`, { parse_mode: 'Markdown' });
+            bot!.sendMessage(chatId, `🎯 **РОЗУМНІ СПОВІЩЕННЯ АКТИВОВАНО!** 🎯\n\n📍 Ваші координати успішно збережено.\n\n🛡️ Тепер ви під надійним захистом: мій штучний інтелект відстежує вектори всіх загроз на карті. Якщо ракета або шахед летітиме прямо у вашу сторону (радіус до 20 км) — ви отримаєте термінове сповіщення!\n\n_Ви також можете обрати регіон для загальних тривог через команду /start._`, { parse_mode: 'Markdown' });
         } catch (e) {
-            bot!.sendMessage(chatId, `❌ Помилка збереження локації.`);
+            bot!.sendMessage(chatId, `❌ **Помилка:** Не вдалося зберегти локацію. Спробуйте ще раз.`);
         }
     }
   });
@@ -94,8 +95,8 @@ export async function startBotWorker() {
           });
         }
 
-        bot!.answerCallbackQuery(query.id, { text: `Ви підписалися на ${region}` });
-        bot!.sendMessage(chatId, `✅ Ви успішно підписалися на сповіщення для: **${region}**.\n\nТепер ви будете отримувати повідомлення про початок та відбій тривог у цьому регіоні.`, { parse_mode: "Markdown" });
+        bot!.answerCallbackQuery(query.id, { text: `✅ Підписку оформлено: ${region}` });
+        bot!.sendMessage(chatId, `✅ **Підписка успішна!**\n\n📌 Регіон: **${region}**\n\nТепер ви миттєво отримуватимете повідомлення про початок та відбій тривог у цьому регіоні! 🚨`, { parse_mode: "Markdown" });
       } catch (e) {
         console.error("Failed to subscribe user", e);
         bot!.answerCallbackQuery(query.id, { text: "Помилка при підписці." });
@@ -130,8 +131,8 @@ export async function sendAlertNotification(region: string, isAlert: boolean) {
     }
 
     const message = isAlert 
-      ? `🔴 **Повітряна тривога!**\n\nРегіон: ${region}\nПрямуйте в укриття!`
-      : `🟢 **Відбій тривоги!**\n\nРегіон: ${region}`;
+      ? `🚨 **УВАГА! ПОВІТРЯНА ТРИВОГА!** 🚨\n\n📍 **Регіон:** ${region}\n\n⚠️ Негайно прямуйте в укриття! Бережіть себе!`
+      : `🟢 **ВІДБІЙ ТРИВОГИ!** 🟢\n\n📍 **Регіон:** ${region}\n\n🕊️ Можна повертатися до звичних справ.`;
 
     for (const sub of uniqueSubscribers) {
       try {
@@ -185,7 +186,19 @@ export async function sendSmartThreatNotification(
         for (const sub of uniqueSmartSubs) {
             if (willIntersectLocation(projection, sub.lat!, sub.lng!, 20)) {
                 // Threat passes within 20km!
-                const message = `⚠️ **УВАГА! РОЗУМНЕ СПОВІЩЕННЯ** ⚠️\n\nОб'єкт **${threatType}** рухається у вашому напрямку! \nРозрахунковий вектор проходить близько до вашої локації. Прямуйте в укриття!`;
+                const typeMap: any = {
+                    'DRONE': '🛸 ШАХЕД / БПЛА',
+                    'FPV': '🚁 FPV ДРОН',
+                    'MISSILE': '🚀 РАКЕТА',
+                    'CRUISE_MISSILE': '🚀 КРИЛАТА РАКЕТА',
+                    'BALLISTIC_MISSILE': '☄️ БАЛІСТИКА',
+                    'KAB': '💣 КАБ',
+                    'AIRCRAFT': '✈️ ВОРОЖА АВІАЦІЯ',
+                    'RECON': '👁️ РОЗВІДНИК'
+                };
+                const displayType = typeMap[threatType] || `⚠️ ${threatType}`;
+                
+                const message = `‼️ **РОЗУМНЕ СПОВІЩЕННЯ: ПРЯМА ЗАГРОЗА!** ‼️\n\n${displayType} зараз рухається **прямо у вашому напрямку**!\n\n📐 Розрахунковий вектор перетинає вашу локацію.\n⏳ Час на реагування може бути мінімальним!\n\n🏃‍♂️ **НЕГАЙНО ПРЯМУЙТЕ В УКРИТТЯ!**`;
                 try {
                     await bot.sendMessage(sub.chatId, message, { parse_mode: "Markdown" });
                 } catch (e) {
