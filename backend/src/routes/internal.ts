@@ -107,21 +107,27 @@ router.post('/telegram-message', async (req, res) => {
                 }
             }
 
-            // If we don't have an initial location but we have a target, spawn it upstream
+            const isUtility = ['PPO', 'INFO', 'SUMMARY'].includes(parsed.type);
+
             if (finalLat == null && parsed.targetLat != null && parsed.targetLng != null) {
-                const turf = require('@turf/turf');
-                const targetPoint = turf.point([parsed.targetLng, parsed.targetLat]);
-                
-                // Spawn in the East/North-East/South/South-East (from Russia/Crimea direction)
-                // Backtrack angle (where it spawns) should be between 45 (NE) and 180 (South)
-                const backtrackAngle = 45 + Math.random() * 135;
-                
-                // Spawn distance based on threat speed
-                const spawnDistKm = parsed.type.includes('MISSILE') || parsed.type === 'KINZHAL' || parsed.type === 'ZIRCON' || parsed.type === 'KALIBR' || parsed.type === 'KH101' ? 250 : 60;
-                
-                const spawnPoint = turf.destination(targetPoint, spawnDistKm, backtrackAngle, { units: 'kilometers' });
-                finalLat = spawnPoint.geometry.coordinates[1];
-                finalLng = spawnPoint.geometry.coordinates[0];
+                if (isUtility) {
+                    finalLat = parsed.targetLat;
+                    finalLng = parsed.targetLng;
+                } else {
+                    const turf = require('@turf/turf');
+                    const targetPoint = turf.point([parsed.targetLng, parsed.targetLat]);
+                    
+                    // Spawn in the East/North-East/South/South-East (from Russia/Crimea direction)
+                    // Backtrack angle (where it spawns) should be between 45 (NE) and 180 (South)
+                    const backtrackAngle = 45 + Math.random() * 135;
+                    
+                    // Spawn distance based on threat speed
+                    const spawnDistKm = parsed.type.includes('MISSILE') || parsed.type === 'KINZHAL' || parsed.type === 'ZIRCON' || parsed.type === 'KALIBR' || parsed.type === 'KH101' ? 250 : 60;
+                    
+                    const spawnPoint = turf.destination(targetPoint, spawnDistKm, backtrackAngle, { units: 'kilometers' });
+                    finalLat = spawnPoint.geometry.coordinates[1];
+                    finalLng = spawnPoint.geometry.coordinates[0];
+                }
             } else if (finalLat == null) {
                 finalLat = parsed.targetLat;
                 finalLng = parsed.targetLng;

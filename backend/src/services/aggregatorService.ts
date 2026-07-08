@@ -101,20 +101,8 @@ export async function processExternalThreat(
     // If no speed/course provided, try to calculate from previous point
     let finalSpeed = speed;
     let finalCourse = course;
-    if ((finalSpeed == null || finalCourse == null) && matchedThreat.locations.length > 0) {
+    if (finalCourse == null && matchedThreat.locations.length > 0) {
       const prevLoc = matchedThreat.locations[0];
-      const dtHours = (time.getTime() - prevLoc.time.getTime()) / (1000 * 60 * 60);
-      if (dtHours > 0) {
-        const dist = getDistanceFromLatLonInKm(lat, lng, prevLoc.lat, prevLoc.lng);
-        if (finalSpeed == null) {
-            finalSpeed = dist / dtHours;
-            // Cap calculated speeds to prevent insane values from GPS jumps
-            const maxSpeed = matchedThreat.type.includes('BALLISTIC') || matchedThreat.type === 'KINZHAL' || matchedThreat.type === 'ZIRCON' ? 12000 :
-                             matchedThreat.type.includes('MISSILE') || matchedThreat.type === 'KALIBR' || matchedThreat.type === 'KH101' ? 1200 : 
-                             300; // Drones
-            if (finalSpeed > maxSpeed) finalSpeed = maxSpeed;
-        }
-        if (finalCourse == null) finalCourse = calculateBearing(prevLoc.lat, prevLoc.lng, lat, lng);
       }
     }
 
@@ -288,13 +276,8 @@ function deg2rad(deg: number) {
 }
 
 export async function archiveThreatsNear(lat: number, lng: number, radiusKm: number, io: Server): Promise<void> {
-  const fiveMinsAgo = new Date(Date.now() - 5 * 60 * 1000);
   const activeThreats = await prisma.threatObject.findMany({
-    where: { 
-      status: 'ACTIVE',
-      // Don't archive threats updated within the last 5 minutes — they may still be active
-      updatedAt: { lt: fiveMinsAgo }
-    },
+    where: { status: 'ACTIVE' },
     include: { locations: { orderBy: { time: 'desc' }, take: 1, include: { source: true } } }
   });
 
