@@ -3,6 +3,7 @@ import asyncio
 import logging
 import requests
 from telethon import TelegramClient, events
+from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.sessions import StringSession
 from parser import parse_telegram_text
 from dotenv import load_dotenv
@@ -36,6 +37,31 @@ async def main():
     me = await client.get_me()
     logger.info(f"Logged in as {me.username or me.id}")
     
+    RECOMMENDED_CHANNELS = [
+        "vanek_nikolaev",
+        "nikalert",
+        "Phantomche",
+        "veselyy_pivden",
+        "donetskiy_on",
+        "war_monitor",
+        "eRadarrua",
+        "radarr_ua",
+        "kievreal1"
+    ]
+    
+    logger.info("Checking and joining recommended monitoring channels...")
+    for ch in RECOMMENDED_CHANNELS:
+        try:
+            await client(JoinChannelRequest(ch))
+            logger.info(f"Successfully joined or already in: @{ch}")
+        except Exception as e:
+            if "USER_ALREADY_PARTICIPANT" in str(e):
+                pass
+            else:
+                logger.warning(f"Could not join @{ch}: {e}")
+                
+    await asyncio.sleep(2) # Give Telegram a moment to register new channels
+    
     def wait_for_node():
         import time
         logger.info(f"Waiting for Node.js API to start at port {node_port}...")
@@ -59,7 +85,7 @@ async def main():
         logger.info("Fetching recent Telegram history (polling top 50 dialogs)...")
         now = time.time()
         
-        async for dialog in client.iter_dialogs(limit=50):
+        async for dialog in client.iter_dialogs(limit=150):
             if not dialog.is_channel and not dialog.is_group:
                 continue
             channel = dialog.entity
