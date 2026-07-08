@@ -546,16 +546,17 @@ function parseDirection(text: string): number | null {
 }
 
 function parseQuantity(text: string): number {
-  const numMatch = text.match(/(?<![a-zа-яіїєґ])(\d{1,2})\s*(?:х|x|-|шт)?\s*(?:шт|шахед|ракет|бпла|каб|дрон|ціл)/i);
+  const numMatch = text.match(/(?<![a-zа-яіїєґ])(\d{1,2})\s*(?:х|x|-|шт)?\s*(?:[а-яіїєґa-z]{3,15}\s+){0,2}(?:шт|шахед|ракет|бпла|каб|дрон|ціл)/i);
   if (numMatch) return Math.min(parseInt(numMatch[1], 10), 30);
   
-  const numMatchReverse = text.match(/(?:шахед|ракет|бпла|каб|дрон|ціл)[^\d]{0,10}(\d{1,2})(?![a-zа-яіїєґ])/i);
+  const numMatchReverse = text.match(/(?:шахед|ракет|бпла|каб|дрон|ціл)[^\d]{0,20}(\d{1,2})(?![a-zа-яіїєґ])/i);
   if (numMatchReverse) return Math.min(parseInt(numMatchReverse[1], 10), 30);
   
-  if (text.match(/\b(пара|пару)\b/i)) return 2;
-  if (text.match(/\b(кілька|декілька)\b/i)) return 3;
-  if (text.match(/\b(група|зграя)\b/i)) return 5;
-  if (text.match(/\b(багато|масова)\b/i)) return 8;
+  const tPadded = ' ' + text.toLowerCase().replace(/[^а-яіїєґa-z0-9]/g, ' ') + ' ';
+  if (tPadded.match(/ (пара|пару) /)) return 2;
+  if (tPadded.match(/ (кілька|декілька) /)) return 3;
+  if (tPadded.match(/ (група|зграя) /)) return 5;
+  if (tPadded.match(/ (багато|масова) /)) return 8;
   return 1;
 }
 
