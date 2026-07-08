@@ -35,7 +35,7 @@ export default function ThreatFilters() {
   return (
     <div className="absolute left-0 top-[var(--mobile-top)] md:top-24 md:left-4 z-20 flex overflow-x-auto md:overflow-visible w-full px-3 md:w-auto md:px-0 scrollbar-hide"
          style={{ '--mobile-top': 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 120px)' } as React.CSSProperties}>
-      <div className="flex gap-2 min-w-max pb-2 md:pb-0 md:min-w-0 md:flex md:flex-col md:gap-2.5 md:w-[180px]">
+      <div className="flex gap-2 min-w-max pb-2 md:pb-0 md:min-w-0 md:flex md:flex-col md:gap-2 md:w-[160px]">
         
         {filterOptions.map(opt => {
           const active = isSelected(opt.type);
@@ -46,13 +46,13 @@ export default function ThreatFilters() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => toggleType(opt.type)}
-              className={`flex items-center justify-start md:w-full gap-3 px-4 py-2.5 md:px-5 md:py-2.5 rounded-full text-[11px] md:text-[12px] font-black tracking-widest uppercase transition-all duration-300 border backdrop-blur-md ${
+              className={`flex items-center justify-start md:w-full gap-2.5 px-4 py-2.5 md:px-4 md:py-2 rounded-full text-[11px] font-black tracking-widest uppercase transition-all duration-300 border backdrop-blur-xl ${
                 active 
-                  ? `${opt.color} shadow-lg`
+                  ? `${opt.color} shadow-[0_4px_12px_rgba(0,0,0,0.4)] brightness-110`
                   : 'bg-white/5 text-white/30 border-transparent hover:bg-white/10 hover:text-white/60 shadow-none'
               }`}
             >
-              <ThreatIcon type={opt.type} className={`w-4 h-4 md:w-4 md:h-4 ${active ? 'opacity-100' : 'opacity-40'}`} />
+              <ThreatIcon type={opt.type} className={`w-4 h-4 md:w-3.5 md:h-3.5 ${active ? 'opacity-100' : 'opacity-40'}`} />
               <span className="truncate">{opt.label}</span>
             </motion.button>
           );
