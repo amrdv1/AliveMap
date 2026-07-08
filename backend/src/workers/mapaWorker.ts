@@ -114,29 +114,8 @@ export async function startMapaWorker(io: Server) {
               io.emit('threat:update', updatedThreat);
           }
         } else {
-           // CREATE NEW THREAT FROM MAPA
-           const newThreat = await prisma.threatObject.create({
-              data: {
-                 externalId: String(obj.id),
-                 type: threatType,
-                 status: ReportStatus.ACTIVE,
-                 confidence: 1.0,
-                 speed: speed,
-                 course: course,
-                 createdAt: timestamp,
-                 locations: {
-                    create: {
-                       lat,
-                       lng: lon,
-                       time: timestamp,
-                       sourceId: source!.id
-                    }
-                 }
-              },
-              include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
-           });
-           
-           io.emit('threat:new', newThreat);
+           // We no longer create new threats from MAPA.UA directly.
+           // MAPA.UA will only enrich threats that were already created by Telegram parsing.
         }
       }
     } catch (error: any) {
