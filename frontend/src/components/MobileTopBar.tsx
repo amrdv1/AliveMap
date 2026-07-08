@@ -70,11 +70,6 @@ export default function MobileTopBar() {
         {/* Dropdown Menu */}
         {menuOpen && (
           <div className="absolute top-[60px] right-3 w-64 bg-black/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden pointer-events-auto flex flex-col z-50">
-            {/* Search inside menu */}
-            <div className="p-3 border-b border-white/10">
-              <CitySearch />
-            </div>
-
             {tabs.map(tab => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -104,6 +99,10 @@ export default function MobileTopBar() {
               <Info size={18} />
               <span className="text-xs font-bold tracking-wider">ІНФО</span>
             </button>
+            <div className="h-[1px] bg-white/10 w-full" />
+            <div className="p-3">
+              <CitySearch />
+            </div>
           </div>
         )}
       </div>

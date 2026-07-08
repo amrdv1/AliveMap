@@ -29,7 +29,7 @@ export default function Navbar() {
   };
 
   return (
-    <div className="absolute top-4 left-4 right-4 h-16 bg-[#050505]/95 backdrop-blur-2xl rounded-3xl flex items-center justify-between px-6 z-30 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
+    <div className="absolute top-0 left-0 right-0 h-[72px] bg-[#050505]/95 backdrop-blur-2xl flex items-center justify-between px-6 z-30 border-b border-white/10 shadow-lg">
       {/* Logo */}
       <div className="flex items-center gap-3 w-48">
         <div className="relative flex items-center justify-center w-8 h-8">
