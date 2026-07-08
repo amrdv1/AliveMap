@@ -36,7 +36,18 @@ class AlertsService {
   }
 
   public isRegionActive(regionName: string): boolean {
-    return this.activeRegions.has(regionName);
+    if (this.activeRegions.has(regionName)) return true;
+    
+    const baseName = regionName.replace(/(ська|цький|ська|область|район|громада|м\.\s*)/gi, '').trim();
+    if (baseName.length < 3) return false;
+
+    for (const active of this.activeRegions) {
+        if (active.includes(baseName) || baseName.includes(active)) {
+            return true;
+        }
+    }
+    
+    return false;
   }
 }
 
