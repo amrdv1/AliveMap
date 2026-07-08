@@ -48,7 +48,7 @@ router.post('/telegram-message', async (req, res) => {
         }
 
         let aiData = null;
-        if (threatType !== 'INFO' && threatType !== 'SUMMARY') {
+        if (threatType !== 'INFO' && threatType !== 'SUMMARY' && threats.length === 1) {
             aiData = await extractWithAI(text);
         }
         
