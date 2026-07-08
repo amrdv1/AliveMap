@@ -33,28 +33,32 @@ export default function ThreatFilters() {
   ];
 
   return (
-    <div className="absolute left-0 top-[var(--mobile-top)] md:top-28 md:left-6 z-20 flex overflow-x-auto md:overflow-visible w-full px-3 md:w-auto md:px-0 scrollbar-hide"
+    <div className="absolute left-0 top-[var(--mobile-top)] md:top-24 md:left-4 z-20 flex overflow-x-auto md:overflow-visible w-full px-3 md:w-auto md:px-0 scrollbar-hide"
          style={{ '--mobile-top': 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 120px)' } as React.CSSProperties}>
-      <div className="flex gap-2 min-w-max pb-2 md:pb-0 md:min-w-0 md:grid md:grid-cols-2 md:gap-2 md:bg-black/40 md:backdrop-blur-xl md:border md:border-white/10 md:rounded-3xl md:p-3 md:shadow-[0_8px_32px_rgba(0,0,0,0.3)] md:w-64">
-        <div className="hidden md:block col-span-2 mb-1 px-1">
-          <span className="text-white/40 text-[9px] font-black tracking-widest uppercase">Фільтри Загроз</span>
+      <div className="flex gap-2 min-w-max pb-2 md:pb-0 md:min-w-0 md:flex md:flex-col md:gap-2 md:bg-[#0a0a0a]/80 md:backdrop-blur-xl md:border md:border-white/5 md:rounded-3xl md:p-4 md:shadow-2xl md:w-[220px]">
+        <div className="hidden md:flex items-center gap-3 mb-3 px-2">
+          <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
+          <span className="text-white font-black tracking-widest text-[15px] uppercase">ALIVE<span className="text-red-600">MAP</span></span>
         </div>
+        
         {filterOptions.map(opt => {
           const active = isSelected(opt.type);
+          const [bgColor, textColor] = opt.color.split(' ');
+          
           return (
             <motion.button
               key={opt.type}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => toggleType(opt.type)}
-              className={`flex items-center justify-start md:w-full gap-2 px-4 py-2.5 md:px-2.5 md:py-1.5 rounded-2xl md:rounded-xl text-[11px] md:text-[9px] font-black tracking-wide uppercase transition-all duration-300 border backdrop-blur-2xl ${
+              className={`flex items-center justify-start md:w-full gap-3 px-4 py-2.5 md:px-4 md:py-2.5 rounded-2xl md:rounded-[14px] text-[11px] md:text-[11px] font-black tracking-widest uppercase transition-all duration-300 border backdrop-blur-2xl ${
                 active 
-                  ? opt.color.replace('bg-', 'bg-').replace('/20', '/10') + ' shadow-[0_4px_20px_rgba(currentColor,0.2)] bg-black/80 border-current/30 md:shadow-sm md:bg-black/60'
-                  : 'bg-black/60 text-white/50 border-white/[0.08] hover:bg-black/80 hover:text-white/80 shadow-[0_4px_15px_rgba(0,0,0,0.4)] md:bg-white/5 md:shadow-none md:border-transparent md:hover:bg-white/10'
+                  ? `${bgColor.replace('/20', '/15')} ${textColor} border-current/10 shadow-sm`
+                  : 'bg-white/5 text-white/30 border-transparent hover:bg-white/10 hover:text-white/60 shadow-none'
               }`}
             >
-              <div className={`flex-shrink-0 w-5 h-5 md:w-4 md:h-4 flex items-center justify-center rounded-full ${active ? 'bg-current/15' : 'bg-white/5 opacity-50'}`}>
-                <ThreatIcon type={opt.type} className="w-3.5 h-3.5 md:w-2.5 md:h-2.5" />
+              <div className={`flex-shrink-0 w-5 h-5 md:w-4 md:h-4 flex items-center justify-center rounded-full ${active ? 'bg-current/20' : 'bg-white/10'}`}>
+                <ThreatIcon type={opt.type} className="w-3.5 h-3.5 md:w-3 md:h-3" />
               </div>
               <span className="truncate">{opt.label}</span>
             </motion.button>
