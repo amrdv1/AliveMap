@@ -1,0 +1,24 @@
+[
+  {
+    "type": "DRONE",
+    "lat": null,
+    "lng": null,
+    "confidence": 30,
+    "direction": null,
+    "quantity": 1,
+    "targetName": "Городній",
+    "targetLat": null,
+    "targetLng": null
+  },
+  {
+    "type": "DRONE",
+    "lat": null,
+    "lng": null,
+    "confidence": 30,
+    "direction": null,
+    "quantity": 1,
+    "targetName": null,
+    "targetLat": null,
+    "targetLng": null
+  }
+]

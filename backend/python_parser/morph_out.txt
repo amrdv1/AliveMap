@@ -1,0 +1,11 @@
+Городні: городній - ADJF plur,nomn
+Городні: городній - ADJF plur,accs
+Городні: городній - ADJF plur,voct
+Городні: городній - NOUN,Surn,anim plur,nomn
+Городні: городній - NOUN,Surn,anim plur,voct
+Городня: городній - ADJF femn,nomn
+Городня: городній - ADJF femn,voct
+Городня: городня - NOUN,Surn,femn,anim nomn
+Городня: городня - NOUN,Surn,femn,anim voct
+Городня: городня - NOUN,femn,inan nomn
+Городня: городня - NOUN,femn,inan voct

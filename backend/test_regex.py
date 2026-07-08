@@ -31,25 +31,9 @@ def detect_threat_type(text):
         return 'PPO'
     return None
 
-import re
+from parser import parse_telegram_text
 
-texts = [
-    "19:58 Дрон 🪕 впав з 💥 детонацією",
-    "19:56 кладовище",
-    "19:55 ⛲ Насосна",
-    "19:53 Стара 🏡 Частина",
-    "🪖 ⛔ Загроза ФПВ"
-]
-
-with open('output.txt', 'w', encoding='utf-8') as f:
-    for text in texts:
-        clean_text = re.sub(r'[^\w\s.,:;!?\'\`\-]', ' ', text, flags=re.UNICODE)
-        # Remove multiple spaces
-        clean_text = re.sub(r'\s+', ' ', clean_text).strip()
-        
-        match = re.search(r'(?:\d{1,2}:\d{2})\s+([а-яіїєґА-ЯІЇЄҐ\'\`\-]{3,}(?:\s+[а-яіїєґА-ЯІЇЄҐ\'\`\-]{2,}){0,2})', clean_text)
-        
-        f.write(f"Original: {text}\n")
-        f.write(f"Cleaned: {clean_text}\n")
-        f.write(f"Match: {match.group(1) if match else None}\n")
-        f.write("---\n")
+text = "Обидва реактивних підлітають до Городні з різних сторін...\nОстанній реактивний над Сновськом інколи відлітає, но кружляє по колу."
+results = parse_telegram_text(text)
+for r in results:
+    print(r.model_dump())
