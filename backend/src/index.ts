@@ -96,29 +96,37 @@ server.listen(PORT, async () => {
       const fortyFiveMinsAgo = new Date(now - 45 * 60 * 1000);
       const fifteenMinsAgo = new Date(now - 15 * 60 * 1000);
 
-      // Missiles: 15 mins
-      const updatedMissiles = await prisma.threatObject.updateMany({
-        where: {
-          status: 'ACTIVE',
-          type: { in: ['MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR'] },
-          updatedAt: { lt: fifteenMinsAgo }
-        },
-        data: { status: 'ARCHIVED' }
+      // Fetch all active threats with their latest location
+      const activeThreats = await prisma.threatObject.findMany({
+        where: { status: 'ACTIVE' },
+        include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
       });
 
-      // Drones, Aircraft, KAB, Others: 45 mins
-      const updatedOthers = await prisma.threatObject.updateMany({
-        where: {
-          status: 'ACTIVE',
-          type: { notIn: ['MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR'] },
-          updatedAt: { lt: fortyFiveMinsAgo }
-        },
-        data: { status: 'ARCHIVED' }
-      });
+      const idsToArchive: string[] = [];
+      
+      for (const t of activeThreats) {
+        if (t.locations.length === 0) {
+            idsToArchive.push(t.id);
+            continue;
+        }
+        
+        const latestTime = t.locations[0].time.getTime();
+        const isMissile = ['MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR'].includes(t.type);
+        
+        const ageInMs = now - latestTime;
+        if (isMissile && ageInMs > 15 * 60 * 1000) {
+            idsToArchive.push(t.id);
+        } else if (!isMissile && ageInMs > 45 * 60 * 1000) {
+            idsToArchive.push(t.id);
+        }
+      }
 
-      const totalArchived = updatedMissiles.count + updatedOthers.count;
-      if (totalArchived > 0) {
-        console.log(`[Archiver] Archived ${totalArchived} stale targets.`);
+      if (idsToArchive.length > 0) {
+        await prisma.threatObject.updateMany({
+            where: { id: { in: idsToArchive } },
+            data: { status: 'ARCHIVED' }
+        });
+        console.log(`[Archiver] Archived ${idsToArchive.length} stale targets based on real event time.`);
         io.emit('threats:refresh');
       }
     } catch (e) {
