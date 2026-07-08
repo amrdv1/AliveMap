@@ -52,11 +52,11 @@ export default function MobileBottomSheet() {
   return (
     <div className="lg:hidden fixed bottom-20 left-0 right-0 z-40 pointer-events-none" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
       {/* Threat count indicator */}
-      <div className="pointer-events-auto flex items-center justify-center mb-2">
-        <div className="bg-black/80 backdrop-blur-xl border border-white/10 rounded-full px-3 py-1 flex items-center gap-2">
-          <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-          <span className="text-[10px] font-bold text-gray-300 tracking-wider uppercase">
-            {totalQuantity} {totalQuantity === 1 ? 'ціль' : 'цілей'}
+      <div className="pointer-events-auto flex items-center justify-center mb-3">
+        <div className="bg-[#0a0a0a]/80 backdrop-blur-3xl border border-white/[0.05] rounded-full px-4 py-1.5 flex items-center gap-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+          <span className="text-[11px] font-black text-white/80 tracking-widest uppercase">
+            {totalQuantity} {totalQuantity === 1 ? 'активна ціль' : 'активних цілей'}
           </span>
         </div>
       </div>
@@ -75,54 +75,53 @@ export default function MobileBottomSheet() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               onClick={() => handleThreatClick(threat)}
-              className="flex-shrink-0 w-[260px] bg-black/85 backdrop-blur-2xl border border-white/[0.08] rounded-2xl p-3.5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] cursor-pointer active:scale-[0.97] transition-transform"
+              className="flex-shrink-0 w-[280px] bg-[#0a0a0a]/90 backdrop-blur-3xl border border-white/[0.05] rounded-[24px] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.5)] cursor-pointer active:scale-[0.97] transition-transform relative overflow-hidden group"
             >
-              <div className="flex items-center gap-3">
+              <div 
+                className="absolute top-0 right-0 w-32 h-32 rounded-full blur-[60px] pointer-events-none opacity-20"
+                style={{ backgroundColor: color }}
+              />
+              <div className="flex items-center gap-3.5 relative z-10">
                 {/* Icon */}
                 <div 
-                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: color + '20', border: `1px solid ${color}40` }}
+                  className="w-12 h-12 rounded-[16px] flex items-center justify-center shrink-0 shadow-inner"
+                  style={{ backgroundColor: color + '15', border: `1px solid ${color}30` }}
                 >
-                  <ThreatIcon type={threat.type} className="w-5 h-5" color={color} />
+                  <ThreatIcon type={threat.type} className="w-6 h-6 drop-shadow-md" color={color} />
                 </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-xs font-black text-white tracking-wide truncate">
+                  <h3 className="text-[13px] font-black text-white tracking-widest truncate">
                     {THREAT_LABELS[threat.type] || threat.type}
                   </h3>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2 mt-1.5">
                     {threat.speed && (
-                      <span className="text-[10px] text-gray-400 font-semibold">
+                      <span className="text-[11px] text-white/50 font-bold tracking-widest">
                         {Math.round(threat.speed)} км/г
                       </span>
                     )}
                     {threat.course != null && (
-                      <span className="text-[10px] text-gray-500 font-semibold">
+                      <span className="text-[11px] text-white/50 font-bold tracking-widest flex items-center gap-1">
+                        <Target size={10} className="opacity-50" />
                         {Math.round(threat.course)}°
-                      </span>
-                    )}
-                    {threat.quantity > 1 && (
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-500/20 text-red-400">
-                        x{threat.quantity}
                       </span>
                     )}
                   </div>
                 </div>
-
-                <ChevronRight className="w-4 h-4 text-gray-600 shrink-0" />
+                
+                <ChevronRight className="w-5 h-5 text-white/20 shrink-0 group-active:translate-x-1 transition-transform" />
               </div>
-
               {/* Target name */}
               {threat.targetName && (
-                <div className="mt-2 pt-2 border-t border-white/5">
-                  <span className="text-[10px] text-gray-500 font-semibold">
+                <div className="mt-3.5 pt-3 border-t border-white/[0.05] relative z-10">
+                  <span className="text-[11px] text-white/40 font-bold tracking-widest truncate flex items-center gap-1.5">
                     {(() => {
                         const loc = threat.locations && threat.locations.length > 0 ? threat.locations[0] : null;
                         const isOver = loc && threat.targetLat && threat.targetLng && (Math.sqrt(Math.pow(loc.lat - threat.targetLat, 2) + Math.pow(loc.lng - threat.targetLng, 2)) < 0.25);
-                        return isOver ? 'В районі: ' : 'Напрямок: ';
+                        return isOver ? 'В районі:' : 'Напрямок:';
                     })()}
-                    <span className="text-gray-300">{threat.targetName}</span>
+                    <span className="text-white/80">{threat.targetName}</span>
                   </span>
                 </div>
               )}

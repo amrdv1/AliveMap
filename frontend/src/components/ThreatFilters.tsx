@@ -35,15 +35,10 @@ export default function ThreatFilters() {
   return (
     <div className="absolute left-0 top-[var(--mobile-top)] md:top-24 md:left-4 z-20 flex overflow-x-auto md:overflow-visible w-full px-3 md:w-auto md:px-0 scrollbar-hide"
          style={{ '--mobile-top': 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 120px)' } as React.CSSProperties}>
-      <div className="flex gap-2 min-w-max pb-2 md:pb-0 md:min-w-0 md:flex md:flex-col md:gap-2 md:bg-[#0a0a0a]/80 md:backdrop-blur-xl md:border md:border-white/5 md:rounded-3xl md:p-4 md:shadow-2xl md:w-[220px]">
-        <div className="hidden md:flex items-center gap-3 mb-3 px-2">
-          <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
-          <span className="text-white font-black tracking-widest text-[15px] uppercase">ALIVE<span className="text-red-600">MAP</span></span>
-        </div>
+      <div className="flex gap-2 min-w-max pb-2 md:pb-0 md:min-w-0 md:flex md:flex-col md:gap-2.5 md:w-[180px]">
         
         {filterOptions.map(opt => {
           const active = isSelected(opt.type);
-          const [bgColor, textColor] = opt.color.split(' ');
           
           return (
             <motion.button
@@ -51,15 +46,13 @@ export default function ThreatFilters() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => toggleType(opt.type)}
-              className={`flex items-center justify-start md:w-full gap-3 px-4 py-2.5 md:px-4 md:py-2.5 rounded-2xl md:rounded-[14px] text-[11px] md:text-[11px] font-black tracking-widest uppercase transition-all duration-300 border backdrop-blur-2xl ${
+              className={`flex items-center justify-start md:w-full gap-3 px-4 py-2.5 md:px-5 md:py-2.5 rounded-full text-[11px] md:text-[12px] font-black tracking-widest uppercase transition-all duration-300 border backdrop-blur-md ${
                 active 
-                  ? `${bgColor.replace('/20', '/15')} ${textColor} border-current/10 shadow-sm`
+                  ? `${opt.color} shadow-lg`
                   : 'bg-white/5 text-white/30 border-transparent hover:bg-white/10 hover:text-white/60 shadow-none'
               }`}
             >
-              <div className={`flex-shrink-0 w-5 h-5 md:w-4 md:h-4 flex items-center justify-center rounded-full ${active ? 'bg-current/20' : 'bg-white/10'}`}>
-                <ThreatIcon type={opt.type} className="w-3.5 h-3.5 md:w-3 md:h-3" />
-              </div>
+              <ThreatIcon type={opt.type} className={`w-4 h-4 md:w-4 md:h-4 ${active ? 'opacity-100' : 'opacity-40'}`} />
               <span className="truncate">{opt.label}</span>
             </motion.button>
           );
