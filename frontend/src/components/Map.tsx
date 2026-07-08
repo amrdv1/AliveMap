@@ -213,7 +213,28 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
                     <div className="w-6 h-6 text-white" dangerouslySetInnerHTML={{ __html: THREAT_SVGS[threat.type as keyof typeof THREAT_SVGS] || THREAT_SVGS['DRONE'] }} />
                  </div>
                  <div>
-                    <div className="font-bold text-[15px]">{threat.type === 'DRONE' ? 'Ударний БпЛА' : threat.type === 'RECON' ? 'Розвідувальний БпЛА' : threat.type === 'MISSILE' ? 'Ракета' : 'Повітряна ціль'}</div>
+                    <div className="font-bold text-[15px]">
+                       {(() => {
+                         const dict: Record<string, string> = {
+                           'DRONE': 'Ударний БпЛА (Шахед)',
+                           'FPV': 'FPV / Ланцет',
+                           'CRUISE_MISSILE': 'Крилата Ракета',
+                           'KH101': 'Крилата Ракета (Х-101/555)',
+                           'KALIBR': 'Крилата Ракета (Калібр)',
+                           'BALLISTIC_MISSILE': 'Балістична Ракета',
+                           'ISKANDER': 'Балістика (Іскандер)',
+                           'KINZHAL': 'Аеробалістична (Кинджал)',
+                           'MISSILE': 'Ракета',
+                           'AIRCRAFT': 'Ворожа Авіація',
+                           'KAB': 'Керована Авіабомба',
+                           'RECON': 'Розвідувальний БпЛА',
+                           'ZIRCON': 'Гіперзвукова (Циркон)',
+                           'UNKNOWN': 'Невідома Повітряна Ціль',
+                           'PPO': 'ППО / Вибухи',
+                         };
+                         return dict[threat.type] || 'Повітряна ціль';
+                       })()}
+                    </div>
                     <div className="text-xs text-white/60 truncate w-[220px]">
                        {(() => {
                            const clat = currentLoc?.lat || loc.lat;
@@ -227,7 +248,26 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
               </div>
               <div className="text-[13px] text-white/80 mb-4 leading-relaxed">
                  {threat.quantity > 1 && <span className="font-bold text-red-400">Кількість: ~{threat.quantity} шт. </span>}
-                 {threat.type === 'DRONE' ? 'Ударний БпЛА' : threat.type === 'RECON' ? 'Розвідувальний БпЛА' : threat.type === 'MISSILE' ? 'Ракета' : 'Повітряна ціль'} 
+                 {(() => {
+                         const dict: Record<string, string> = {
+                           'DRONE': 'Ударний БпЛА (Шахед)',
+                           'FPV': 'FPV / Ланцет',
+                           'CRUISE_MISSILE': 'Крилата Ракета',
+                           'KH101': 'Крилата Ракета (Х-101/555)',
+                           'KALIBR': 'Крилата Ракета (Калібр)',
+                           'BALLISTIC_MISSILE': 'Балістична Ракета',
+                           'ISKANDER': 'Балістика (Іскандер)',
+                           'KINZHAL': 'Аеробалістична (Кинджал)',
+                           'MISSILE': 'Ракета',
+                           'AIRCRAFT': 'Ворожа Авіація',
+                           'KAB': 'Керована Авіабомба',
+                           'RECON': 'Розвідувальний БпЛА',
+                           'ZIRCON': 'Гіперзвукова (Циркон)',
+                           'UNKNOWN': 'Невідома Повітряна Ціль',
+                           'PPO': 'ППО / Вибухи',
+                         };
+                         return dict[threat.type] || 'Повітряна ціль';
+                 })()} 
                  {(() => {
                      const clat = currentLoc?.lat || loc.lat;
                      const clng = currentLoc?.lng || loc.lng;
