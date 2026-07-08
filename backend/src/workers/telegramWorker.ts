@@ -35,6 +35,7 @@ const CHANNELS = [
   'kharkov_media', 'pivden_fpv', 'tlknewsua', 'temporis_odesa', 'kherson_monitoring', 
   'shahedradar', 'operatyvnohlep', 'poltavaranger', 'raketa_trevoga',
   'roman_romanchuk', 'kyivoda', 'suspilne_news', 'ukraine_radar',
+  'київський купол', 'ринда моніторить', 'повітряний простір', 'єрадар',
 
   // ─── Official / OVA Channels ───
   'volynskaODA', 'zhytomyrskaODA', 'ternopilskaODA', 'khmelnytskaODA',
@@ -160,7 +161,20 @@ export async function startTelegramWorker(io: Server) {
       if (!isMonitoredChannel) return;
 
       {
-        const text = message.message;
+        let text = message.message;
+        
+        // Handle Replies: Prepend parent message text for context
+        if (message.replyTo && message.replyTo.replyToMsgId) {
+            try {
+                const parentMsgs = await client.getMessages(message.peerId, { ids: [message.replyTo.replyToMsgId] });
+                if (parentMsgs && parentMsgs.length > 0 && parentMsgs[0].message) {
+                    text = parentMsgs[0].message + '\n---\n' + text;
+                }
+            } catch (e) {
+                console.error("Failed to fetch reply context", e);
+            }
+        }
+
         const parsedThreats = parseTelegramText(text);
         if (!parsedThreats || parsedThreats.length === 0) return;
         
@@ -289,18 +303,28 @@ export async function startTelegramWorker(io: Server) {
               );
               
             if (savedThreat) {
-                io.emit('threat:update', savedThreat);
-                
-                // Smart Notification
-                if (savedThreat.speed && savedThreat.course != null) {
-                    const { sendSmartThreatNotification } = require('./botWorker');
-                    sendSmartThreatNotification(savedThreat.type, finalLat, finalLng, savedThreat.speed, savedThreat.course);
+                if (Array.isArray(savedThreat)) {
+                    savedThreat.forEach(threat => {
+                        io.emit('threat:new', threat);
+                        // Smart Notification
+                        if (threat.speed && threat.course != null) {
+                            const { sendSmartThreatNotification } = require('./botWorker');
+                            sendSmartThreatNotification(threat.type, finalLat, finalLng, threat.speed, threat.course);
+                        }
+                    });
+                } else {
+                    io.emit('threat:update', savedThreat);
+                    // Smart Notification
+                    if (savedThreat.speed && savedThreat.course != null) {
+                        const { sendSmartThreatNotification } = require('./botWorker');
+                        sendSmartThreatNotification(savedThreat.type, finalLat, finalLng, savedThreat.speed, savedThreat.course);
+                    }
                 }
-            }
-          }
-        }
-      }
-    }, new NewMessage({}));
+            } // end if (savedThreat)
+        } // end if (finalLat !== null && finalLng !== null)
+      } // end if (parsed)
+    } // end if (message.message)
+  }, new NewMessage({}));
 
     // ─── POLLING HISTORY ─────────────────────────────────────────────────
     const pollHistory = async () => {
@@ -318,7 +342,21 @@ export async function startTelegramWorker(io: Server) {
                         if (!message || !message.message) continue;
                         const msgTime = message.date * 1000;
                         
-                        const parsedThreats = parseTelegramText(message.message);
+                        let text = message.message;
+                        
+                        // Handle Replies: Prepend parent message text for context
+                        if (message.replyTo && message.replyTo.replyToMsgId) {
+                            try {
+                                const parentMsgs = await client.getMessages(channel, { ids: [message.replyTo.replyToMsgId] });
+                                if (parentMsgs && parentMsgs.length > 0 && parentMsgs[0].message) {
+                                    text = parentMsgs[0].message + '\n---\n' + text;
+                                }
+                            } catch (e) {
+                                console.error("Failed to fetch reply context in pollHistory", e);
+                            }
+                        }
+
+                        const parsedThreats = parseTelegramText(text);
                         if (!parsedThreats || parsedThreats.length === 0) continue;
                         
                         const channelDisplay = channel;
@@ -395,7 +433,13 @@ export async function startTelegramWorker(io: Server) {
                                         sourceId, null, parsed.direction, parsed.confidence / 100,
                                         parsed.quantity, parsed.targetName ?? null, parsed.targetLat ?? null, parsed.targetLng ?? null
                                     );
-                                    if (savedThreat) io.emit('threat:update', savedThreat);
+                                    if (savedThreat) {
+                                        if (Array.isArray(savedThreat)) {
+                                            savedThreat.forEach(threat => io.emit('threat:new', threat));
+                                        } else {
+                                            io.emit('threat:update', savedThreat);
+                                        }
+                                    }
                                 }
                             }
                         }

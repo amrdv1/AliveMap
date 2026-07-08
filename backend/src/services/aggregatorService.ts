@@ -17,7 +17,7 @@ export async function processExternalThreat(
   targetLat: number | null = null,
   targetLng: number | null = null,
   trailLocations?: Array<{lat: number, lng: number, time: Date, sourceId: string | null}>
-): Promise<ThreatObject | null> {
+): Promise<ThreatObject | ThreatObject[] | null> {
   // If it's a PPO event (Shot down / Destroyed)
   if (threatType === 'PPO') {
     // Find closest ACTIVE threat
@@ -146,34 +146,45 @@ export async function processExternalThreat(
   }
 
   const initialConfidence = 0.4;
+  const createdThreats = [];
 
-  const newThreat = await prisma.threatObject.create({
-    data: {
-      externalId,
-      type: threatType as ReportType,
-      confidence: Math.max(confidence, initialConfidence),
-      status: ReportStatus.ACTIVE,
-      speed: defaultSpeed,
-      course: finalCourse,
-      quantity,
-      targetName,
-      targetLat,
-      targetLng,
-      locations: {
-        createMany: {
-          data: trailLocations && trailLocations.length > 0 ? trailLocations : [{
-            lat,
-            lng,
-            time,
-            sourceId
-          }]
+  // If quantity > 1, create multiple separate objects with a tiny coordinate offset
+  const actualQuantity = Math.min(quantity || 1, 30); // Cap at 30 to avoid DB spam
+  for (let i = 0; i < actualQuantity; i++) {
+    // Add a small pseudo-random offset (approx 100-300 meters) so they don't overlap perfectly
+    const offsetLat = lat + (i > 0 ? (Math.random() - 0.5) * 0.005 : 0);
+    const offsetLng = lng + (i > 0 ? (Math.random() - 0.5) * 0.005 : 0);
+
+    const newThreat = await prisma.threatObject.create({
+      data: {
+        externalId: i === 0 ? externalId : null, // Only bind externalId to the first one
+        type: threatType as ReportType,
+        confidence: Math.max(confidence, initialConfidence),
+        status: ReportStatus.ACTIVE,
+        speed: defaultSpeed,
+        course: finalCourse,
+        quantity: 1, // Since we split them, each one is 1
+        targetName,
+        targetLat,
+        targetLng,
+        locations: {
+          createMany: {
+            data: trailLocations && trailLocations.length > 0 ? trailLocations : [{
+              lat: offsetLat,
+              lng: offsetLng,
+              time,
+              sourceId
+            }]
+          }
         }
-      }
-    },
-    include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
-  });
+      },
+      include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
+    });
+    
+    createdThreats.push(newThreat);
+  }
 
-  return newThreat;
+  return createdThreats;
 }
 
 async function updateThreat(
