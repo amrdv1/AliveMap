@@ -152,8 +152,8 @@ export default function Home() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-0 pb-[76px] z-50 bg-black/95 backdrop-blur-3xl overflow-hidden"
-              style={{ paddingTop: 'calc(56px + env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px))' }}
+              className="fixed inset-0 pb-4 z-50 bg-black/95 backdrop-blur-3xl overflow-hidden"
+              style={{ paddingTop: 'calc(56px + env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 36px)' }}
             >
               <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-2 mb-1 cursor-grab active:cursor-grabbing" />
               <MonitoringFeed isMobile />
@@ -162,7 +162,6 @@ export default function Home() {
         </AnimatePresence>
         
         {activeTab === 'MAP' && <MobileBottomSheet />}
-        <MobileBottomNav />
       </div>
 
       {/* Global About Modal */}

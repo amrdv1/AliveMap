@@ -50,7 +50,7 @@ export default function MobileBottomSheet() {
   };
 
   return (
-    <div className="lg:hidden fixed bottom-[72px] left-0 right-0 z-40 pointer-events-none">
+    <div className="lg:hidden fixed bottom-4 left-0 right-0 z-40 pointer-events-none" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
       {/* Threat count indicator */}
       <div className="pointer-events-auto flex items-center justify-center mb-2">
         <div className="bg-black/80 backdrop-blur-xl border border-white/10 rounded-full px-3 py-1 flex items-center gap-2">
