@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+UA.zip
+UA.txt
+cities.json
+python_parser/venv/
+python_parser/__pycache__/
