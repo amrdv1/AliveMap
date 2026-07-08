@@ -605,7 +605,18 @@ export default function UkraineMap() {
                 offset={10}
               >
                 <div className="bg-[#1a1a1a] text-white p-4 rounded-xl border border-white/10 shadow-2xl relative w-[240px]">
-                  <button onClick={(e) => { e.stopPropagation(); setClickedRegion(null); }} className="absolute top-3 right-3 text-white/50 hover:text-white transition">
+                  <button 
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      e.nativeEvent.stopImmediatePropagation(); 
+                      setClickedRegion(null); 
+                    }} 
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                      e.nativeEvent.stopImmediatePropagation();
+                    }}
+                    className="absolute top-3 right-3 text-white/50 hover:text-white transition z-[110] p-1"
+                  >
                      <X size={16} />
                   </button>
                   <div className="font-bold text-lg mb-1 drop-shadow-md pr-6 leading-tight">{alertInfo.name}</div>
