@@ -27,6 +27,12 @@ async def main():
         logger.error("Missing TELEGRAM_API_ID, TELEGRAM_API_HASH, or TELEGRAM_SESSION.")
         return
 
+    # Wait 15 seconds before connecting to avoid AuthKeyDuplicatedError during Railway zero-downtime deployments.
+    # Railway sends SIGTERM to the old container and waits 10s before killing it.
+    # By waiting 15s here, we ensure the old container has fully disconnected.
+    logger.info("Waiting 15 seconds before connecting to Telegram to avoid session conflicts during deployment...")
+    await asyncio.sleep(15)
+
     client = TelegramClient(StringSession(session_string), int(api_id), api_hash)
     await client.connect()
     
