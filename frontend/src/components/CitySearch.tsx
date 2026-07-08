@@ -81,7 +81,7 @@ export default function CitySearch() {
             >
               <MapPin className="w-4 h-4 text-red-500 shrink-0" />
               <div className="flex flex-col overflow-hidden">
-                <span className="text-sm font-bold text-white truncate">{city.names[0]}</span>
+                <span className="text-sm font-bold text-white truncate capitalize">{city.name}</span>
                 <span className="text-xs text-white/40 truncate">{city.region}</span>
               </div>
             </button>
