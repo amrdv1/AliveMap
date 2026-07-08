@@ -80,6 +80,8 @@ export interface AppState {
   setIs3D: (val: boolean) => void;
   setShowHeatmap: (val: boolean) => void;
   setFlyToLocation: (loc: { lat: number, lng: number } | null) => void;
+  selectedThreat: ThreatObject | null;
+  setSelectedThreat: (threat: ThreatObject | null) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -93,6 +95,8 @@ export const useStore = create<AppState>((set) => ({
   is3D: false,
   showHeatmap: false,
   flyToLocation: null,
+  selectedThreat: null,
+  setSelectedThreat: (threat) => set({ selectedThreat: threat }),
   filters: {
     types: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KAB', 'AIRCRAFT', 'ALERT', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR', 'PPO', 'RECON', 'FPV', 'UNKNOWN', 'MOLNIYA', 'DECOY'],
     showArchived: false,

@@ -34,7 +34,7 @@ export default function MobileTopBar() {
   return (
     <div className="lg:hidden fixed top-0 left-0 right-0 z-50 pointer-events-none"
          style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 36px)' }}>
-      <div className="h-14 bg-black/85 backdrop-blur-3xl border-y border-white/[0.08] flex items-center justify-between px-4 pointer-events-auto shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+      <div className="h-14 mx-3 bg-black/60 backdrop-blur-3xl border border-white/[0.1] rounded-2xl flex items-center justify-between px-4 pointer-events-auto shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
         {/* Logo */}
         <div className="flex items-center gap-2">
           <div className="relative w-7 h-7 flex items-center justify-center">
@@ -51,12 +51,12 @@ export default function MobileTopBar() {
             {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />}
           </div>
 
-          <div className="text-gray-400 font-mono text-xs font-semibold tabular-nums">
+          <div className="text-gray-300 font-mono text-xs font-semibold tabular-nums">
             {time.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}
           </div>
 
-          <button onClick={() => setMenuOpen(!menuOpen)} className="p-1.5 bg-white/10 hover:bg-white/20 rounded-xl transition-colors ml-1">
-            <Menu size={20} className="text-white" />
+          <button onClick={() => setMenuOpen(!menuOpen)} className="p-1.5 hover:bg-white/10 active:bg-white/15 rounded-xl transition-colors ml-1 text-gray-300 hover:text-white">
+            <Menu size={22} />
           </button>
         </div>
       </div>
