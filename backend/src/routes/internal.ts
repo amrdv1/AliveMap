@@ -95,8 +95,8 @@ router.post('/telegram-message', async (req, res) => {
         const sourceId = source.id;
 
         for (const parsed of threatsToProcess) {
-            let finalLat = parsed.lat ?? parsed.targetLat;
-            let finalLng = parsed.lng ?? parsed.targetLng;
+            let finalLat = parsed.lat;
+            let finalLng = parsed.lng;
 
             if (!parsed.targetLat && !parsed.targetLng && parsed.targetName) {
                 const dropIfQuiet = !['FPV', 'KAB', 'AIRCRAFT', 'RECON', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KINZHAL', 'ZIRCON', 'KALIBR', 'ISKANDER', 'KH101', 'PPO', 'INFO', 'SUMMARY'].includes(parsed.type);
@@ -104,11 +104,27 @@ router.post('/telegram-message', async (req, res) => {
                 if (geoResult) {
                     parsed.targetLat = geoResult.lat;
                     parsed.targetLng = geoResult.lng;
-                    if (finalLat == null && finalLng == null) {
-                        finalLat = geoResult.lat;
-                        finalLng = geoResult.lng;
-                    }
                 }
+            }
+
+            // If we don't have an initial location but we have a target, spawn it upstream
+            if (finalLat == null && parsed.targetLat != null && parsed.targetLng != null) {
+                const turf = require('@turf/turf');
+                const targetPoint = turf.point([parsed.targetLng, parsed.targetLat]);
+                
+                // Random approach angle between 45 (NE) and 135 (SE)
+                const approachAngle = 45 + Math.random() * 90;
+                const backtrackAngle = approachAngle - 180;
+                
+                // Spawn distance based on threat speed
+                const spawnDistKm = parsed.type.includes('MISSILE') || parsed.type === 'KINZHAL' || parsed.type === 'ZIRCON' || parsed.type === 'KALIBR' || parsed.type === 'KH101' ? 250 : 60;
+                
+                const spawnPoint = turf.destination(targetPoint, spawnDistKm, backtrackAngle, { units: 'kilometers' });
+                finalLat = spawnPoint.geometry.coordinates[1];
+                finalLng = spawnPoint.geometry.coordinates[0];
+            } else if (finalLat == null) {
+                finalLat = parsed.targetLat;
+                finalLng = parsed.targetLng;
             }
 
             if (finalLat !== null && finalLng !== null) {
