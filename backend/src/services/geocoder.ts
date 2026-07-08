@@ -68,11 +68,11 @@ export async function geocodeLocation(locationName: string, dropIfQuiet: boolean
   let matches = citiesCache.filter(c => c.names.includes(cleanQuery));
 
   if (matches.length === 0) {
-      matches = citiesCache.filter(c => c.names.some(n => cleanQuery.startsWith(n) || n.startsWith(cleanQuery)));
+      matches = citiesCache.filter(c => c.names.some((n: string) => cleanQuery.startsWith(n) || n.startsWith(cleanQuery)));
   }
 
   if (matches.length === 0) {
-      matches = citiesCache.filter(c => c.names.some(n => cleanQuery.includes(n) || n.includes(cleanQuery)));
+      matches = citiesCache.filter(c => c.names.some((n: string) => cleanQuery.includes(n) || n.includes(cleanQuery)));
   }
 
   if (matches.length === 0) {
