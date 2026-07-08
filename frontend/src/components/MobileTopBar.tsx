@@ -69,7 +69,12 @@ export default function MobileTopBar() {
 
         {/* Dropdown Menu */}
         {menuOpen && (
-          <div className="absolute top-[60px] right-3 w-48 bg-black/90 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden pointer-events-auto flex flex-col z-50">
+          <div className="absolute top-[60px] right-3 w-64 bg-black/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden pointer-events-auto flex flex-col z-50">
+            {/* Search inside menu */}
+            <div className="p-3 border-b border-white/10">
+              <CitySearch />
+            </div>
+
             {tabs.map(tab => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
