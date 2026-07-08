@@ -9,7 +9,9 @@
     "dev:python": "cd python_parser && venv\\Scripts\\uvicorn main:app --reload",
     "dev": "concurrently \"npm run dev:node\" \"npm run dev:python\"",
     "build": "npx prisma generate && tsc",
-    "start": "npx prisma db push --accept-data-loss && node dist/index.js",
+    "start:node": "npx prisma db push --accept-data-loss && node dist/index.js",
+    "start:python": "cd python_parser && uvicorn main:app --host 0.0.0.0 --port 8000",
+    "start": "concurrently \"npm run start:node\" \"npm run start:python\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

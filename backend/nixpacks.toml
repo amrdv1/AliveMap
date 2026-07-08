@@ -1,0 +1,15 @@
+[phases.setup]
+nixPkgs = ["nodejs_20", "python311", "gcc"]
+
+[phases.install]
+cmds = [
+    "npm ci",
+    "python -m venv /opt/venv",
+    "/opt/venv/bin/pip install -r python_parser/requirements.txt"
+]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "PATH=/opt/venv/bin:$PATH npm start"
