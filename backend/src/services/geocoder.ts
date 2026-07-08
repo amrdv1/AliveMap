@@ -81,14 +81,14 @@ export async function geocodeLocation(locationName: string, dropIfQuiet: boolean
 
   // Sort matches to prioritize regions with active alerts, but NEVER let a tiny village override a major city
   matches.sort((a, b) => {
-    const aActive = alertsService.isRegionActive(a.region) ? 1 : 0;
-    const bActive = alertsService.isRegionActive(b.region) ? 1 : 0;
+    const aActive = alertsService.isRegionActive(a.region);
+    const bActive = alertsService.isRegionActive(b.region);
     
-    // Give active regions a +500,000 population bonus.
+    // Use a multiplier instead of a flat bonus. An active region gives a 10x population boost.
     // This allows active small towns to win over inactive small towns,
-    // but ensures huge cities (>500k) always win regardless of alert status.
-    const aScore = a.pop + (aActive * 500000);
-    const bScore = b.pop + (bActive * 500000);
+    // but ensures a 100k+ city will never be beaten by a tiny 100-person village.
+    const aScore = a.pop * (aActive ? 10 : 1);
+    const bScore = b.pop * (bActive ? 10 : 1);
     
     return bScore - aScore;
   });

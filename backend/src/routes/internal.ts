@@ -98,9 +98,13 @@ router.post('/telegram-message', async (req, res) => {
                     const turf = require('@turf/turf');
                     const targetPoint = turf.point([parsed.targetLng, parsed.targetLat]);
                     
-                    // Spawn in the East/North-East/South/South-East (from Russia/Crimea direction)
-                    // Backtrack angle (where it spawns) should be between 45 (NE) and 180 (South)
-                    const backtrackAngle = 45 + Math.random() * 135;
+                    // Spawn in the opposite direction of the threat's course if known.
+                    // If course is unknown, spawn in the East/North-East/South/South-East (from Russia direction)
+                    let backtrackAngle = 45 + Math.random() * 135;
+                    const knownCourse = finalCourse ?? parsed.direction;
+                    if (knownCourse != null) {
+                        backtrackAngle = (knownCourse + 180) % 360;
+                    }
                     
                     // Spawn distance based on threat speed
                     const spawnDistKm = parsed.type.includes('MISSILE') || parsed.type === 'KINZHAL' || parsed.type === 'ZIRCON' || parsed.type === 'KALIBR' || parsed.type === 'KH101' ? 250 : 60;
