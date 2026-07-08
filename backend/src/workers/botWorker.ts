@@ -152,7 +152,7 @@ export async function sendAlertNotification(region: string, isAlert: boolean) {
   }
 }
 
-const activeSmartAlerts = new Map<string, Set<bigint>>(); // threatId -> chatIds
+const activeSmartAlerts = new Map<string, Set<string>>(); // threatId -> chatIds (as string)
 
 /**
  * Sends a smart notification if a threat is heading towards a subscribed user.
@@ -176,11 +176,12 @@ export async function sendSmartThreatNotification(
 
         // Deduplicate to prevent spam
         const uniqueSmartSubs = [];
-        const seenSmart = new Set();
+        const seenSmart = new Set<string>();
         for (const sub of smartSubs) {
-            if (!seenSmart.has(sub.chatId)) {
-                seenSmart.add(sub.chatId);
-                uniqueSmartSubs.push(sub);
+            const chatIdStr = sub.chatId.toString();
+            if (!seenSmart.has(chatIdStr)) {
+                seenSmart.add(chatIdStr);
+                uniqueSmartSubs.push({ ...sub, chatIdStr });
             }
         }
         
@@ -193,7 +194,7 @@ export async function sendSmartThreatNotification(
         }
         
         for (const sub of uniqueSmartSubs) {
-            if (!threatAlerts.has(sub.chatId) && willIntersectLocation(projection, sub.lat!, sub.lng!, 20)) {
+            if (!threatAlerts.has(sub.chatIdStr) && willIntersectLocation(projection, sub.lat!, sub.lng!, 20)) {
                 // Threat passes within 20km!
                 const typeMap: any = {
                     'DRONE': '🛸 ШАХЕД / БПЛА',
@@ -209,8 +210,8 @@ export async function sendSmartThreatNotification(
                 
                 const message = `🚨 **ПРЯМА ЗАГРОЗА**\n${displayType} рухається у вашому напрямку! Прямуйте в укриття.`;
                 try {
-                    await bot.sendMessage(sub.chatId, message, { parse_mode: "Markdown" });
-                    threatAlerts.add(sub.chatId);
+                    await bot.sendMessage(sub.chatIdStr, message, { parse_mode: "Markdown" });
+                    threatAlerts.add(sub.chatIdStr);
                 } catch (e) {
                     // Ignore send errors
                 }
@@ -230,10 +231,10 @@ export async function sendSmartAllClear(threatId: string) {
         const chatIds = activeSmartAlerts.get(threatId);
         if (!chatIds || chatIds.size === 0) return;
         
-        for (const chatId of chatIds) {
+        for (const chatIdStr of chatIds) {
             try {
                 const message = `✅ **ВІДБІЙ ЗАГРОЗИ**\nПовітряна ціль, що рухалась у вашому напрямку, перестала фіксуватись (можливо збита або змінила курс).`;
-                await bot.sendMessage(chatId, message, { parse_mode: "Markdown" });
+                await bot.sendMessage(chatIdStr, message, { parse_mode: "Markdown" });
             } catch (e) {
                 // Ignore send errors
             }
