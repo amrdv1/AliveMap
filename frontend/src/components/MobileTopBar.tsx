@@ -7,6 +7,7 @@ export default function MobileTopBar() {
   const { threats, alerts, activeTab, setActiveTab, setAboutOpen } = useStore();
   const [time, setTime] = useState(new Date());
   const [isOnline, setIsOnline] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -56,41 +57,52 @@ export default function MobileTopBar() {
             <div className={`flex items-center gap-1 ml-1 ${isOnline ? 'text-emerald-400' : 'text-red-400'}`}>
               {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />}
             </div>
+
+            <button 
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="ml-2 p-1.5 bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-white/10 text-white"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
         </div>
 
-        {/* Bottom Row: Horizontal Tabs */}
-        <div className="h-12 bg-black/60 backdrop-blur-3xl border border-white/[0.1] rounded-2xl flex items-center p-1 pointer-events-auto shadow-lg overflow-x-auto scrollbar-hide">
-          {tabs.map(tab => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 h-full rounded-xl transition-colors shrink-0 ${
-                  isActive ? 'bg-white/15 text-white shadow-sm' : 'text-gray-400 hover:text-white/80'
-                }`}
-              >
-                <Icon size={16} className={isActive ? 'text-red-500' : ''} />
-                <span className="text-xs font-bold tracking-wider">{tab.label}</span>
-                {tab.id === 'MAP' && activeThreatsCount > 0 && (
-                  <span className="ml-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-black">
-                    {activeThreatsCount}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-          
-          <button
-            onClick={() => setAboutOpen(true)}
-            className="flex items-center gap-2 px-4 h-full rounded-xl text-gray-400 hover:text-white/80 transition-colors shrink-0"
-          >
-            <Info size={16} />
-            <span className="text-xs font-bold tracking-wider">ІНФО</span>
-          </button>
-        </div>
+        {/* Dropdown Menu */}
+        {menuOpen && (
+          <div className="absolute top-[60px] right-3 w-48 bg-black/90 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden pointer-events-auto flex flex-col z-50">
+            {tabs.map(tab => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => { setActiveTab(tab.id); setMenuOpen(false); }}
+                  className={`flex items-center gap-3 px-4 py-3 transition-colors ${
+                    isActive ? 'bg-red-500/10 text-red-500' : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  <Icon size={18} />
+                  <span className="text-xs font-bold tracking-wider">{tab.label}</span>
+                  {tab.id === 'MAP' && activeThreatsCount > 0 && (
+                    <span className="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-black">
+                      {activeThreatsCount}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+            <div className="h-[1px] bg-white/10 w-full" />
+            <button
+              onClick={() => { setAboutOpen(true); setMenuOpen(false); }}
+              className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+            >
+              <Info size={18} />
+              <span className="text-xs font-bold tracking-wider">ІНФО</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
