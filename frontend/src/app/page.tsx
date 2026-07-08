@@ -157,10 +157,10 @@ export default function Home() {
         <AnimatePresence>
           {activeTab === 'MONITORING' && (
             <motion.div 
-              initial={{ opacity: 0, scale: 0.96, y: 15 }}
+              initial={{ opacity: 0, scale: 0.98, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 15 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              exit={{ opacity: 0, scale: 0.98, y: 10 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
               className="absolute top-24 left-6 bottom-24 z-20 flex flex-col gap-4 w-80 lg:w-[400px]"
             >
                <MonitoringFeed />
@@ -172,10 +172,10 @@ export default function Home() {
         <AnimatePresence>
           {activeTab === 'MAP' && (
             <motion.div 
-              initial={{ opacity: 0, scale: 0.96, y: 15 }}
+              initial={{ opacity: 0, scale: 0.98, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 15 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              exit={{ opacity: 0, scale: 0.98, y: 10 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
               className="absolute top-28 right-6 bottom-24 z-20 flex flex-col gap-4 w-80"
             >
               <div className="bg-gradient-to-b from-black/40 to-black/10 backdrop-blur-xl rounded-3xl border border-white/10 flex-1 min-h-[150px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
@@ -200,7 +200,7 @@ export default function Home() {
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              transition={{ type: 'spring', damping: 26, stiffness: 260, mass: 0.8 }}
               className="fixed inset-0 pb-4 z-50 bg-black/95 backdrop-blur-3xl overflow-hidden"
               style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 126px)' }}
             >
@@ -226,6 +226,7 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.95, y: 20 }} 
             animate={{ opacity: 1, scale: 1, y: 0 }} 
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="bg-[#010a1b] border border-gray-800 rounded-3xl p-8 w-[90%] md:w-[550px] shadow-[0_0_50px_rgba(0,0,0,1)] relative overflow-hidden" onClick={e => e.stopPropagation()}
           >
             {/* Background glowing effects */}
