@@ -25,7 +25,7 @@ export default function MobileTopBar() {
 
   return (
     <div className="lg:hidden fixed top-0 left-0 right-0 z-40"
-         style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+         style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px))' }}>
       <div className="h-14 bg-black/60 backdrop-blur-2xl border-b border-white/[0.06] flex items-center justify-between px-4">
         {/* Logo */}
         <div className="flex items-center gap-2">
