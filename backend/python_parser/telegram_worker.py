@@ -57,7 +57,23 @@ async def main():
         "raketa_trevoga",
         "rdaprostir",
         "place_kharkiv",
-        "krolevetsnews"
+        "krolevetsnews",
+        "UkraineAlarmSignal",
+        "kievmap",
+        "kharkivlife",
+        "kherson_non_fake",
+        "odessa_info",
+        "xydessa",
+        "dnepr_operativ",
+        "hueviy_dnepr",
+        "sumy_alarm",
+        "poltava_typical",
+        "zoda_gov_ua",
+        "monitor_ukraine",
+        "povitryana_tryvoga",
+        "air_alert_ua",
+        "alarm_ukraine",
+        "tryvoga_ua"
     ]
     
     logger.info("Checking and joining recommended monitoring channels...")
