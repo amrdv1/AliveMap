@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { Wifi, WifiOff, Map as MapIcon, List, Activity, Info, Search } from 'lucide-react';
+import { Wifi, WifiOff, Map as MapIcon, List, Activity, Info, Search, X } from 'lucide-react';
 import CitySearch from './CitySearch';
 import { motion, AnimatePresence } from 'framer-motion';
 
