@@ -139,6 +139,12 @@ server.listen(PORT, async () => {
             where: { id: { in: idsToArchive } },
             data: { status: 'ARCHIVED' }
         });
+        
+        const { sendSmartAllClear } = require('./workers/botWorker');
+        for (const id of idsToArchive) {
+            sendSmartAllClear(id);
+        }
+        
         console.log(`[Archiver] Archived ${idsToArchive.length} stale targets based on real event time.`);
         io.emit('threats:refresh');
       }

@@ -300,6 +300,8 @@ export async function archiveThreatsNear(lat: number, lng: number, radiusKm: num
           include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
         });
         io.emit('threat:update', archived);
+        const { sendSmartAllClear } = require('../workers/botWorker');
+        sendSmartAllClear(t.id);
       }
     }
   }

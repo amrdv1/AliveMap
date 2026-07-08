@@ -152,10 +152,13 @@ export async function sendAlertNotification(region: string, isAlert: boolean) {
   }
 }
 
+const activeSmartAlerts = new Map<string, Set<bigint>>(); // threatId -> chatIds
+
 /**
  * Sends a smart notification if a threat is heading towards a subscribed user.
  */
 export async function sendSmartThreatNotification(
+    threatId: string,
     threatType: string,
     lat: number,
     lng: number,
@@ -183,8 +186,14 @@ export async function sendSmartThreatNotification(
         
         const projection = projectTrajectory(lat, lng, speedKmh, courseDegrees, 30); // Project 30 mins
         
+        let threatAlerts = activeSmartAlerts.get(threatId);
+        if (!threatAlerts) {
+            threatAlerts = new Set();
+            activeSmartAlerts.set(threatId, threatAlerts);
+        }
+        
         for (const sub of uniqueSmartSubs) {
-            if (willIntersectLocation(projection, sub.lat!, sub.lng!, 20)) {
+            if (!threatAlerts.has(sub.chatId) && willIntersectLocation(projection, sub.lat!, sub.lng!, 20)) {
                 // Threat passes within 20km!
                 const typeMap: any = {
                     'DRONE': '🛸 ШАХЕД / БПЛА',
@@ -201,6 +210,7 @@ export async function sendSmartThreatNotification(
                 const message = `🚨 **ПРЯМА ЗАГРОЗА**\n${displayType} рухається у вашому напрямку! Прямуйте в укриття.`;
                 try {
                     await bot.sendMessage(sub.chatId, message, { parse_mode: "Markdown" });
+                    threatAlerts.add(sub.chatId);
                 } catch (e) {
                     // Ignore send errors
                 }
@@ -211,3 +221,26 @@ export async function sendSmartThreatNotification(
     }
 }
 
+/**
+ * Sends an All Clear (Відбій) notification to users who received a smart alert for a specific threat.
+ */
+export async function sendSmartAllClear(threatId: string) {
+    if (!bot) return;
+    try {
+        const chatIds = activeSmartAlerts.get(threatId);
+        if (!chatIds || chatIds.size === 0) return;
+        
+        for (const chatId of chatIds) {
+            try {
+                const message = `✅ **ВІДБІЙ ЗАГРОЗИ**\nПовітряна ціль, що рухалась у вашому напрямку, перестала фіксуватись (можливо збита або змінила курс).`;
+                await bot.sendMessage(chatId, message, { parse_mode: "Markdown" });
+            } catch (e) {
+                // Ignore send errors
+            }
+        }
+        
+        activeSmartAlerts.delete(threatId);
+    } catch (e) {
+        console.error("Error in sendSmartAllClear:", e);
+    }
+}

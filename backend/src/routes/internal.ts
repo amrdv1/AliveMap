@@ -164,14 +164,14 @@ router.post('/telegram-message', async (req, res) => {
                             io.emit('threat:new', threat);
                             if (threat.speed && threat.course != null) {
                                 const { sendSmartThreatNotification } = require('../workers/botWorker');
-                                sendSmartThreatNotification(threat.type, finalLat, finalLng, threat.speed, threat.course);
+                                sendSmartThreatNotification(threat.id, threat.type, finalLat, finalLng, threat.speed, threat.course);
                             }
                         });
                     } else {
                         io.emit('threat:update', savedThreat);
                         if (savedThreat.speed && savedThreat.course != null) {
                             const { sendSmartThreatNotification } = require('../workers/botWorker');
-                            sendSmartThreatNotification(savedThreat.type, finalLat, finalLng, savedThreat.speed, savedThreat.course);
+                            sendSmartThreatNotification(savedThreat.id, savedThreat.type, finalLat, finalLng, savedThreat.speed, savedThreat.course);
                         }
                     }
                 }
