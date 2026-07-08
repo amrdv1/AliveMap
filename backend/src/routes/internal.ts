@@ -111,8 +111,12 @@ router.post('/telegram-message', async (req, res) => {
                         backtrackAngle = (knownCourse + 180) % 360;
                     }
                     
-                    // Spawn distance based on threat speed
-                    const spawnDistKm = parsed.type.includes('MISSILE') || parsed.type === 'KINZHAL' || parsed.type === 'ZIRCON' || parsed.type === 'KALIBR' || parsed.type === 'KH101' ? 250 : 60;
+                    let spawnDistKm = 60;
+                    if (['BALLISTIC_MISSILE', 'ISKANDER', 'KINZHAL', 'ZIRCON'].includes(parsed.type)) {
+                        spawnDistKm = 120; // Ballistics fly very fast, 120km takes ~1 min
+                    } else if (parsed.type.includes('MISSILE') || parsed.type === 'KALIBR' || parsed.type === 'KH101') {
+                        spawnDistKm = 250; // Cruise missiles fly longer
+                    }
                     
                     const spawnPoint = turf.destination(targetPoint, spawnDistKm, backtrackAngle, { units: 'kilometers' });
                     finalLat = spawnPoint.geometry.coordinates[1];
