@@ -57,24 +57,37 @@ const REGION_CENTERS: Record<string, {lat: number, lng: number, region: string}>
 export async function geocodeLocation(locationName: string, dropIfQuiet: boolean = true): Promise<GeocodeResult | null> {
   if (citiesCache.length === 0) return null;
 
-  const query = locationName.trim().toLowerCase();
-  if (query.length < 2) return null;
+  let cleanQuery = locationName.trim().toLowerCase()
+    .replace(/\s*\(.*?\)\s*/g, ' ')
+    .replace(/\s+(тг|отг|район|обл|область|м\.|село|смт|місто)\b/g, ' ')
+    .replace(/^(м\.|село|смт|місто)\s+/g, '')
+    .trim();
 
-  let matches = citiesCache.filter(c => c.names.includes(query));
+  if (cleanQuery.length < 2) return null;
+
+  let matches = citiesCache.filter(c => c.names.includes(cleanQuery));
+
+  if (matches.length === 0) {
+      matches = citiesCache.filter(c => c.names.some(n => cleanQuery.startsWith(n) || n.startsWith(cleanQuery)));
+  }
+
+  if (matches.length === 0) {
+      matches = citiesCache.filter(c => c.names.some(n => cleanQuery.includes(n) || n.includes(cleanQuery)));
+  }
 
   if (matches.length === 0) {
     // Fallback to region colloquial names
-    let matchedRegionKey = Object.keys(REGION_CENTERS).find(key => query.includes(key));
+    let matchedRegionKey = Object.keys(REGION_CENTERS).find(key => cleanQuery.includes(key));
     if (matchedRegionKey) {
         matches = [{
-            names: [query],
+            names: [cleanQuery],
             lat: REGION_CENTERS[matchedRegionKey].lat,
             lng: REGION_CENTERS[matchedRegionKey].lng,
             region: REGION_CENTERS[matchedRegionKey].region,
             pop: 1000000 // high priority
         }];
     } else {
-        console.log(`[Geocoder] Not found: ${query}`);
+        console.log(`[Geocoder] Not found: ${cleanQuery}`);
         return null;
     }
   }
@@ -99,12 +112,12 @@ export async function geocodeLocation(locationName: string, dropIfQuiet: boolean
     const isActive = alertsService.isRegionActive(bestMatch.region);
     // If the region has no active alert, we drop it to prevent false positives
     if (!isActive && bestMatch.region !== 'Unknown') {
-      console.log(`[Geocoder] Dropped ${query} because ${bestMatch.region} has NO active alert.`);
+      console.log(`[Geocoder] Dropped ${cleanQuery} because ${bestMatch.region} has NO active alert.`);
       return null;
     }
   }
 
-  console.log(`[Geocoder] Found: ${query} -> [${bestMatch.lat}, ${bestMatch.lng}] in ${bestMatch.region}`);
+  console.log(`[Geocoder] Found: ${cleanQuery} -> [${bestMatch.lat}, ${bestMatch.lng}] in ${bestMatch.region}`);
   return { lat: bestMatch.lat, lng: bestMatch.lng, region: bestMatch.region };
 }
 
