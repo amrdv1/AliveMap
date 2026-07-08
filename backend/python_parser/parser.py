@@ -111,7 +111,7 @@ def parse_telegram_text(text: str) -> List[ParsedThreat]:
     if not base_type:
         return []
         
-    if base_type in ['INFO', 'SUMMARY', 'PPO']:
+    if base_type in ['INFO', 'SUMMARY']:
         return [ParsedThreat(type=base_type, confidence=100)]
         
     chunks = [c for c in re.split(r'(?i)(?:\n|,|(?:а|і|та)\s+також\s+|\s+та\s+)', text) if len(c.strip()) > 3]
@@ -120,7 +120,7 @@ def parse_telegram_text(text: str) -> List[ParsedThreat]:
     for chunk in chunks:
         chunk_lower = chunk.lower()
         chunk_type = detect_threat_type(chunk_lower) or base_type
-        if chunk_type in ['INFO', 'SUMMARY', 'PPO']:
+        if chunk_type in ['INFO', 'SUMMARY']:
             continue
             
         qty = parse_quantity(chunk_lower)
@@ -132,10 +132,14 @@ def parse_telegram_text(text: str) -> List[ParsedThreat]:
             # Fallback: time followed by any word (e.g. "19:22 Марганецька ТГ" or "19:56 кладовище")
             target_match = re.search(r'(?:\d{1,2}:\d{2})\s+([а-яіїєґА-ЯІЇЄҐ\'\`\-]{3,}(?:\s+[а-яіїєґА-ЯІЇЄҐ\'\`\-]{2,}){0,2})', chunk)
 
+        if not target_match:
+            # Fallback 2: leading capitalized word (e.g. "Шостка шах до вас")
+            target_match = re.search(r'^\s*([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}(?:\s+[А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}){0,2})', chunk)
+
         target_name = None
         if target_match:
             extracted_name = target_match.group(1).strip()
-            skip_words = ['також', 'шахед', 'дрон', 'бпла', 'ракет', 'район', 'область', 'типу', 'невідом', 'ударний', 'реактивний', 'загроза', 'увага', 'відбій']
+            skip_words = ['також', 'шахед', 'дрон', 'бпла', 'ракет', 'район', 'область', 'типу', 'невідом', 'ударний', 'реактивний', 'загроза', 'увага', 'відбій', 'уважно']
             if not any(extracted_name.lower().startswith(w) for w in skip_words):
                 # Split by space and lemmatize each word
                 parts = extracted_name.split()

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { Target, Info, ShieldAlert, Cpu, Map as MapIcon, Radar } from 'lucide-react';
 
+import CitySearch from './CitySearch';
+
 export default function Navbar() {
   const [time, setTime] = useState(new Date());
   const [mounted, setMounted] = useState(false);
@@ -56,8 +58,11 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Time & Live Indicator */}
+      {/* Search & Time & Live Indicator */}
       <div className="flex items-center gap-4">
+        <div className="hidden lg:block">
+          <CitySearch />
+        </div>
         <div className="text-gray-300 font-mono text-lg font-medium drop-shadow-md">
           {mounted ? time.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
         </div>
