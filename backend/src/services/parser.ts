@@ -624,11 +624,14 @@ export function parseTelegramText(text: string): ParsedThreat[] {
 
     // We collect all locations mentioned in the chunk, with their roles
     for (const [cityKey, coords] of Object.entries(CITY_COORDS)) {
-      const regex = new RegExp(`(?:^|[^а-яіїєґ'’])(${cityKey})`, 'i');
+      const regex = new RegExp(`(?:^|[^а-яіїєґ'’])(${cityKey}[а-яіїєґ'’]*)`, 'i');
       const match = chunk.match(regex);
       if (match) {
         const matchIndex = match.index as number;
         const prefix = chunk.substring(Math.max(0, matchIndex - 20), matchIndex);
+        
+        // Capitalize the first letter for proper display
+        const extractedName = match[1].charAt(0).toUpperCase() + match[1].slice(1);
         
         if (prefix.match(/(?:на|напрямку|напрямок|курсом на|до|над|біля|поблизу)\s*$/)) {
           // If there's already a targetLoc, we push the current built threat and start a new one!
@@ -646,9 +649,9 @@ export function parseTelegramText(text: string): ParsedThreat[] {
               targetLng: targetLoc.lng
             });
           }
-          targetLoc = { lat: coords.lat, lng: coords.lng, name: cityKey };
+          targetLoc = { lat: coords.lat, lng: coords.lng, name: extractedName };
         } else if (prefix.match(/(?:з|від|через|повз)\s*$/)) {
-          originLoc = { lat: coords.lat, lng: coords.lng, name: cityKey };
+          originLoc = { lat: coords.lat, lng: coords.lng, name: extractedName };
         } else {
           // It's a current loc. Same logic, if already have one, push the previous
           if (currentLoc) {
@@ -665,7 +668,7 @@ export function parseTelegramText(text: string): ParsedThreat[] {
             });
             targetLoc = null;
           }
-          currentLoc = { lat: coords.lat, lng: coords.lng, name: cityKey };
+          currentLoc = { lat: coords.lat, lng: coords.lng, name: extractedName };
         }
       }
     }
