@@ -22,6 +22,7 @@
     "@prisma/client": "^5.22.0",
     "@turf/turf": "^7.3.5",
     "adm-zip": "^0.5.18",
+    "alivemap-root": "file:..",
     "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
     "bullmq": "^5.79.2",
