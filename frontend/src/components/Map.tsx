@@ -109,13 +109,12 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
         speedKmh = ['DRONE', 'RECON', 'MOLNIYA', 'DECOY', 'FPV'].includes(threat.type) ? 150 : 800;
     }
 
-    if (bearing == null || bearing === undefined) {
-        if (threat.targetLat && threat.targetLng) {
-            bearing = turf.bearing(turf.point([loc.lng, loc.lat]), turf.point([threat.targetLng, threat.targetLat]));
-            if (bearing < 0) bearing += 360;
-        } else {
-            bearing = 0; // default north
-        }
+    // Always prioritize bearing towards the target if we have one
+    if (threat.targetLat && threat.targetLng) {
+        bearing = turf.bearing(turf.point([loc.lng, loc.lat]), turf.point([threat.targetLng, threat.targetLat]));
+        if (bearing < 0) bearing += 360;
+    } else if (bearing == null || bearing === undefined) {
+        bearing = 0; // default north
     }
 
     const startPt = turf.point([loc.lng, loc.lat]);
