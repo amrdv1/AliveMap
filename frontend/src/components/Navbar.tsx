@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { Target, Info, ShieldAlert, Cpu, Map as MapIcon, Radar, Maximize } from 'lucide-react';
+import { Target, Info, ShieldAlert, Cpu, Map as MapIcon, Radar } from 'lucide-react';
 
 import CitySearch from './CitySearch';
 
@@ -29,9 +29,9 @@ export default function Navbar() {
   };
 
   return (
-    <div className="absolute top-4 left-4 right-4 h-16 bg-black/30 backdrop-blur-2xl rounded-3xl flex items-center justify-between px-6 z-30 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+    <div className="absolute top-4 left-4 right-4 h-16 bg-[#050505]/95 backdrop-blur-2xl rounded-3xl flex items-center justify-between px-6 z-30 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
       {/* Logo */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 w-48">
         <div className="relative flex items-center justify-center w-8 h-8">
           <img src="/logo.png" alt="AliveMap Logo" className="relative z-10 w-7 h-7 object-contain" />
         </div>
@@ -41,7 +41,7 @@ export default function Navbar() {
       </div>
 
       {/* Tabs */}
-      <div className="hidden md:flex items-center gap-1 bg-black/20 p-1 rounded-2xl border border-white/5">
+      <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/5">
         <button 
           onClick={() => setActiveTab('MAP')}
           className={`px-5 py-2 rounded-xl text-sm font-semibold tracking-widest uppercase transition-all duration-300 ${
@@ -71,14 +71,7 @@ export default function Navbar() {
       </div>
 
       {/* Search & Time & Live Indicator */}
-      <div className="flex items-center gap-4">
-        <button 
-          onClick={toggleFullScreen}
-          className="p-2 text-white/40 hover:text-white/80 transition-colors"
-          title="Fullscreen"
-        >
-          <Maximize className="w-5 h-5" />
-        </button>
+      <div className="flex items-center justify-end gap-4 w-auto">
         <div className="hidden lg:block w-48 lg:w-64">
           <CitySearch />
         </div>

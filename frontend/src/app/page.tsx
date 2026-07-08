@@ -34,6 +34,9 @@ export default function Home() {
         if (tg.requestFullscreen) {
           tg.requestFullscreen();
         }
+        if (tg.disableVerticalSwipes) {
+          tg.disableVerticalSwipes();
+        }
       }
     } catch (e) {
       console.warn("Telegram WebApp API error:", e);
@@ -208,8 +211,6 @@ export default function Home() {
         </AnimatePresence>
         
         {activeTab === 'MAP' && <MobileBottomSheet />}
-        
-        <MobileBottomNav />
       </div>
 
       {/* Global About Modal */}
