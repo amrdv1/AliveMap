@@ -50,25 +50,37 @@ export default function MobileTopBar() {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <div className={`flex items-center gap-1.5 mr-2 px-3 py-1.5 rounded-full ${isOnline ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'} border border-current/10`}>
-              {isOnline ? <Wifi size={12} strokeWidth={3} /> : <WifiOff size={12} strokeWidth={3} />}
-              <span className="text-[10px] font-black tracking-widest">
-                {time.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}
-              </span>
-            </div>
+            {activeTab !== 'MAP' ? (
+              <button 
+                onClick={() => setActiveTab('MAP')}
+                className="flex items-center gap-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-500 px-3 py-1.5 rounded-full transition-colors border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
+              >
+                <X size={14} strokeWidth={3} />
+                <span className="text-[10px] font-black tracking-widest uppercase">Закрити</span>
+              </button>
+            ) : (
+              <>
+                <div className={`flex items-center gap-1.5 mr-2 px-3 py-1.5 rounded-full ${isOnline ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'} border border-current/10`}>
+                  {isOnline ? <Wifi size={12} strokeWidth={3} /> : <WifiOff size={12} strokeWidth={3} />}
+                  <span className="text-[10px] font-black tracking-widest">
+                    {time.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
 
-            <button 
-              onClick={() => setMenuOpen(!menuOpen)}
-              className={`p-2 rounded-full transition-all duration-300 ${menuOpen ? 'bg-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)] text-white' : 'bg-white/5 hover:bg-white/10 text-white/80 border border-white/[0.05]'}`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {menuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
+                <button 
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className={`p-2 rounded-full transition-all duration-300 ${menuOpen ? 'bg-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)] text-white' : 'bg-white/5 hover:bg-white/10 text-white/80 border border-white/[0.05]'}`}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {menuOpen ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                    )}
+                  </svg>
+                </button>
+              </>
+            )}
           </div>
         </div>
 
