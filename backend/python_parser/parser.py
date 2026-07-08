@@ -129,31 +129,46 @@ def parse_telegram_text(text: str) -> List[ParsedThreat]:
         qty = parse_quantity(chunk_lower)
         
         # Search for targets using PyMorphy3 to get proper Nominative case!
-        target_match = re.search(r'(?i:на|курсом на|напрямку|в напрямку|у напрямку|до|над|біля|поблизу|район|в районі|у районі|у бік|в бік|у|в|зпр:|через)\s+(?:[а-яіїєґА-ЯІЇЄҐa-zA-Z\.\-]{1,15}\s+){0,2}([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}(?:\s+[А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}){0,2})', chunk)
+        prep_match = re.search(r'(?i)(на|курсом на|напрямку|в напрямку|у напрямку|до|у бік|в бік|зпр:|над|біля|поблизу|район|в районі|у районі|через|у|в)\s+(?:[а-яіїєґА-ЯІЇЄҐa-zA-Z\.\-]{1,15}\s+){0,2}([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}(?:\s+[А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}){0,2})', chunk)
         
-        if not target_match:
-            # Fallback: time followed by any word (e.g. "19:22 Марганецька ТГ" or "19:56 кладовище")
-            target_match = re.search(r'(?:\d{1,2}:\d{2})\s+([а-яіїєґА-ЯІЇЄҐ\'\`\-]{3,}(?:\s+[а-яіїєґА-ЯІЇЄҐ\'\`\-]{2,}){0,2})', chunk)
-
-        if not target_match:
-            # Fallback 2: leading capitalized word (e.g. "Шостка шах до вас")
-            target_match = re.search(r'^\s*([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}(?:\s+[А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}){0,2})', chunk)
-
         target_name = None
-        if target_match:
-            extracted_name = target_match.group(1).strip()
+        location_name = None
+        
+        if prep_match:
+            prep = prep_match.group(1).lower()
+            extracted_name = prep_match.group(2).strip()
             skip_words = ['також', 'шахед', 'дрон', 'бпла', 'ракет', 'район', 'область', 'типу', 'невідом', 'ударний', 'реактивний', 'загроза', 'увага', 'відбій', 'уважно']
             if not any(extracted_name.lower().startswith(w) for w in skip_words):
-                # Split by space and lemmatize each word
                 parts = extracted_name.split()
                 lemmatized_parts = [lemmatize_word(p) for p in parts]
-                target_name = " ".join(lemmatized_parts)
+                lemmatized = " ".join(lemmatized_parts)
                 
+                # If the preposition implies heading towards, it's a target. Otherwise it's a current location.
+                if prep in ['на', 'курсом на', 'напрямку', 'в напрямку', 'у напрямку', 'до', 'у бік', 'в бік', 'зпр:']:
+                    target_name = lemmatized
+                else:
+                    location_name = lemmatized
+
+        if not target_name and not location_name:
+            # Fallback 1: time followed by word
+            fb_match = re.search(r'(?:\d{1,2}:\d{2})\s+([а-яіїєґА-ЯІЇЄҐ\'\`\-]{3,}(?:\s+[а-яіїєґА-ЯІЇЄҐ\'\`\-]{2,}){0,2})', chunk)
+            if not fb_match:
+                # Fallback 2: leading capitalized word
+                fb_match = re.search(r'^\s*([А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}(?:\s+[А-ЯІЇЄҐ][а-яіїєґ\'\`\-]{2,}){0,2})', chunk)
+            if fb_match:
+                extracted_name = fb_match.group(1).strip()
+                skip_words = ['також', 'шахед', 'дрон', 'бпла', 'ракет', 'район', 'область', 'типу', 'невідом', 'ударний', 'реактивний', 'загроза', 'увага', 'відбій', 'уважно']
+                if not any(extracted_name.lower().startswith(w) for w in skip_words):
+                    parts = extracted_name.split()
+                    lemmatized_parts = [lemmatize_word(p) for p in parts]
+                    location_name = " ".join(lemmatized_parts) # By default, fallback implies it's just a location mention
+
         results.append(ParsedThreat(
             type=chunk_type,
             quantity=qty,
             confidence=30,
-            targetName=target_name
+            targetName=target_name,
+            locationName=location_name
         ))
         
     # Deduplicate

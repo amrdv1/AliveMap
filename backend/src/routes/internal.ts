@@ -84,6 +84,17 @@ router.post('/telegram-message', async (req, res) => {
             let finalLat = parsed.lat;
             let finalLng = parsed.lng;
 
+            if (parsed.locationName && !finalLat && !finalLng) {
+                const dropIfQuiet = !['FPV', 'KAB', 'AIRCRAFT', 'RECON', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KINZHAL', 'ZIRCON', 'KALIBR', 'ISKANDER', 'KH101', 'PPO', 'INFO', 'SUMMARY'].includes(parsed.type);
+                const geoResult = await geocodeLocation(parsed.locationName, dropIfQuiet, channelName);
+                if (geoResult) {
+                    finalLat = geoResult.lat;
+                    finalLng = geoResult.lng;
+                    // When it's a current location, we also set targetName to it so the UI shows "В районі: ..."
+                    if (!parsed.targetName) parsed.targetName = parsed.locationName;
+                }
+            }
+
             if (!parsed.targetLat && !parsed.targetLng && parsed.targetName) {
                 const dropIfQuiet = !['FPV', 'KAB', 'AIRCRAFT', 'RECON', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KINZHAL', 'ZIRCON', 'KALIBR', 'ISKANDER', 'KH101', 'PPO', 'INFO', 'SUMMARY'].includes(parsed.type);
                 const geoResult = await geocodeLocation(parsed.targetName, dropIfQuiet, channelName);
