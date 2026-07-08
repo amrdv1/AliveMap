@@ -33,8 +33,8 @@ export default function ThreatFilters() {
   ];
 
   return (
-    <div className="absolute top-[60px] md:top-28 left-0 md:left-6 z-20 flex md:flex-col gap-1.5 md:gap-2 overflow-x-auto md:overflow-visible w-full px-3 md:w-auto md:px-0 scrollbar-hide pointer-events-none">
-      <div className="pointer-events-auto flex md:flex-col gap-1.5 md:gap-2 bg-black/50 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none p-1.5 md:p-0 rounded-2xl md:rounded-none border border-white/[0.06] md:border-none shadow-[0_4px_20px_rgba(0,0,0,0.3)] md:shadow-none min-w-max">
+    <div className="absolute top-[60px] md:top-28 left-0 md:left-6 z-20 flex md:flex-col gap-1.5 md:gap-2 overflow-x-auto md:overflow-visible w-full px-3 md:w-auto md:px-0 scrollbar-hide">
+      <div className="flex md:flex-col gap-1.5 md:gap-2 bg-black/50 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none p-1.5 md:p-0 rounded-2xl md:rounded-none border border-white/[0.06] md:border-none shadow-[0_4px_20px_rgba(0,0,0,0.3)] md:shadow-none min-w-max">
         {filterOptions.map(opt => {
           const active = isSelected(opt.type);
           return (
