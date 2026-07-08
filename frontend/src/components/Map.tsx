@@ -303,8 +303,8 @@ export default function UkraineMap() {
   const [geoData, setGeoData] = useState<any>(null); // Districts
   const [geoDataStates, setGeoDataStates] = useState<any>(null); // States
   const mapRef = React.useRef<any>(null);
-  const mapRef = React.useRef<any>(null);
   const [clickedRegion, setClickedRegion] = useState<any>(null);
+  
   useEffect(() => {
     fetch('/ukraine-districts.geojson')
       .then((res) => res.json())
