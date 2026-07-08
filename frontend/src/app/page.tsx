@@ -26,6 +26,19 @@ export default function Home() {
   const { activeTab, setMessages, isAboutOpen, setAboutOpen } = useStore();
 
   React.useEffect(() => {
+    // Attempt to expand and request fullscreen for Telegram Mini App
+    try {
+      const tg = (window as any).Telegram?.WebApp;
+      if (tg) {
+        tg.expand();
+        if (tg.requestFullscreen) {
+          tg.requestFullscreen();
+        }
+      }
+    } catch (e) {
+      console.warn("Telegram WebApp API error:", e);
+    }
+
     const fetchMessages = () => {
       fetch('/api/messages')
         .then(res => res.json())

@@ -33,9 +33,9 @@ export default function ThreatFilters() {
   ];
 
   return (
-    <div className="absolute left-0 top-[var(--mobile-top)] md:top-28 md:left-6 z-20 flex md:flex-col gap-1.5 md:gap-2 overflow-x-auto md:overflow-visible w-full px-3 md:w-auto md:px-0 scrollbar-hide"
+    <div className="absolute left-0 top-[var(--mobile-top)] md:top-28 md:left-6 z-20 flex md:flex-col overflow-x-auto md:overflow-visible w-full px-3 md:w-auto md:px-0 scrollbar-hide"
          style={{ '--mobile-top': 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 126px)' } as React.CSSProperties}>
-      <div className="flex md:flex-col gap-1.5 md:gap-2 bg-black/60 md:bg-transparent backdrop-blur-3xl md:backdrop-blur-none p-1.5 md:p-0 rounded-2xl md:rounded-none border border-white/[0.1] md:border-none shadow-[0_8px_32px_rgba(0,0,0,0.4)] md:shadow-none min-w-max">
+      <div className="flex md:flex-col gap-2 min-w-max pb-2">
         {filterOptions.map(opt => {
           const active = isSelected(opt.type);
           return (
@@ -44,13 +44,13 @@ export default function ThreatFilters() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => toggleType(opt.type)}
-              className={`flex items-center justify-start md:w-full gap-2 px-4 py-2 rounded-full text-xs font-semibold tracking-wide uppercase transition-colors duration-300 border backdrop-blur-md ${
+              className={`flex items-center justify-start md:w-full gap-2 px-4 py-2.5 rounded-2xl text-[11px] font-black tracking-wide uppercase transition-all duration-300 border backdrop-blur-2xl ${
                 active 
-                  ? opt.color + ' shadow-[0_0_15px_rgba(currentColor,0.2)] bg-black/20'
-                  : 'bg-black/20 text-white/40 border-white/5 hover:bg-white/10 hover:text-white/70 shadow-sm'
+                  ? opt.color.replace('bg-', 'bg-').replace('/20', '/10') + ' shadow-[0_4px_20px_rgba(currentColor,0.2)] bg-black/80 border-current/30'
+                  : 'bg-black/60 text-white/50 border-white/[0.08] hover:bg-black/80 hover:text-white/80 shadow-[0_4px_15px_rgba(0,0,0,0.4)]'
               }`}
             >
-              <div className={`w-5 h-5 flex items-center justify-center rounded-full ${active ? 'bg-current/10' : 'bg-white/5 opacity-50'}`}>
+              <div className={`w-5 h-5 flex items-center justify-center rounded-full ${active ? 'bg-current/15' : 'bg-white/5 opacity-50'}`}>
                 <ThreatIcon type={opt.type} className="w-3.5 h-3.5" />
               </div>
               {opt.label}
