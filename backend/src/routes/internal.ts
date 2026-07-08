@@ -23,29 +23,7 @@ router.post('/telegram-message', async (req, res) => {
         const msgTime = new Date(timestamp);
         const threatType = threats[0].type;
 
-        const shouldSaveToFeed = MOVEMENT_TYPES.has(threatType) || ['INFO', 'SUMMARY', 'PPO'].includes(threatType);
-        if (shouldSaveToFeed) {
-            try {
-                const existing = await prisma.monitoringMessage.findFirst({
-                    where: { text, timestamp: msgTime }
-                });
-                if (!existing) {
-                    const savedMsg = await prisma.monitoringMessage.create({
-                        data: {
-                            text,
-                            channelName: channelName,
-                            timestamp: msgTime,
-                            tags: [threatType],
-                            lat: threats[0].lat ?? null,
-                            lng: threats[0].lng ?? null
-                        }
-                    });
-                    io.emit('monitoring:new_message', savedMsg);
-                }
-            } catch (e) {
-                console.error("Failed to save monitoring message", e);
-            }
-        }
+        // Message saving moved to the end so we can use geocoded coordinates
 
         let aiData = null;
         if (threatType !== 'INFO' && threatType !== 'SUMMARY' && threats.length === 1) {
@@ -94,6 +72,9 @@ router.post('/telegram-message', async (req, res) => {
         }
         const sourceId = source.id;
 
+        let bestMessageLat: number | null = null;
+        let bestMessageLng: number | null = null;
+
         for (const parsed of threatsToProcess) {
             let finalLat = parsed.lat;
             let finalLng = parsed.lng;
@@ -134,6 +115,11 @@ router.post('/telegram-message', async (req, res) => {
             }
 
             if (finalLat !== null && finalLng !== null) {
+                if (bestMessageLat == null) {
+                    bestMessageLat = parsed.targetLat ?? finalLat;
+                    bestMessageLng = parsed.targetLng ?? finalLng;
+                }
+
                 if (parsed.type === 'INFO' || parsed.type === 'SUMMARY') {
                     const { archiveThreatsNear } = require('../services/aggregatorService');
                     const radius = parsed.confidence === 50 ? 2000 : 150;
@@ -185,6 +171,30 @@ router.post('/telegram-message', async (req, res) => {
                         }
                     }
                 }
+            }
+        }
+        
+        const shouldSaveToFeed = MOVEMENT_TYPES.has(threatType) || ['INFO', 'SUMMARY', 'PPO'].includes(threatType);
+        if (shouldSaveToFeed) {
+            try {
+                const existing = await prisma.monitoringMessage.findFirst({
+                    where: { text, timestamp: msgTime }
+                });
+                if (!existing) {
+                    const savedMsg = await prisma.monitoringMessage.create({
+                        data: {
+                            text,
+                            channelName: channelName,
+                            timestamp: msgTime,
+                            tags: [threatType],
+                            lat: bestMessageLat,
+                            lng: bestMessageLng
+                        }
+                    });
+                    io.emit('monitoring:new_message', savedMsg);
+                }
+            } catch (e) {
+                console.error("Failed to save monitoring message", e);
             }
         }
 
