@@ -98,7 +98,11 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
   useEffect(() => {
     const loc = threat.locations[0];
     if (!loc) {
-      setCurrentLoc(null);
+      if (threat.targetLat && threat.targetLng) {
+        setCurrentLoc({ lng: threat.targetLng, lat: threat.targetLat });
+      } else {
+        setCurrentLoc(null);
+      }
       return;
     }
 
