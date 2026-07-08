@@ -20,31 +20,7 @@ node_port = os.environ.get('PORT', '3001')
 
 NODE_API_URL = f"http://127.0.0.1:{node_port}/api/internal/telegram-message"
 
-CHANNELS = [
-  'vanek_nikolaev', 'monitor', 'kievreal1', 'operativnoZSU', 'insiderUKR', 'smolii_ukraine', 
-  'kyiv_golovne', 'war_monitor', 'monitor_ukraine', 'kyiv_vanek', 'nebo_raketa', 
-  'sectorv666', 'deraketaua', 'kherson_non_drone', 'rozvidkaneba', 'kudy_letyt', 
-  'nablydatel_dozor', 'krolevetsnews', 'place_kharkiv', 'ukraineradar_24_7', 'kievmap', 
-  'truexanewsua', 'kpszsu', 'veselyy_pivden', 'kharkivoda', 'odessa_typical', 
-  'realwar_ukraine', 'ukraine_now',
-  'pivden_varta', 'radar_top_ua', 'odessa_inform', 'monitor1654', 
-  'ukrainealarmsignal', 'eyes_everywhere_ua', 'vibuxaviasia', 'renihub', 'odessaveter', 
-  'kharkov_media', 'pivden_fpv', 'tlknewsua', 'temporis_odesa', 'kherson_monitoring', 
-  'shahedradar', 'operatyvnohlep', 'poltavaranger', 'raketa_trevoga',
-  'roman_romanchuk', 'kyivoda', 'suspilne_news', 'ukraine_radar',
-  'київський купол', 'ринда моніторить', 'повітряний простір', 'єрадар',
-  'volynskaODA', 'zhytomyrskaODA', 'ternopilskaODA', 'khmelnytskaODA',
-  'vinnytskaODA', 'chernivetskaODA', 'ifoda', 'zakarpatskaODA',
-  'cherkaskaODA', 'kirovohradskaODA', 'poltavskaODA', 'sumy_oda',
-  'synegubov', 'dnipropetrovskaODA', 'zoda_gov_ua', 'mykolaivskaODA',
-  'odeskaODA', 'khersonskaODA', 'pavlokyrylenko_donoda', 'luhanskaVTSA', 'VA_Kyiv',
-  'korabeli', 'monitorwar', 'monitoring_ukraine',
-  'air_alert_ua', 'zahyst_ua', 'radar_dnepr', 'kharkiv_1654',
-  'zsu_insider', 'air_alarm_ua', 'ua_drones', 'mykolaiv_online',
-  'poltava_monitoring', 'cherkasy_today', 'sumy_today',
-  'uaradar', 'raketna_zagroza'
-]
-
+# We no longer hardcode CHANNELS, we read all channels/groups the user is in.
 async def main():
     if not api_id or not api_hash or not session_string:
         logger.error("Missing TELEGRAM_API_ID, TELEGRAM_API_HASH, or TELEGRAM_SESSION.")
@@ -80,12 +56,16 @@ async def main():
         
     async def poll_history():
         import time
-        logger.info("Fetching recent Telegram history (polling top channels)...")
+        logger.info("Fetching recent Telegram history (polling top 50 dialogs)...")
         now = time.time()
         
-        for channel in CHANNELS:
+        async for dialog in client.iter_dialogs(limit=50):
+            if not dialog.is_channel and not dialog.is_group:
+                continue
+            channel = dialog.entity
+            channel_name = getattr(channel, 'username', getattr(channel, 'title', str(channel.id)))
             try:
-                await asyncio.sleep(1.5) # Prevent FloodWait
+                await asyncio.sleep(1.0) # Prevent FloodWait
                 messages = await client.get_messages(channel, limit=10)
                 for message in reversed(messages):
                     if not message.message or not message.date:
@@ -127,7 +107,7 @@ async def main():
                         logger.error(f"Poll Exception: {e}")
                         
             except Exception as e:
-                logger.error(f"Failed to fetch history for {channel}: {e}")
+                logger.error(f"Failed to fetch history for {channel_name}: {e}")
                 
         logger.info("Finished polling history.")
         
@@ -141,18 +121,7 @@ async def main():
         username = getattr(chat, 'username', None)
         title = getattr(chat, 'title', None)
         
-        username_lower = username.lower() if username else None
-        title_lower = title.lower() if title else None
-        
-        channels_lower = [c.lower() for c in CHANNELS]
-        is_monitored = False
-        
-        if username_lower and username_lower in channels_lower:
-            is_monitored = True
-        elif title_lower and any(c in title_lower for c in channels_lower):
-            is_monitored = True
-            
-        if not is_monitored:
+        if not event.is_channel and not event.is_group:
             return
             
         text = event.message.message
