@@ -1,25 +1,24 @@
 import axios from 'axios';
 import { Server } from 'socket.io';
 import prisma from '../db';
-import { ReportType, ReportStatus, SourceType } from '@prisma/client';
 
 const MAPA_API_URL = 'https://mapa.ua/api/v1/current';
 
 // Maps MAPA kind -> our ReportType
-const KIND_MAPPING: Record<string, ReportType> = {
-  'drone_piston': ReportType.DRONE,
-  'drone_jet': ReportType.DRONE,
-  'missile_cruise': ReportType.CRUISE_MISSILE,
-  'missile_ballistic': ReportType.BALLISTIC_MISSILE,
-  'bomb': ReportType.KAB,
-  'default': ReportType.DRONE
+const KIND_MAPPING: Record<string, string> = {
+  'drone_piston': 'DRONE',
+  'drone_jet': 'DRONE',
+  'missile_cruise': 'CRUISE_MISSILE',
+  'missile_ballistic': 'BALLISTIC_MISSILE',
+  'bomb': 'KAB',
+  'default': 'DRONE'
 };
 
 export async function startMapaWorker(io: Server) {
   let source = await prisma.source.findFirst({ where: { name: 'MAPA.UA API' } });
   if (!source) {
     source = await prisma.source.create({
-      data: { name: 'MAPA.UA API', type: SourceType.API }
+      data: { name: 'MAPA.UA API', type: 'API' }
     });
   }
 
@@ -48,7 +47,7 @@ export async function startMapaWorker(io: Server) {
 
         // ONLY search for ACTIVE threats of the same type
         const recentThreats = await prisma.threatObject.findMany({
-          where: { status: ReportStatus.ACTIVE, type: threatType },
+          where: { status: 'ACTIVE', type: threatType },
           include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
         });
 
@@ -72,7 +71,7 @@ export async function startMapaWorker(io: Server) {
 
         // If no location match, but there's a threat of the SAME TYPE with NO locations, link it
         if (!matchedThreat) {
-           const locationlessThreat = recentThreats.find(t => t.locations.length === 0);
+           const locationlessThreat = recentThreats.find((t: any) => t.locations.length === 0);
            if (locationlessThreat) {
                matchedThreat = locationlessThreat;
            }
@@ -111,7 +110,7 @@ export async function startMapaWorker(io: Server) {
            const newThreat = await prisma.threatObject.create({
               data: {
                  type: threatType,
-                 status: ReportStatus.ACTIVE,
+                 status: 'ACTIVE',
                  confidence: 1.0,
                  speed: speed,
                  course: course,
