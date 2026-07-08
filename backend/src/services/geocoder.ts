@@ -108,31 +108,34 @@ export async function geocodeLocation(locationName: string, dropIfQuiet: boolean
 
   if (cleanQuery.length < 2) return null;
 
+  // 1. Check Region Fallbacks FIRST to prevent colloquial regions from matching random villages
+  let matchedRegionKey = Object.keys(REGION_CENTERS).find(key => cleanQuery.includes(key));
+  if (matchedRegionKey) {
+      return {
+          names: [cleanQuery],
+          lat: REGION_CENTERS[matchedRegionKey].lat,
+          lng: REGION_CENTERS[matchedRegionKey].lng,
+          region: REGION_CENTERS[matchedRegionKey].region,
+          pop: 1000000
+      };
+  }
+
+  // 2. Exact matches
   let matches = citiesCache.filter(c => c.names.includes(cleanQuery));
 
+  // 3. Starts-with matches
   if (matches.length === 0) {
       matches = citiesCache.filter(c => c.names.some((n: string) => cleanQuery.startsWith(n) || n.startsWith(cleanQuery)));
   }
 
+  // 4. Substring matches
   if (matches.length === 0 && cleanQuery.length >= 5) {
       matches = citiesCache.filter(c => c.names.some((n: string) => cleanQuery.includes(n) || n.includes(cleanQuery)));
   }
 
   if (matches.length === 0) {
-    // Fallback to region colloquial names
-    let matchedRegionKey = Object.keys(REGION_CENTERS).find(key => cleanQuery.includes(key));
-    if (matchedRegionKey) {
-        matches = [{
-            names: [cleanQuery],
-            lat: REGION_CENTERS[matchedRegionKey].lat,
-            lng: REGION_CENTERS[matchedRegionKey].lng,
-            region: REGION_CENTERS[matchedRegionKey].region,
-            pop: 1000000 // high priority
-        }];
-    } else {
-        console.log(`[Geocoder] Not found: ${cleanQuery}`);
-        return null;
-    }
+      console.log(`[Geocoder] Not found: ${cleanQuery}`);
+      return null;
   }
 
   // Sort matches to prioritize regions with active alerts, but NEVER let a tiny village override a major city

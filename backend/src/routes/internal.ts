@@ -116,6 +116,8 @@ router.post('/telegram-message', async (req, res) => {
                         spawnDistKm = 120; // Ballistics fly very fast, 120km takes ~1 min
                     } else if (parsed.type.includes('MISSILE') || parsed.type === 'KALIBR' || parsed.type === 'KH101') {
                         spawnDistKm = 250; // Cruise missiles fly longer
+                    } else if (parsed.type === 'FPV' || parsed.type === 'MOLNIYA') {
+                        spawnDistKm = 8; // FPVs are extremely short range
                     }
                     
                     const spawnPoint = turf.destination(targetPoint, spawnDistKm, backtrackAngle, { units: 'kilometers' });
