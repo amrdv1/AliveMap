@@ -46,13 +46,18 @@ async def main():
     RECOMMENDED_CHANNELS = [
         "vanek_nikolaev",
         "nikalert",
-        "Phantomche",
+        "phantomcha",
         "veselyy_pivden",
         "donetskiy_on",
         "war_monitor",
         "eRadarrua",
         "radarr_ua",
-        "kievreal1"
+        "kievreal1",
+        "tknwwasu",
+        "raketa_trevoga",
+        "rdaprostir",
+        "place_kharkiv",
+        "krolevetsnews"
     ]
     
     logger.info("Checking and joining recommended monitoring channels...")
