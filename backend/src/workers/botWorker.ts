@@ -198,7 +198,7 @@ export async function sendSmartThreatNotification(
                 };
                 const displayType = typeMap[threatType] || `⚠️ ${threatType}`;
                 
-                const message = `‼️ **РОЗУМНЕ СПОВІЩЕННЯ: ПРЯМА ЗАГРОЗА!** ‼️\n\n${displayType} зараз рухається **прямо у вашому напрямку**!\n\n📐 Розрахунковий вектор перетинає вашу локацію.\n⏳ Час на реагування може бути мінімальним!\n\n🏃‍♂️ **НЕГАЙНО ПРЯМУЙТЕ В УКРИТТЯ!**`;
+                const message = `🚨 **ПРЯМА ЗАГРОЗА**\n${displayType} рухається у вашому напрямку! Прямуйте в укриття.`;
                 try {
                     await bot.sendMessage(sub.chatId, message, { parse_mode: "Markdown" });
                 } catch (e) {
