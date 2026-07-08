@@ -115,7 +115,7 @@ export async function startMapaWorker(io: Server) {
                  confidence: 1.0,
                  speed: speed,
                  course: course,
-                 firstSeen: timestamp,
+                 createdAt: timestamp,
                  locations: {
                     create: {
                        lat,
