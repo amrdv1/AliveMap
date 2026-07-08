@@ -57,10 +57,10 @@ def parse_quantity(text: str) -> int:
     # Remove times like 16:13 so they aren't parsed as quantities
     text_no_time = re.sub(r'\b\d{1,2}:\d{2}\b', '', text)
     
-    num_match = re.search(r'(?:[^\d]|^)(\d{1,2})\s*(?:шахед|ракет|бпла|каб|дрон|ціл)', text_no_time, re.IGNORECASE)
+    num_match = re.search(r'(?:[^\d]|^)(\d{1,2})\s*[xх]?\s*(?:шахед|ракет|бпла|каб|дрон|ціл)', text_no_time, re.IGNORECASE)
     if num_match: return min(int(num_match.group(1)), 30)
     
-    num_match_reverse = re.search(r'(?:шахед|ракет|бпла|каб|дрон|ціл)[^\d]{0,20}(\d{1,2})(?![a-zа-яіїєґ])', text_no_time, re.IGNORECASE)
+    num_match_reverse = re.search(r'(?:шахед|ракет|бпла|каб|дрон|ціл)[^\d]{0,20}(\d{1,2})\s*[xх]?(?![a-zа-яіїєґ])', text_no_time, re.IGNORECASE)
     if num_match_reverse: return min(int(num_match_reverse.group(1)), 30)
     
     t_padded = f" {re.sub(r'[^а-яіїєґa-z0-9]', ' ', text.lower())} "
@@ -97,7 +97,7 @@ def parse_telegram_text(text: str) -> List[ParsedThreat]:
     
     # Strip emojis and special characters to allow clean regex matching
     text = re.sub(r'[^\w\s.,:;!?\'\`\-]', ' ', text, flags=re.UNICODE)
-    text = re.sub(r'\s+', ' ', text).strip()
+    text = re.sub(r'[^\S\n]+', ' ', text).strip()
     
     lower_text = text.lower()
     
@@ -118,6 +118,9 @@ def parse_telegram_text(text: str) -> List[ParsedThreat]:
     results = []
     
     for chunk in chunks:
+        if chunk.strip().endswith(':'):
+            continue
+            
         chunk_lower = chunk.lower()
         chunk_type = detect_threat_type(chunk_lower) or base_type
         if chunk_type in ['INFO', 'SUMMARY']:
@@ -155,7 +158,13 @@ def parse_telegram_text(text: str) -> List[ParsedThreat]:
         
     # Deduplicate
     unique_results = []
+    has_targets = any(r.targetName is not None for r in results)
+    
     for res in results:
+        # Skip header-like threats with no target if we have actual targets
+        if res.targetName is None and has_targets:
+            continue
+            
         is_dup = False
         for u in unique_results:
             if u.type == res.type and u.targetName == res.targetName:
