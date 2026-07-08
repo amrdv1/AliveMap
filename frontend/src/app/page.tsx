@@ -152,14 +152,6 @@ export default function Home() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              drag="y"
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={0.2}
-              onDragEnd={(e, info) => {
-                if (info.offset.y > 150 || info.velocity.y > 500) {
-                  useStore.getState().setActiveTab('MAP');
-                }
-              }}
               className="fixed inset-0 pt-14 pb-[76px] z-50 bg-black/95 backdrop-blur-3xl overflow-hidden"
             >
               <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-2 mb-1 cursor-grab active:cursor-grabbing" />

@@ -218,7 +218,7 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
                        {(() => {
                            const clat = currentLoc?.lat || loc.lat;
                            const clng = currentLoc?.lng || loc.lng;
-                           const isOver = threat.targetLat && threat.targetLng && (Math.sqrt(Math.pow(clat - threat.targetLat, 2) + Math.pow(clng - threat.targetLng, 2)) < 0.25);
+                           const isOver = threat.targetLat && threat.targetLng && (Math.sqrt(Math.pow(clat - threat.targetLat, 2) + Math.pow(clng - threat.targetLng, 2)) < 0.05);
                            if (threat.targetName) return isOver ? `В районі: ${threat.targetName}` : `Напрямок: ${threat.targetName}`;
                            return threat.course != null ? `Курс: ${getCourseText(threat.course)}` : 'Курс невідомий';
                        })()}
@@ -231,7 +231,7 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
                  {(() => {
                      const clat = currentLoc?.lat || loc.lat;
                      const clng = currentLoc?.lng || loc.lng;
-                     const isOver = threat.targetLat && threat.targetLng && (Math.sqrt(Math.pow(clat - threat.targetLat, 2) + Math.pow(clng - threat.targetLng, 2)) < 0.25);
+                     const isOver = threat.targetLat && threat.targetLng && (Math.sqrt(Math.pow(clat - threat.targetLat, 2) + Math.pow(clng - threat.targetLng, 2)) < 0.05);
                      if (threat.targetName) return isOver ? ` (в районі: ${threat.targetName})` : ` (напрямок: ${threat.targetName})`;
                      return threat.course != null ? `, курс ${getCourseText(threat.course).toLowerCase()}` : '';
                  })()}.
