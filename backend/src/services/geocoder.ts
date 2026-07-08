@@ -64,12 +64,13 @@ export async function geocodeLocation(locationName: string, dropIfQuiet: boolean
 
   if (matches.length === 0) {
     // Fallback to region colloquial names
-    if (REGION_CENTERS[query]) {
+    let matchedRegionKey = Object.keys(REGION_CENTERS).find(key => query.includes(key));
+    if (matchedRegionKey) {
         matches = [{
             names: [query],
-            lat: REGION_CENTERS[query].lat,
-            lng: REGION_CENTERS[query].lng,
-            region: REGION_CENTERS[query].region,
+            lat: REGION_CENTERS[matchedRegionKey].lat,
+            lng: REGION_CENTERS[matchedRegionKey].lng,
+            region: REGION_CENTERS[matchedRegionKey].region,
             pop: 1000000 // high priority
         }];
     } else {
