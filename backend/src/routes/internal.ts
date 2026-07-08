@@ -26,7 +26,7 @@ router.post('/telegram-message', async (req, res) => {
         // Message saving moved to the end so we can use geocoded coordinates
 
         let aiData = null;
-        if (threatType !== 'INFO' && threatType !== 'SUMMARY' && threats.length === 1) {
+        if (threatType !== 'INFO' && threatType !== 'SUMMARY') {
             aiData = await extractWithAI(text);
         }
         
@@ -48,17 +48,22 @@ router.post('/telegram-message', async (req, res) => {
                });
             } else if (aiData.locationNames && aiData.locationNames.length > 0) {
                const dropIfQuiet = !['FPV', 'KAB', 'AIRCRAFT', 'RECON', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KINZHAL', 'ZIRCON', 'KALIBR', 'ISKANDER', 'KH101', 'PPO', 'INFO', 'SUMMARY'].includes(threatType);
-               for (const locName of aiData.locationNames) {
-                  const coords = await geocodeLocation(locName, dropIfQuiet);
-                  if (coords) {
-                     overrideParsedThreats.push({
-                        ...threats[0],
-                        confidence: 95,
-                        targetName: locName,
-                        targetLat: coords.lat,
-                        targetLng: coords.lng
-                     });
-                  }
+               
+               const allSameType = threats.every((t: any) => t.type === threatType);
+               
+               if (allSameType) {
+                   for (const locName of aiData.locationNames) {
+                      const coords = await geocodeLocation(locName, dropIfQuiet);
+                      if (coords) {
+                         overrideParsedThreats.push({
+                            ...threats[0],
+                            confidence: 95,
+                            targetName: locName,
+                            targetLat: coords.lat,
+                            targetLng: coords.lng
+                         });
+                      }
+                   }
                }
             }
             if (overrideParsedThreats.length > 0) {
