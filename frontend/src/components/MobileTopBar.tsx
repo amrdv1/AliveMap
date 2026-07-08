@@ -33,7 +33,7 @@ export default function MobileTopBar() {
 
   return (
     <div className="lg:hidden fixed top-0 left-0 right-0 z-50 pointer-events-none"
-         style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 36px)' }}>
+         style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 54px)' }}>
       <div className="h-14 mx-3 bg-black/60 backdrop-blur-3xl border border-white/[0.1] rounded-2xl flex items-center justify-between px-4 pointer-events-auto shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
         {/* Logo */}
         <div className="flex items-center gap-2">
