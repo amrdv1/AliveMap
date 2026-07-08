@@ -74,7 +74,8 @@ export async function startAlertsWorker(io: Server) {
                       await sendAlertNotification(region, true);
 
                     } else if (wasActive && !isNowActive) {
-                      // Alert Cleared — DO NOT send to Telegram bot (requested by user to prevent spam)
+                      // Alert Cleared — send to Telegram bot
+                      await sendAlertNotification(region, false);
                       
                       // Also archive threats in this region
                       const regionCoords = getRegionCenter(region);
