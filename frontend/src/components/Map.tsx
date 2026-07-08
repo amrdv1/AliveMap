@@ -304,6 +304,7 @@ export default function UkraineMap() {
   const [geoDataStates, setGeoDataStates] = useState<any>(null); // States
   const mapRef = React.useRef<any>(null);
   const [clickedRegion, setClickedRegion] = useState<any>(null);
+  const [hoveredRegion, setHoveredRegion] = useState<any>(null);
   
   useEffect(() => {
     fetch('/ukraine-districts.geojson')
@@ -410,6 +411,20 @@ export default function UkraineMap() {
     });
   };
 
+  const onMouseMove = useCallback((event: any) => {
+    const { features } = event;
+    const topFeature = features && features[0];
+    if (topFeature && topFeature.properties) {
+      setHoveredRegion(topFeature.properties);
+    } else {
+      setHoveredRegion(null);
+    }
+  }, []);
+
+  const onMouseLeave = useCallback(() => {
+    setHoveredRegion(null);
+  }, []);
+
   const onRegionClick = useCallback((event: any) => {
     const { features, point, lngLat } = event;
     const topFeature = features && features[0];
@@ -431,6 +446,8 @@ export default function UkraineMap() {
 
   const clickedRegionName = clickedRegion ? (clickedRegion.features.find((f:any) => f.properties.region)?.properties.region || '') : '';
   const clickedRayonName = clickedRegion ? (clickedRegion.features.find((f:any) => f.properties.rayon)?.properties.rayon || '') : '';
+  const hoveredRegionName = hoveredRegion?.region || '';
+  const hoveredRayonName = hoveredRegion?.rayon || '';
 
   const getAlertInfo = (featuresList: any[]) => {
     if (!featuresList || featuresList.length === 0) return null;
@@ -497,6 +514,8 @@ export default function UkraineMap() {
           ref={mapRef}
           interactiveLayerIds={['regions-states-fill', 'regions-districts-fill']}
           onClick={onRegionClick}
+          onMouseMove={onMouseMove}
+          onMouseLeave={onMouseLeave}
           initialViewState={{
             longitude: 31.1656,
             latitude: 48.3794,
@@ -518,15 +537,28 @@ export default function UkraineMap() {
                     'fill-color': [
                         'case',
                         ['==', ['get', 'hasAlert'], 1],
-                        ['case', ['==', ['get', 'region'], clickedRegionName], 'rgba(239, 68, 68, 0.65)', 'rgba(239, 68, 68, 0.45)'],
+                        ['case', 
+                            ['==', ['get', 'region'], clickedRegionName], 'rgba(239, 68, 68, 0.65)', 
+                            ['==', ['get', 'region'], hoveredRegionName], 'rgba(239, 68, 68, 0.55)', 
+                            'rgba(239, 68, 68, 0.45)'
+                        ],
                         ['==', ['get', 'region'], clickedRegionName], 'rgba(255, 255, 255, 0.08)',
+                        ['==', ['get', 'region'], hoveredRegionName], 'rgba(255, 255, 255, 0.05)',
                         'rgba(0, 0, 0, 0)'
                     ],
                     'fill-outline-color': [
                         'case',
                         ['==', ['get', 'hasAlert'], 1],
-                        ['case', ['==', ['get', 'region'], clickedRegionName], 'rgba(255, 255, 255, 0.9)', 'rgba(239, 68, 68, 0.6)'],
-                        ['case', ['==', ['get', 'region'], clickedRegionName], 'rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.15)']
+                        ['case', 
+                            ['==', ['get', 'region'], clickedRegionName], 'rgba(255, 255, 255, 0.9)', 
+                            ['==', ['get', 'region'], hoveredRegionName], 'rgba(255, 255, 255, 0.8)', 
+                            'rgba(239, 68, 68, 0.6)'
+                        ],
+                        ['case', 
+                            ['==', ['get', 'region'], clickedRegionName], 'rgba(255, 255, 255, 0.9)', 
+                            ['==', ['get', 'region'], hoveredRegionName], 'rgba(255, 255, 255, 0.6)', 
+                            'rgba(255, 255, 255, 0.15)'
+                        ]
                     ]
                 }} 
               />
@@ -543,15 +575,28 @@ export default function UkraineMap() {
                     'fill-color': [
                         'case',
                         ['==', ['get', 'hasAlert'], 1],
-                        ['case', ['==', ['get', 'rayon'], clickedRayonName], 'rgba(239, 68, 68, 0.65)', 'rgba(239, 68, 68, 0.45)'],
+                        ['case', 
+                            ['==', ['get', 'rayon'], clickedRayonName], 'rgba(239, 68, 68, 0.65)', 
+                            ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(239, 68, 68, 0.55)', 
+                            'rgba(239, 68, 68, 0.45)'
+                        ],
                         ['==', ['get', 'rayon'], clickedRayonName], 'rgba(255, 255, 255, 0.08)',
+                        ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(255, 255, 255, 0.05)',
                         'rgba(0, 0, 0, 0)'
                     ],
                     'fill-outline-color': [
                         'case',
                         ['==', ['get', 'hasAlert'], 1],
-                        ['case', ['==', ['get', 'rayon'], clickedRayonName], 'rgba(255, 255, 255, 0.9)', 'rgba(239, 68, 68, 0.6)'],
-                        ['case', ['==', ['get', 'rayon'], clickedRayonName], 'rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.12)']
+                        ['case', 
+                            ['==', ['get', 'rayon'], clickedRayonName], 'rgba(255, 255, 255, 0.9)', 
+                            ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(255, 255, 255, 0.8)', 
+                            'rgba(239, 68, 68, 0.6)'
+                        ],
+                        ['case', 
+                            ['==', ['get', 'rayon'], clickedRayonName], 'rgba(255, 255, 255, 0.9)', 
+                            ['==', ['get', 'rayon'], hoveredRayonName], 'rgba(255, 255, 255, 0.6)', 
+                            'rgba(255, 255, 255, 0.12)'
+                        ]
                     ]
                 }} 
               />
