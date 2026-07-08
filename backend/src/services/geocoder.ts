@@ -107,3 +107,29 @@ export async function geocodeLocation(locationName: string, dropIfQuiet: boolean
   console.log(`[Geocoder] Found: ${query} -> [${bestMatch.lat}, ${bestMatch.lng}] in ${bestMatch.region}`);
   return { lat: bestMatch.lat, lng: bestMatch.lng, region: bestMatch.region };
 }
+
+export async function searchCities(query: string, limit: number = 10) {
+  if (citiesCache.length === 0) return [];
+  
+  const q = query.trim().toLowerCase();
+  if (q.length < 2) return [];
+
+  const matches = citiesCache.filter(c => c.names.some((n: string) => n.includes(q)));
+  
+  matches.sort((a, b) => {
+    // Exact match boost
+    const aExact = a.names.includes(q) ? 1 : 0;
+    const bExact = b.names.includes(q) ? 1 : 0;
+    if (aExact !== bExact) return bExact - aExact;
+    
+    return b.pop - a.pop;
+  });
+
+  return matches.slice(0, limit).map(c => ({
+    name: c.names.find((n: string) => n.toLowerCase().includes(q)) || c.names[0],
+    region: c.region,
+    lat: c.lat,
+    lng: c.lng,
+    pop: c.pop
+  }));
+}

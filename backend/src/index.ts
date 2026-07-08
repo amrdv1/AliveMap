@@ -43,6 +43,19 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/internal', internalRoutes);
 
+import { searchCities } from './services/geocoder';
+app.get('/api/search', async (req, res) => {
+  try {
+    const q = req.query.q as string;
+    if (!q) return res.json([]);
+    const limit = parseInt(req.query.limit as string) || 10;
+    const results = await searchCities(q, limit);
+    res.json(results);
+  } catch (error) {
+    res.status(500).json({ error: 'Search failed' });
+  }
+});
+
 app.get('/api/alerts', async (req, res) => {
   try {
     const response = await fetch('https://siren.pp.ua/api/v3/alerts');
