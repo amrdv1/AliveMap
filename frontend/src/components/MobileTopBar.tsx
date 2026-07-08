@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { Wifi, WifiOff, Menu, Map as MapIcon, List, Activity, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import CitySearch from './CitySearch';
 
 export default function MobileTopBar() {
   const { threats, alerts, activeTab, setActiveTab, setAboutOpen } = useStore();
@@ -68,36 +69,44 @@ export default function MobileTopBar() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full right-4 mt-2 w-48 bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-hidden pointer-events-auto"
+            className="absolute top-full right-4 mt-2 w-56 flex flex-col gap-2 pointer-events-auto"
           >
-            <div className="flex flex-col p-1">
-              {tabs.map(tab => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => { setActiveTab(tab.id); setMenuOpen(false); }}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${isActive ? 'bg-red-500/10 text-red-500' : 'text-gray-300 hover:bg-white/5'}`}
-                  >
-                    <Icon size={18} />
-                    <span className="text-xs font-bold tracking-wider">{tab.label}</span>
-                    {tab.id === 'MAP' && activeThreatsCount > 0 && (
-                      <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-black">
-                        {activeThreatsCount}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-              <div className="h-px bg-white/10 my-1 mx-2" />
-              <button
-                onClick={() => { setAboutOpen(true); setMenuOpen(false); }}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 transition-colors"
-              >
-                <Info size={18} />
-                <span className="text-xs font-bold tracking-wider">ІНФО</span>
-              </button>
+            {/* Search Bar Container */}
+            <div className="bg-[#0a0a0a]/90 backdrop-blur-md rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-white/10 p-0.5">
+              <CitySearch />
+            </div>
+
+            {/* Menu Items Container */}
+            <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-hidden">
+              <div className="flex flex-col p-1">
+                {tabs.map(tab => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => { setActiveTab(tab.id); setMenuOpen(false); }}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${isActive ? 'bg-red-500/10 text-red-500' : 'text-gray-300 hover:bg-white/5'}`}
+                    >
+                      <Icon size={18} />
+                      <span className="text-xs font-bold tracking-wider">{tab.label}</span>
+                      {tab.id === 'MAP' && activeThreatsCount > 0 && (
+                        <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-black">
+                          {activeThreatsCount}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+                <div className="h-px bg-white/10 my-1 mx-2" />
+                <button
+                  onClick={() => { setAboutOpen(true); setMenuOpen(false); }}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 transition-colors"
+                >
+                  <Info size={18} />
+                  <span className="text-xs font-bold tracking-wider">ІНФО</span>
+                </button>
+              </div>
             </div>
           </motion.div>
         )}

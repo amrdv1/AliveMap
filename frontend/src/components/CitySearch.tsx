@@ -64,7 +64,7 @@ export default function CitySearch() {
           }}
           onFocus={() => setIsOpen(true)}
           placeholder="Пошук н.п..."
-          className="w-48 lg:w-64 bg-white/5 border border-white/10 text-white text-sm rounded-full pl-9 pr-4 py-1.5 outline-none focus:border-red-500/50 focus:bg-white/10 transition-all placeholder:text-white/40"
+          className="w-full bg-white/5 border border-white/10 text-white text-sm rounded-full pl-9 pr-4 py-1.5 outline-none focus:border-red-500/50 focus:bg-white/10 transition-all placeholder:text-white/40"
         />
         {loading && (
           <div className="absolute right-3 w-3 h-3 border-2 border-white/20 border-t-red-500 rounded-full animate-spin"></div>

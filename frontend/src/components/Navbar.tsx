@@ -79,7 +79,7 @@ export default function Navbar() {
         >
           <Maximize className="w-5 h-5" />
         </button>
-        <div className="hidden lg:block">
+        <div className="hidden lg:block w-48 lg:w-64">
           <CitySearch />
         </div>
         <div className="text-gray-300 font-mono text-lg font-medium drop-shadow-md">
