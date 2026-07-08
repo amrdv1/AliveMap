@@ -33,7 +33,7 @@ export default function MobileTopBar() {
 
   return (
     <div className="lg:hidden fixed top-0 left-0 right-0 z-50 pointer-events-none"
-         style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 12px)' }}>
+         style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 56px)' }}>
       
       <div className="mx-3 flex flex-col gap-2">
         {/* Top Row: Logo & Status & Search */}
