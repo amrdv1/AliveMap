@@ -6,6 +6,7 @@ interface GeocodeResult {
   lat: number;
   lng: number;
   region?: string;
+  isLaunchSite?: boolean;
 }
 
 let citiesCache: any[] = [];
@@ -72,6 +73,29 @@ const SLANG_MAP: Record<string, string> = {
   'шевчик': 'шевченківський'
 };
 
+const LAUNCH_SITES: Record<string, {lat: number, lng: number, region: string}> = {
+  'таганрог': { lat: 47.23, lng: 38.89, region: 'РФ (Таганрог)' },
+  'крим': { lat: 45.3, lng: 34.4, region: 'АР Крим' },
+  'курськ': { lat: 51.73, lng: 36.19, region: 'РФ (Курськ)' },
+  'курська': { lat: 51.73, lng: 36.19, region: 'РФ (Курськ)' },
+  'бєлгород': { lat: 50.59, lng: 36.58, region: 'РФ (Бєлгород)' },
+  'белгород': { lat: 50.59, lng: 36.58, region: 'РФ (Бєлгород)' },
+  'брянськ': { lat: 53.24, lng: 34.37, region: 'РФ (Брянськ)' },
+  'брянська': { lat: 53.24, lng: 34.37, region: 'РФ (Брянськ)' },
+  'єйськ': { lat: 46.71, lng: 38.27, region: 'РФ (Єйськ)' },
+  'приморсько-ахтарськ': { lat: 46.04, lng: 38.17, region: 'РФ (Приморсько-Ахтарськ)' },
+  'ахтарськ': { lat: 46.04, lng: 38.17, region: 'РФ (Приморсько-Ахтарськ)' },
+  'енгельс': { lat: 51.48, lng: 46.11, region: 'РФ (Енгельс)' },
+  'воронеж': { lat: 51.66, lng: 39.20, region: 'РФ (Воронеж)' },
+  'морозовськ': { lat: 48.35, lng: 41.82, region: 'РФ (Морозовськ)' },
+  'оленья': { lat: 68.15, lng: 33.45, region: 'РФ (Мурманськ)' },
+  'саваслейка': { lat: 55.45, lng: 42.31, region: 'РФ (Саваслейка)' },
+  'каспійськ': { lat: 44.30, lng: 47.45, region: 'РФ (Каспійськ)' },
+  'рязань': { lat: 54.62, lng: 39.73, region: 'РФ (Рязань)' },
+  'тула': { lat: 54.19, lng: 37.61, region: 'РФ (Тула)' },
+  'орел': { lat: 52.96, lng: 36.06, region: 'РФ (Орел)' }
+};
+
 export async function geocodeLocation(locationName: string, dropIfQuiet: boolean = true, contextChannel?: string): Promise<GeocodeResult | null> {
   if (citiesCache.length === 0) return null;
 
@@ -94,6 +118,17 @@ export async function geocodeLocation(locationName: string, dropIfQuiet: boolean
           lat: REGION_CENTERS[matchedRegionKey].lat,
           lng: REGION_CENTERS[matchedRegionKey].lng,
           region: REGION_CENTERS[matchedRegionKey].region
+      };
+  }
+
+  // 1.5. Check Launch Sites
+  let matchedLaunchSite = Object.keys(LAUNCH_SITES).find(key => cleanQuery.includes(key));
+  if (matchedLaunchSite) {
+      return {
+          lat: LAUNCH_SITES[matchedLaunchSite].lat,
+          lng: LAUNCH_SITES[matchedLaunchSite].lng,
+          region: LAUNCH_SITES[matchedLaunchSite].region,
+          isLaunchSite: true
       };
   }
 

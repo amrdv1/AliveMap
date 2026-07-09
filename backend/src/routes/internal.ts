@@ -55,13 +55,30 @@ router.post('/telegram-message', async (req, res) => {
                    for (const locName of aiData.locationNames) {
                       const coords = await geocodeLocation(locName, dropIfQuiet, channelName);
                       if (coords) {
-                         overrideParsedThreats.push({
-                            ...threats[0],
-                            confidence: 95,
-                            targetName: locName,
-                            targetLat: coords.lat,
-                            targetLng: coords.lng
-                         });
+                         if (coords.isLaunchSite) {
+                             const turf = require('@turf/turf');
+                             let dir = threats[0].direction;
+                             if (dir == null) {
+                                 dir = Math.round(turf.bearing(turf.point([coords.lng, coords.lat]), turf.point([31.16, 48.37])));
+                                 if (dir < 0) dir += 360;
+                             }
+                             overrideParsedThreats.push({
+                                ...threats[0],
+                                confidence: 95,
+                                targetName: locName,
+                                lat: coords.lat,
+                                lng: coords.lng,
+                                direction: dir
+                             });
+                         } else {
+                             overrideParsedThreats.push({
+                                ...threats[0],
+                                confidence: 95,
+                                targetName: locName,
+                                targetLat: coords.lat,
+                                targetLng: coords.lng
+                             });
+                         }
                       }
                    }
                }
@@ -90,6 +107,11 @@ router.post('/telegram-message', async (req, res) => {
                 if (geoResult) {
                     finalLat = geoResult.lat;
                     finalLng = geoResult.lng;
+                    if (geoResult.isLaunchSite && parsed.direction == null && finalCourse == null) {
+                        const turf = require('@turf/turf');
+                        parsed.direction = Math.round(turf.bearing(turf.point([finalLng, finalLat]), turf.point([31.16, 48.37])));
+                        if (parsed.direction < 0) parsed.direction += 360;
+                    }
                     // When it's a current location, we also set targetName to it so the UI shows "В районі: ..."
                     if (!parsed.targetName) parsed.targetName = parsed.locationName;
                 }
@@ -99,8 +121,18 @@ router.post('/telegram-message', async (req, res) => {
                 const dropIfQuiet = !['FPV', 'KAB', 'AIRCRAFT', 'RECON', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KINZHAL', 'ZIRCON', 'KALIBR', 'ISKANDER', 'KH101', 'PPO', 'INFO', 'SUMMARY'].includes(parsed.type);
                 const geoResult = await geocodeLocation(parsed.targetName, dropIfQuiet, channelName);
                 if (geoResult) {
-                    parsed.targetLat = geoResult.lat;
-                    parsed.targetLng = geoResult.lng;
+                    if (geoResult.isLaunchSite) {
+                        finalLat = geoResult.lat;
+                        finalLng = geoResult.lng;
+                        if (parsed.direction == null && finalCourse == null) {
+                            const turf = require('@turf/turf');
+                            parsed.direction = Math.round(turf.bearing(turf.point([finalLng, finalLat]), turf.point([31.16, 48.37])));
+                            if (parsed.direction < 0) parsed.direction += 360;
+                        }
+                    } else {
+                        parsed.targetLat = geoResult.lat;
+                        parsed.targetLng = geoResult.lng;
+                    }
                 }
             }
 
