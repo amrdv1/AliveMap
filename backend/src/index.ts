@@ -118,12 +118,7 @@ server.listen(PORT, async () => {
       const idsToArchive: string[] = [];
       
       for (const t of activeThreats) {
-        if (t.locations.length === 0) {
-            idsToArchive.push(t.id);
-            continue;
-        }
-        
-        const latestTime = t.locations[0].time.getTime();
+        const latestTime = t.locations.length > 0 ? t.locations[0].time.getTime() : t.updatedAt.getTime();
         const isMissile = ['MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR'].includes(t.type);
         
         const ageInMs = now - latestTime;
