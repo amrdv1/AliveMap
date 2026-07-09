@@ -34,39 +34,21 @@ export default function SummaryView({ isMobile }: { isMobile?: boolean }) {
       <div className={isMobile ? "w-full max-w-5xl flex flex-col gap-4" : "w-full max-w-4xl flex flex-col gap-6"}>
         
         {/* Header */}
-        {isMobile ? (
-          <div className="relative overflow-hidden bg-gradient-to-r from-red-900/20 via-black/40 to-black/40 backdrop-blur-3xl border border-white/5 rounded-[24px] p-5 flex flex-col justify-between items-center gap-4 shadow-[0_16px_40px_rgba(0,0,0,0.5)]">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 rounded-full blur-[80px] pointer-events-none" />
-            <div className="relative z-10 flex flex-col items-center text-center w-full">
-              <h1 className="text-xl font-black text-white uppercase tracking-widest mb-1 flex flex-col items-center gap-2">
-                <span className="truncate w-full">ОПЕРАТИВНЕ ЗВЕДЕННЯ</span>
-              </h1>
-              <p className="text-white/40 font-bold tracking-wider text-[11px]">
-                Станом на {new Date().toLocaleTimeString('uk-UA')}
-              </p>
-            </div>
-            <div className="relative z-10 bg-red-500/10 border border-red-500/20 px-6 py-3 rounded-[20px] text-center min-w-[140px] shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_32px_rgba(239,68,68,0.2)]">
-              <div className="text-3xl font-black text-red-500 mb-1 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)] tracking-tighter">{totalActiveQuantity}</div>
-              <div className="text-[10px] font-black text-red-400/90 uppercase tracking-[0.2em]">Активних цілей</div>
-            </div>
+        <div className={`bg-gradient-to-r from-white/[0.05] to-transparent backdrop-blur-3xl border border-white/10 rounded-3xl ${isMobile ? 'p-5 flex-col items-center text-center gap-4' : 'p-8 flex-row items-center justify-between gap-6'} flex shadow-[0_8px_32px_rgba(0,0,0,0.5)]`}>
+          <div>
+            <h1 className={`${isMobile ? 'text-xl justify-center' : 'text-3xl'} font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3`}>
+              <ShieldAlert className="text-red-500 w-8 h-8" />
+              Оперативне Зведення
+            </h1>
+            <p className="text-gray-400 font-medium tracking-wide">
+              Поточна ситуація в повітряному просторі України станом на {new Date().toLocaleTimeString('uk-UA')}
+            </p>
           </div>
-        ) : (
-          <div className="bg-gradient-to-r from-white/[0.05] to-transparent backdrop-blur-3xl border border-white/10 rounded-3xl p-8 flex justify-between items-center gap-6 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
-            <div>
-              <h1 className="text-3xl font-black text-white uppercase tracking-wider mb-2 flex items-center gap-3">
-                <ShieldAlert className="text-red-500 w-8 h-8" />
-                Оперативне Зведення
-              </h1>
-              <p className="text-gray-400 font-medium tracking-wide">
-                Поточна ситуація в повітряному просторі України станом на {new Date().toLocaleTimeString('uk-UA')}
-              </p>
-            </div>
-            <div className="bg-red-500/10 border border-red-500/20 px-6 py-4 rounded-2xl text-center min-w-[150px]">
-              <div className="text-3xl font-black text-red-500 mb-1">{totalActiveQuantity}</div>
-              <div className="text-xs font-bold text-red-400/80 uppercase tracking-widest">Активних цілей</div>
-            </div>
+          <div className="bg-red-500/10 border border-red-500/20 px-6 py-4 rounded-2xl text-center min-w-[150px]">
+            <div className="text-3xl font-black text-red-500 mb-1">{totalActiveQuantity}</div>
+            <div className="text-xs font-bold text-red-400/80 uppercase tracking-widest">Активних цілей</div>
           </div>
-        )}
+        </div>
 
         {/* Detailed Stats */}
         <div className={`grid ${isMobile ? 'grid-cols-2 gap-4' : 'grid-cols-6 gap-4'}`}>
@@ -143,34 +125,6 @@ export default function SummaryView({ isMobile }: { isMobile?: boolean }) {
 }
 
 function StatCard({ title, count, color, icon, isMobile }: { title: string, count: number, color: string, icon: string, isMobile?: boolean }) {
-  if (isMobile) {
-    const colorMap: Record<string, { text: string, bg: string, border: string, glow: string }> = {
-      'bg-red-500': { text: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20', glow: 'shadow-[0_0_30px_rgba(239,68,68,0.15)]' },
-      'bg-orange-500': { text: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20', glow: 'shadow-[0_0_30px_rgba(249,115,22,0.15)]' },
-      'bg-blue-500': { text: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', glow: 'shadow-[0_0_30px_rgba(59,130,246,0.15)]' },
-      'bg-yellow-500': { text: 'text-yellow-500', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20', glow: 'shadow-[0_0_30px_rgba(234,179,8,0.15)]' },
-      'bg-gray-500': { text: 'text-gray-400', bg: 'bg-white/5', border: 'border-white/10', glow: '' },
-      'bg-zinc-500': { text: 'text-zinc-400', bg: 'bg-white/5', border: 'border-white/10', glow: '' },
-    };
-    const style = colorMap[color] || colorMap['bg-gray-500'];
-    const isActive = count > 0;
-    return (
-      <motion.div 
-        whileHover={{ scale: 1.02 }} 
-        className={`relative overflow-hidden ${isActive ? style.bg : 'bg-[#0a0a0a]/40'} backdrop-blur-2xl border ${isActive ? style.border : 'border-white/[0.02]'} rounded-[20px] p-4 flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer ${isActive ? style.glow : 'shadow-sm'}`}
-      >
-        {isActive && <div className={`absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none`} />}
-        <div className={`relative z-10 w-10 h-10 rounded-[12px] flex items-center justify-center text-xl ${isActive ? style.bg : 'bg-transparent'} border ${isActive ? style.border : 'border-transparent'} shadow-inner transition-transform duration-500 hover:scale-110`}>
-          <span className={isActive ? 'drop-shadow-lg' : 'opacity-40 grayscale-0 brightness-75'}>{icon}</span>
-        </div>
-        <div className="relative z-10 text-center">
-          <div className={`text-2xl font-black tracking-tighter mb-1 ${isActive ? style.text : 'text-white/40'}`}>{count}</div>
-          <div className={`text-[9px] font-black uppercase tracking-[0.1em] ${isActive ? 'text-white/80' : 'text-white/50'}`}>{title}</div>
-        </div>
-      </motion.div>
-    );
-  }
-
   const colorMap: Record<string, { text: string, bg: string, border: string, from: string }> = {
     'bg-red-500': { text: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20', from: 'from-red-500/10' },
     'bg-orange-500': { text: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20', from: 'from-orange-500/10' },
@@ -185,18 +139,20 @@ function StatCard({ title, count, color, icon, isMobile }: { title: string, coun
   return (
     <motion.div 
       whileHover={{ scale: 1.03, y: -2 }} 
-      className="bg-gradient-to-b from-white/[0.04] to-transparent backdrop-blur-3xl border border-white/10 rounded-3xl p-5 shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center gap-4 relative overflow-hidden group cursor-pointer"
+      className={`bg-gradient-to-b from-white/[0.04] to-transparent backdrop-blur-3xl border border-white/10 rounded-3xl ${isMobile ? 'p-3 gap-2' : 'p-5 gap-4'} shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center relative overflow-hidden group cursor-pointer`}
     >
       <div className={`absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b ${style.from} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`} />
       
-      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl ${style.bg} border ${style.border} shadow-inner z-10 transition-transform duration-300 group-hover:scale-110`}>
+      <div className={`${isMobile ? 'w-10 h-10 rounded-xl text-xl' : 'w-14 h-14 rounded-2xl text-2xl'} flex items-center justify-center ${style.bg} border ${style.border} shadow-inner z-10 transition-transform duration-300 group-hover:scale-110`}>
         {icon}
       </div>
       
       <div className="text-center z-10">
-        <div className={`text-3xl font-black ${style.text} drop-shadow-md mb-1`}>{count}</div>
-        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] group-hover:text-white transition-colors">{title}</div>
+        <div className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-black ${style.text} drop-shadow-md mb-1`}>{count}</div>
+        <div className={`text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] group-hover:text-white transition-colors`}>{title}</div>
       </div>
     </motion.div>
   );
 }
+
+
