@@ -120,11 +120,14 @@ server.listen(PORT, async () => {
       for (const t of activeThreats) {
         const latestTime = t.locations.length > 0 ? t.locations[0].time.getTime() : t.updatedAt.getTime();
         const isMissile = ['MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR'].includes(t.type);
+        const hasMapaData = !!t.externalId;
         
         const ageInMs = now - latestTime;
-        if (isMissile && ageInMs > 15 * 60 * 1000) {
+        if (hasMapaData && ageInMs > 15 * 60 * 1000) {
+            idsToArchive.push(t.id); // MAPA ghosts fade out after 15 mins
+        } else if (isMissile && ageInMs > 15 * 60 * 1000) {
             idsToArchive.push(t.id);
-        } else if (!isMissile && ageInMs > 45 * 60 * 1000) {
+        } else if (!hasMapaData && !isMissile && ageInMs > 45 * 60 * 1000) {
             idsToArchive.push(t.id);
         }
       }

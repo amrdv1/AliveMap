@@ -46,6 +46,11 @@ export async function startMapaWorker(io: Server) {
         const speed = obj.speed_kmh || null;
         const course = heading || obj.heading || null;
 
+        // Skip "ghosts" or translucent targets (older than 15 minutes)
+        if (Date.now() - timestamp.getTime() > 15 * 60 * 1000) {
+           continue;
+        }
+
         // First, try to find the exact threat by externalId
         let matchedThreat: any = await prisma.threatObject.findUnique({
            where: { externalId: String(obj.id) },
