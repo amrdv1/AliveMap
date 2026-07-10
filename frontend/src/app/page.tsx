@@ -227,46 +227,43 @@ export default function Home() {
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md" onClick={() => setAboutOpen(false)}
         >
           <motion.div 
-            initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+            initial={{ opacity: 0, scale: 0.95, y: 10 }} 
             animate={{ opacity: 1, scale: 1, y: 0 }} 
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="bg-[#010a1b] border border-gray-800 rounded-3xl p-8 w-[90%] md:w-[550px] shadow-[0_0_50px_rgba(0,0,0,1)] relative overflow-hidden" onClick={e => e.stopPropagation()}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            transition={{ duration: 0.2 }}
+            className="bg-zinc-950 border border-white/10 rounded-2xl p-6 w-[90%] md:w-[480px] shadow-2xl relative" onClick={e => e.stopPropagation()}
           >
-            {/* Background glowing effects */}
-            <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-red-500/10 to-transparent pointer-events-none"></div>
-            
-            <button className="absolute top-5 right-5 text-gray-500 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-colors" onClick={() => setAboutOpen(false)}>
+            <button className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors" onClick={() => setAboutOpen(false)}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-red-500/10 rounded-2xl border border-red-500/20 flex items-center justify-center w-14 h-14">
-                <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
+              <div className="w-10 h-10 flex items-center justify-center">
+                <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain opacity-90" />
               </div>
               <div>
-                <h2 className="text-2xl font-black text-white uppercase tracking-wider">ALIVEMAP</h2>
-                <p className="text-red-400 text-sm font-bold tracking-widest uppercase">Система Моніторингу</p>
+                <h2 className="text-xl font-bold text-white tracking-wide">ALIVEMAP</h2>
+                <p className="text-gray-400 text-xs tracking-wider uppercase">Система Моніторингу</p>
               </div>
             </div>
             
-            <div className="space-y-4 text-sm text-gray-300 font-medium">
-              <div className="flex gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
-                <ShieldAlert className="w-6 h-6 text-orange-400 shrink-0" />
-                <p><strong className="text-white">Збір даних:</strong> Система автоматично моніторить десятки Telegram-каналів ОВА та перевірених джерел.</p>
+            <div className="space-y-6 text-sm text-gray-300">
+              <div className="flex gap-4">
+                <ShieldAlert className="w-5 h-5 text-gray-400 shrink-0 mt-0.5" />
+                <p><strong className="text-white font-semibold">Збір даних:</strong> Система автоматично моніторить десятки Telegram-каналів ОВА та перевірених джерел.</p>
               </div>
-              <div className="flex gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
-                <Cpu className="w-6 h-6 text-blue-400 shrink-0" />
-                <p><strong className="text-white">ШІ-аналіз:</strong> Кожне повідомлення обробляється штучним інтелектом (Google Gemini) для визначення типу та вектора загрози.</p>
+              <div className="flex gap-4">
+                <Cpu className="w-5 h-5 text-gray-400 shrink-0 mt-0.5" />
+                <p><strong className="text-white font-semibold">ШІ-аналіз:</strong> Кожне повідомлення обробляється штучним інтелектом (Google Gemini) для визначення типу та вектора загрози.</p>
               </div>
-              <div className="flex gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
-                <MapIcon className="w-6 h-6 text-green-400 shrink-0" />
-                <p><strong className="text-white">Трекінг:</strong> Маркери плавно переміщуються по карті в реальному часі на основі курсу та швидкості цілей.</p>
+              <div className="flex gap-4">
+                <MapIcon className="w-5 h-5 text-gray-400 shrink-0 mt-0.5" />
+                <p><strong className="text-white font-semibold">Трекінг:</strong> Маркери плавно переміщуються по карті в реальному часі на основі курсу та швидкості цілей.</p>
               </div>
             </div>
             
-            <div className="mt-8 pt-5 border-t border-gray-800/50 flex justify-between items-center text-xs font-semibold text-gray-600 uppercase tracking-widest">
-              <span>ALIVEMAP v1.0.0</span>
+            <div className="mt-8 pt-4 border-t border-white/10 flex justify-between items-center text-[10px] text-gray-500 uppercase tracking-widest">
+              <span>v1.0.0</span>
               <span>Слава Україні</span>
             </div>
           </motion.div>
