@@ -30,7 +30,7 @@ export default function Navbar() {
   };
 
   return (
-    <div className="absolute top-0 left-0 right-0 h-[72px] bg-black/40 backdrop-blur-2xl flex items-center justify-between px-6 z-30 border-b border-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.3)]">
+    <div className="absolute top-4 left-4 right-4 h-[64px] bg-[#0a0a0a]/85 backdrop-blur-3xl flex items-center justify-between px-6 z-30 border border-white/[0.05] shadow-[0_8px_32px_rgba(0,0,0,0.5)] rounded-full">
       {/* Logo */}
       <div className="flex items-center gap-3 pl-2">
         <div className="relative w-12 h-12 flex items-center justify-center">
