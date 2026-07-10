@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, MapPin } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
-export default function CitySearch() {
+export default function CitySearch({ onSelect, className }: { onSelect?: (loc: any) => void; className?: string } = {}) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -49,6 +49,7 @@ export default function CitySearch() {
     setActiveTab('MAP');
     setQuery('');
     setIsOpen(false);
+    if (onSelect) onSelect(city);
   };
 
   return (
@@ -63,8 +64,8 @@ export default function CitySearch() {
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
-          placeholder="Пошук н.п..."
-          className="w-full bg-white/5 border border-white/10 text-white text-sm rounded-full pl-9 pr-4 py-1.5 outline-none focus:border-red-500/50 focus:bg-white/10 transition-all placeholder:text-white/40"
+          placeholder="Пошук міста..."
+          className={className || "w-full bg-black/40 text-white text-sm rounded-xl pl-10 pr-4 py-3 outline-none border border-white/10 focus:border-red-500/50 focus:bg-black/60 transition-all placeholder:text-gray-500"}
         />
         {loading && (
           <div className="absolute right-3 w-3 h-3 border-2 border-white/20 border-t-red-500 rounded-full animate-spin"></div>
