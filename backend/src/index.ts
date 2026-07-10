@@ -102,6 +102,12 @@ server.listen(PORT, async () => {
   startNeptunWorker(io); // Selective Neptun integration
   startBotWorker(); // Telegram Notification Bot
   
+  // Clear any residual hallucinated threats from the disabled telegram-parser
+  prisma.threatObject.deleteMany({
+      where: { externalId: null }
+  }).then(res => console.log(`[Cleanup] Cleared ${res.count} non-Neptun threats.`))
+    .catch(console.error);
+  
   // Auto-archive stale targets based on type
   setInterval(async () => {
     try {
