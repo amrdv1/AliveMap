@@ -188,12 +188,12 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
             <div 
               key={i}
               style={{ 
-                transform: `translateY(${i * 12}px) scale(${Math.max(0.5, 1 - i * 0.05)})`,
+                transform: `translateY(${i * 25}px)`,
                 filter: `drop-shadow(0 0 4px ${ringColor})`,
-                opacity: Math.max(0.2, 1 - i * 0.1),
+                opacity: 1,
                 zIndex: 20 - i
               }} 
-              className="absolute w-7 h-7 text-white"
+              className="absolute w-7 h-7 text-white drop-shadow-md"
               dangerouslySetInnerHTML={{ __html: svgIcon }}
             />
           ))}
