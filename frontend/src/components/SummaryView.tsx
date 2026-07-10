@@ -30,8 +30,11 @@ export default function SummaryView({ isMobile }: { isMobile?: boolean }) {
   const totalActiveQuantity = activeThreats.reduce((acc, t) => acc + (t.quantity || 1), 0);
 
   return (
-    <div className={isMobile ? "absolute inset-0 z-20 bg-[#050505]/95 backdrop-blur-2xl pt-20 px-3 pb-20 overflow-y-auto custom-scrollbar flex justify-center" : "absolute inset-0 z-20 bg-black/40 backdrop-blur-md pt-24 px-4 pb-24 overflow-y-auto custom-scrollbar flex justify-center"}>
-      <div className={isMobile ? "w-full max-w-5xl flex flex-col gap-4" : "w-full max-w-4xl flex flex-col gap-6"}>
+    <div 
+      className={isMobile ? "absolute inset-0 z-20 bg-[#050505]/95 backdrop-blur-2xl px-3 pb-20 overflow-y-auto custom-scrollbar flex flex-col" : "absolute inset-0 z-20 bg-black/40 backdrop-blur-md pt-24 px-4 pb-24 overflow-y-auto custom-scrollbar flex justify-center"}
+      style={isMobile ? { paddingTop: 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 70px)' } : undefined}
+    >
+      <div className={isMobile ? "w-full max-w-5xl flex flex-col gap-4 mx-auto pb-10" : "w-full max-w-4xl flex flex-col gap-6"}>
         
         {/* Header */}
         <div className={`bg-gradient-to-r from-white/[0.05] to-transparent backdrop-blur-3xl border border-white/10 rounded-3xl ${isMobile ? 'p-5 flex-col items-center text-center gap-4' : 'p-8 flex-row items-center justify-between gap-6'} flex shadow-[0_8px_32px_rgba(0,0,0,0.5)]`}>
