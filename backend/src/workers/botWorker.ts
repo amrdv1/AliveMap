@@ -25,21 +25,29 @@ export async function startBotWorker() {
 
   console.log("Personal Telegram Notification Bot started...");
 
-  bot.onText(/\/start/, (msg) => {
-    const chatId = msg.chat.id;
-
-    // Create a keyboard chunked by 2
+  const getKeyboard = async (chatId: string) => {
+    const subs = await prisma.telegramSubscriber.findMany({ where: { chatId } });
+    const subscribedRegions = new Set(subs.map(s => s.region));
+    
     const keyboard = [];
     for (let i = 0; i < REGIONS.length; i += 2) {
       const row = [];
-      row.push({ text: REGIONS[i], callback_data: `region:${REGIONS[i]}` });
+      const r1 = REGIONS[i];
+      row.push({ text: `${subscribedRegions.has(r1) ? '✅ ' : ''}${r1}`, callback_data: `region:${r1}` });
       if (i + 1 < REGIONS.length) {
-        row.push({ text: REGIONS[i + 1], callback_data: `region:${REGIONS[i + 1]}` });
+        const r2 = REGIONS[i + 1];
+        row.push({ text: `${subscribedRegions.has(r2) ? '✅ ' : ''}${r2}`, callback_data: `region:${r2}` });
       }
       keyboard.push(row);
     }
+    return keyboard;
+  };
 
-    bot!.sendMessage(chatId, "👋 **Привіт! Я — твій персональний радар-помічник.** 📡\n\n🎯 **Обери свій регіон** нижче для отримання сповіщень про повітряні тривоги.\n\n🔥 **СУПЕР-ФІЧА: Розумні Сповіщення** 🔥\nНадішли мені свою геолокацію (скріпкою 📎 -> Розташування), і я попереджатиму тебе **ТІЛЬКИ ТОДІ**, коли ракета чи шахед летить **ПРЯМО НА ТЕБЕ** (навіть якщо вони зараз в іншій області)!", {
+  bot.onText(/\/start/, async (msg) => {
+    const chatId = msg.chat.id.toString();
+    const keyboard = await getKeyboard(chatId);
+
+    bot!.sendMessage(chatId, "👋 **Привіт! Я — твій персональний радар-помічник.**\n\nОбери регіони нижче для отримання сповіщень про повітряні тривоги.\n\n📍 **Розумні сповіщення:**\nНадішли мені свою геолокацію (скріпка 📎 -> Розташування), і я попереджатиму тебе **ТІЛЬКИ ТОДІ**, коли ракета чи шахед летить у твоєму напрямку (радіус до 20 км)!", {
       parse_mode: 'Markdown',
       reply_markup: {
         inline_keyboard: keyboard
@@ -76,7 +84,6 @@ export async function startBotWorker() {
       const region = data.split(':')[1];
 
       try {
-        // Upsert subscription
         const existing = await prisma.telegramSubscriber.findUnique({
           where: {
             chatId_region: {
@@ -86,20 +93,32 @@ export async function startBotWorker() {
           }
         });
 
-        if (!existing) {
+        if (existing) {
+          await prisma.telegramSubscriber.delete({
+            where: { id: existing.id }
+          });
+          bot!.answerCallbackQuery(query.id, { text: `❌ Відписано від: ${region}` });
+        } else {
           await prisma.telegramSubscriber.create({
             data: {
               chatId,
               region
             }
           });
+          bot!.answerCallbackQuery(query.id, { text: `✅ Підписано на: ${region}` });
         }
 
-        bot!.answerCallbackQuery(query.id, { text: `✅ Підписку оформлено: ${region}` });
-        bot!.sendMessage(chatId, `✅ **Підписка успішна!**\n\n📌 Регіон: **${region}**\n\nТепер ви миттєво отримуватимете повідомлення про початок та відбій тривог у цьому регіоні! 🚨`, { parse_mode: "Markdown" });
+        const newKeyboard = await getKeyboard(chatId);
+        
+        bot!.editMessageReplyMarkup({ inline_keyboard: newKeyboard }, {
+          chat_id: chatId,
+          message_id: query.message.message_id
+        }).catch(err => {
+            // Ignore message is not modified errors
+        });
       } catch (e) {
-        console.error("Failed to subscribe user", e);
-        bot!.answerCallbackQuery(query.id, { text: "Помилка при підписці." });
+        console.error("Failed to toggle subscription", e);
+        bot!.answerCallbackQuery(query.id, { text: "Помилка." });
       }
     }
   });
