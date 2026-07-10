@@ -147,7 +147,35 @@ export async function startNeptunWorker(io: Server) {
            
            io.emit('threat:new', newThreat);
         }
+       }
+
+      // STRICT SYNC: Archive any active targets in our DB that are NO LONGER active in Neptun
+      const activeNeptunIds = objects
+         .filter((o: any) => o.status === 'active' && (Date.now() - new Date(o.updatedAt).getTime() <= 15 * 60 * 1000))
+         .map((o: any) => String(o.id));
+
+      const staleThreats = await prisma.threatObject.findMany({
+          where: {
+              status: 'ACTIVE',
+              externalId: { not: null, notIn: activeNeptunIds }
+          }
+      });
+
+      if (staleThreats.length > 0) {
+          const staleIds = staleThreats.map((t: any) => t.id);
+          await prisma.threatObject.updateMany({
+              where: { id: { in: staleIds } },
+              data: { status: 'ARCHIVED' }
+          });
+          
+          const { sendSmartAllClear } = require('./botWorker');
+          for (const id of staleIds) {
+              sendSmartAllClear(id);
+          }
+          io.emit('threats:refresh');
+          console.log(`[Neptun Sync] Auto-archived ${staleIds.length} threats no longer active in Neptun.`);
       }
+
     } catch (error: any) {
       console.error("Error fetching NEPTUN API (can be ignored if down):", error.message);
     }
