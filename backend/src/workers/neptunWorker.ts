@@ -222,12 +222,14 @@ export async function startNeptunWorker(io: Server) {
            else if (t.includes('ракет') || t.includes('балістик') || t.includes('кинджал') || t.includes('іскандер')) type = 'MISSILE';
            else if (t.includes('злет') || t.includes('авіація') || t.includes('міг-') || t.includes('борти') || t.includes('авіа')) type = 'AIRCRAFT';
            else if (t.includes('ppo') || t.includes('ппо') || t.includes('вибух')) type = 'PPO';
+           else if (t.includes('fpv') || t.includes('фпв') || t.includes('ланцет')) type = 'FPV';
+           else if (t.includes('zala') || t.includes('зала') || t.includes('rozvid') || t.includes('розвідник') || t.includes('орлан') || t.includes('supercam')) type = 'RECON';
            
            let linkedThreatId: string | null = null;
            let linkedLat: number | null = null;
            let linkedLng: number | null = null;
 
-           if (['DRONE', 'KAB', 'MISSILE', 'AIRCRAFT', 'BALLISTIC_MISSILE', 'CRUISE_MISSILE'].includes(type)) {
+           if (['DRONE', 'KAB', 'MISSILE', 'AIRCRAFT', 'BALLISTIC_MISSILE', 'CRUISE_MISSILE', 'FPV', 'RECON'].includes(type)) {
                try {
                    const aiData = await extractWithAI(msg.text);
                    if (aiData) {

@@ -41,7 +41,7 @@ def detect_threat_type(text: str) -> Optional[str]:
     if re.search(r'(балістик|баллистик)', t): return 'BALLISTIC_MISSILE'
     if re.search(r'(ракет|missile)', t): return 'MISSILE'
     if re.search(r'авіабомб', t) or re.search(r' (каб|каби|кабів|фаб|фаби|бомб|бомби|бомбу) ', t_padded): return 'KAB'
-    if re.search(r'(fpv|fрv|фпв|фпві)', t): return 'FPV'
+    if re.search(r'(fpv|fрv|фпв|фпві|ланцет|lancet)', t): return 'FPV'
     if re.search(r'(молнія|блискавка|molniya)', t): return 'MOLNIYA'
     if re.search(r'(гербер|імітатор|пародія|decoy|parodi|gerbera)', t): return 'DECOY'
     if re.search(r'(розвідник|орлан|zala|зала|supercam|suрercam|суперкам|recon)', t): return 'RECON'
