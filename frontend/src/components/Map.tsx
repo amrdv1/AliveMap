@@ -182,20 +182,15 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
        }}
     >
       <div className="relative w-10 h-10 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform">
-        {threat.quantity && threat.quantity > 1 && (
-          <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded px-1 z-30 border border-red-900 shadow-[0_0_5px_#ef4444]">
-            x{threat.quantity}
-          </div>
-        )}
         <div className="radar-pulse" style={{ '--ring-color': ringColor + '40' } as any}></div>
         <div className="absolute inset-0 flex items-center justify-center" style={{ transform: `rotate(${rot}deg)` }}>
-          {Array.from({ length: Math.min(threat.quantity || 1, 3) }).map((_, i) => (
+          {Array.from({ length: Math.min(threat.quantity || 1, 15) }).map((_, i) => (
             <div 
               key={i}
               style={{ 
-                transform: `translateY(${i * 10}px) scale(${1 - i * 0.1})`,
+                transform: `translateY(${i * 12}px) scale(${Math.max(0.5, 1 - i * 0.05)})`,
                 filter: `drop-shadow(0 0 4px ${ringColor})`,
-                opacity: 1 - (i * 0.25),
+                opacity: Math.max(0.2, 1 - i * 0.1),
                 zIndex: 20 - i
               }} 
               className="absolute w-7 h-7 text-white"
