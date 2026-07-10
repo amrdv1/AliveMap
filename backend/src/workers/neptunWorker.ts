@@ -3,48 +3,48 @@ import { Server } from 'socket.io';
 import prisma from '../db';
 import { ReportType, ReportStatus, SourceType } from '@prisma/client';
 
-const MAPA_API_URL = 'https://mapa.ua/api/v1/current';
+const NEPTUN_API_URL = 'https://neptun.in.ua/api/v1/threats';
 
-// Maps MAPA kind -> our ReportType
 const KIND_MAPPING: Record<string, ReportType> = {
-  'drone_piston': ReportType.DRONE,
-  'drone_jet': ReportType.DRONE,
-  'missile_cruise': ReportType.CRUISE_MISSILE,
-  'missile_ballistic': ReportType.BALLISTIC_MISSILE,
-  'bomb': ReportType.KAB,
+  'uav': ReportType.DRONE,
+  'recon': ReportType.RECON,
+  'missile': ReportType.CRUISE_MISSILE,
+  'ballistic': ReportType.BALLISTIC_MISSILE,
+  'kab': ReportType.KAB,
+  'mig31k': ReportType.AIRCRAFT,
+  'unknown': ReportType.UNKNOWN,
   'default': ReportType.DRONE
 };
 
-export async function startMapaWorker(io: Server) {
-  let source = await prisma.source.findFirst({ where: { name: 'MAPA.UA API' } });
+export async function startNeptunWorker(io: Server) {
+  let source = await prisma.source.findFirst({ where: { name: 'NEPTUN API' } });
   if (!source) {
     source = await prisma.source.create({
-      data: { name: 'MAPA.UA API', type: SourceType.API }
+      data: { name: 'NEPTUN API', type: SourceType.API }
     });
   }
 
-  console.log("MAPA.UA Worker started (Selective Correlation Mode)...");
+  console.log("NEPTUN API Worker started (Selective Correlation Mode)...");
 
-  const fetchMapaData = async () => {
+  const fetchNeptunData = async () => {
     try {
-      const { data } = await axios.get(MAPA_API_URL, { timeout: 10000 });
-      if (!data || !data.objects) return;
+      const { data } = await axios.get(NEPTUN_API_URL, { timeout: 10000 });
+      if (!data || !data.threats) return;
 
-      const objects = data.objects;
+      const objects = data.threats;
 
       for (const obj of objects) {
         if (obj.status !== 'active') continue;
 
-        const threatType = KIND_MAPPING[obj.kind] || KIND_MAPPING['default'];
+        const threatType = KIND_MAPPING[obj.type] || KIND_MAPPING['default'];
         
-        // Use the last coordinate in the trail as the current, most accurate location
-        const trail = obj.trail || [];
-        const currentLoc = trail.length > 0 ? trail[trail.length - 1] : [obj.lon, obj.lat, Math.floor(Date.now()/1000), obj.heading];
-        const [lon, lat, ts, heading] = currentLoc;
-        const timestamp = new Date(ts * 1000);
+        const lon = obj.lon;
+        const lat = obj.lat;
+        const timestamp = new Date(obj.updatedAt);
+        const heading = obj.heading;
 
-        const speed = obj.speed_kmh || null;
-        const course = heading || obj.heading || null;
+        const speed = obj.velocity?.speedKmh || null;
+        const course = heading || null;
 
         // Skip "ghosts" or translucent targets (older than 15 minutes)
         if (Date.now() - timestamp.getTime() > 15 * 60 * 1000) {
@@ -90,13 +90,13 @@ export async function startMapaWorker(io: Server) {
         }
 
         if (matchedThreat) {
-          // Check if we already have this exact timestamp from MAPA to avoid spamming
-          const lastMapaLoc = await prisma.threatLocation.findFirst({
+          // Check if we already have this exact timestamp from NEPTUN to avoid spamming
+          const lastNeptunLoc = await prisma.threatLocation.findFirst({
             where: { threatObjectId: matchedThreat.id, sourceId: source!.id },
             orderBy: { time: 'desc' }
           });
 
-          if (!lastMapaLoc || lastMapaLoc.time.getTime() < timestamp.getTime()) {
+          if (!lastNeptunLoc || lastNeptunLoc.time.getTime() < timestamp.getTime()) {
              const updatedThreat = await prisma.threatObject.update({
                 where: { id: matchedThreat.id },
                 data: {
@@ -119,7 +119,7 @@ export async function startMapaWorker(io: Server) {
               io.emit('threat:update', updatedThreat);
           }
         } else {
-           // We create new threats from MAPA.UA directly to match external maps
+           // We create new threats from NEPTUN directly to match external maps
            const newThreat = await prisma.threatObject.create({
              data: {
                type: threatType,
@@ -144,12 +144,12 @@ export async function startMapaWorker(io: Server) {
         }
       }
     } catch (error: any) {
-      console.error("Error fetching MAPA.UA API (can be ignored if down):", error.message);
+      console.error("Error fetching NEPTUN API (can be ignored if down):", error.message);
     }
   };
 
-  fetchMapaData();
-  setInterval(fetchMapaData, 20000); // Poll every 20 seconds
+  fetchNeptunData();
+  setInterval(fetchNeptunData, 20000); // Poll every 20 seconds
 }
 
 function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {

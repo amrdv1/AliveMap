@@ -15,7 +15,7 @@ import webhookRoutes from './routes/webhooks';
 import internalRoutes from './routes/internal';
 
 import { startAlertsWorker } from './workers/alertsWorker';
-import { startMapaWorker } from './workers/mapaWorker';
+import { startNeptunWorker } from './workers/neptunWorker';
 import { startBotWorker } from './workers/botWorker';
 
 dotenv.config();
@@ -99,7 +99,7 @@ server.listen(PORT, async () => {
   
   // Start remaining background workers
   startAlertsWorker(io);
-  startMapaWorker(io); // Selective Mapa.ua integration
+  startNeptunWorker(io); // Selective Neptun integration
   startBotWorker(); // Telegram Notification Bot
   
   // Auto-archive stale targets based on type
@@ -119,15 +119,15 @@ server.listen(PORT, async () => {
       
       for (const t of activeThreats) {
         const latestTime = t.locations.length > 0 ? t.locations[0].time.getTime() : t.updatedAt.getTime();
-        const isMissile = ['MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR'].includes(t.type);
-        const hasMapaData = !!t.externalId;
-        
         const ageInMs = now - latestTime;
-        if (hasMapaData && ageInMs > 15 * 60 * 1000) {
-            idsToArchive.push(t.id); // MAPA ghosts fade out after 15 mins
-        } else if (isMissile && ageInMs > 15 * 60 * 1000) {
+        const hasNeptunData = !!t.externalId;
+        const isMissile = t.type.includes('MISSILE') || t.type === 'KINZHAL' || t.type === 'ZIRCON' || t.type === 'ISKANDER' || t.type === 'KALIBR';
+
+        if (hasNeptunData && ageInMs > 15 * 60 * 1000) {
+            idsToArchive.push(t.id); // NEPTUN ghosts fade out after 15 mins
+        } else if (!hasNeptunData && isMissile && ageInMs > 15 * 60 * 1000) {
             idsToArchive.push(t.id);
-        } else if (!hasMapaData && !isMissile && ageInMs > 45 * 60 * 1000) {
+        } else if (!hasNeptunData && !isMissile && ageInMs > 45 * 60 * 1000) {
             idsToArchive.push(t.id);
         }
       }

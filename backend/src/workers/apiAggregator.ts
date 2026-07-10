@@ -8,13 +8,13 @@ const ALERTS_IN_UA_TOKEN = process.env.ALERTS_IN_UA_TOKEN || '';
 const JAAM_API_KEY = process.env.JAAM_API_KEY || '';
 
 export async function startApiAggregator(io: Server) {
-  console.log('Starting External API Aggregator (JAAM, Alerts.in.ua, Mapa.ua)');
+  console.log('Starting External API Aggregator (JAAM, Alerts.in.ua, Neptun)');
 
   setInterval(async () => {
     try {
       await pollAlertsInUa(io);
       await pollJaam(io);
-      await pollMapaUa(io);
+      // await pollNeptun(io); // Now handled by neptunWorker
     } catch (e) {
       console.error('API Aggregator error:', e);
     }
@@ -38,6 +38,6 @@ async function pollJaam(io: Server) {
     // JAAM is usually private, scaffold implementation
 }
 
-async function pollMapaUa(io: Server) {
-    // mapa.ua json polling (like the siren.pp.ua one we had)
+async function pollNeptun(io: Server) {
+    // handled by neptunWorker
 }
