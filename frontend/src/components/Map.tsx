@@ -92,6 +92,32 @@ const heatmapLayer = {
   }
 } as any;
 
+function getStaggeredOffset(index: number, course: number, lat: number) {
+    if (index === 0) return { dLat: 0, dLng: 0 };
+    
+    const row = Math.ceil(index / 2);
+    const isLeft = index % 2 !== 0;
+    
+    const backKm = row * 3;
+    const sideKm = (isLeft ? -1 : 1) * row * 1.5;
+    
+    const radCourse = course * Math.PI / 180;
+    
+    const dxBack = -backKm * Math.sin(radCourse);
+    const dyBack = -backKm * Math.cos(radCourse);
+    
+    const dxSide = sideKm * Math.cos(radCourse);
+    const dySide = -sideKm * Math.sin(radCourse);
+    
+    const totalDx = dxBack + dxSide;
+    const totalDy = dyBack + dySide;
+    
+    const dLat = totalDy * 0.009;
+    const dLng = totalDx * 0.009 / Math.cos(lat * Math.PI / 180);
+    
+    return { dLat, dLng };
+}
+
 const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: ThreatObject, onClick: (t: ThreatObject) => void, isSelected: boolean, onClosePopup: () => void }) => {
   const [currentLoc, setCurrentLoc] = useState<{lng: number, lat: number} | null>(null);
 
@@ -171,39 +197,48 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
   let svgIcon = THREAT_SVGS[threat.type as keyof typeof THREAT_SVGS] || THREAT_SVGS['DRONE'];
   let ringColor = THREAT_COLORS[threat.type as keyof typeof THREAT_COLORS] || '#ffffff';
 
+  const qty = Math.min(threat.quantity || 1, 15);
+  const baseLat = currentLoc?.lat || loc.lat;
+  const baseLng = currentLoc?.lng || loc.lng;
+
   return (
-    <Marker  
-       longitude={currentLoc?.lng || loc.lng} 
-       latitude={currentLoc?.lat || loc.lat} 
-       anchor="center"
-       onClick={(e) => {
-         e.originalEvent.stopPropagation();
-         onClick(threat);
-       }}
-    >
-      <div className="relative w-10 h-10 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform">
-        <div className="radar-pulse" style={{ '--ring-color': ringColor + '40' } as any}></div>
-        <div className="absolute inset-0 flex items-center justify-center" style={{ transform: `rotate(${rot}deg)` }}>
-          {Array.from({ length: Math.min(threat.quantity || 1, 15) }).map((_, i) => (
-            <div 
-              key={i}
-              style={{ 
-                transform: `translateY(${i * 25}px)`,
-                filter: `drop-shadow(0 0 4px ${ringColor})`,
-                opacity: 1,
-                zIndex: 20 - i
-              }} 
-              className="absolute w-7 h-7 text-white drop-shadow-md"
-              dangerouslySetInnerHTML={{ __html: svgIcon }}
-            />
-          ))}
-        </div>
-      </div>
+    <>
+      {Array.from({ length: qty }).map((_, i) => {
+        const { dLat, dLng } = getStaggeredOffset(i, rot, baseLat);
+        const markerLat = baseLat + dLat;
+        const markerLng = baseLng + dLng;
+
+        return (
+          <Marker  
+             key={`${threat.id}-${i}`}
+             longitude={markerLng} 
+             latitude={markerLat} 
+             anchor="center"
+             onClick={(e) => {
+               e.originalEvent.stopPropagation();
+               onClick(threat);
+             }}
+          >
+            <div className="relative w-10 h-10 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform">
+              {i === 0 && <div className="radar-pulse" style={{ '--ring-color': ringColor + '40' } as any}></div>}
+              <div className="absolute inset-0 flex items-center justify-center" style={{ transform: `rotate(${rot}deg)` }}>
+                <div 
+                  style={{ 
+                    filter: `drop-shadow(0 0 4px ${ringColor})`,
+                  }} 
+                  className="absolute w-7 h-7 text-white drop-shadow-md"
+                  dangerouslySetInnerHTML={{ __html: svgIcon }}
+                />
+              </div>
+            </div>
+          </Marker>
+        );
+      })}
 
       {isSelected && (
         <Popup
-           longitude={currentLoc?.lng || loc.lng}
-           latitude={currentLoc?.lat || loc.lat}
+           longitude={baseLng}
+           latitude={baseLat}
            anchor="bottom"
            onClose={() => {
              onClosePopup();
@@ -303,7 +338,7 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
            </div>
         </Popup>
       )}
-    </Marker>
+    </>
   );
 };
 
