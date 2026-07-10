@@ -93,7 +93,7 @@ export default function MobileTopBar() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-[68px] right-3 w-[280px] bg-[#0a0a0a]/90 backdrop-blur-3xl border border-white/5 rounded-[24px] shadow-[0_16px_40px_rgba(0,0,0,0.5)] overflow-hidden pointer-events-auto flex flex-col z-50 p-2"
+            className="absolute top-[68px] right-3 w-[280px] bg-[#0a0a0a]/90 backdrop-blur-3xl border border-white/5 rounded-[24px] shadow-[0_16px_40px_rgba(0,0,0,0.5)] pointer-events-auto flex flex-col z-50 p-2"
           >
             <div className="flex flex-col gap-1">
             {tabs.map(tab => {
