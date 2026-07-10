@@ -49,9 +49,10 @@ export async function startNeptunWorker(io: Server) {
         const course = heading || null;
         const quantity = obj.count || 1;
 
-        // Skip "ghosts" or translucent targets (older than 15 minutes)
-        if (Date.now() - timestamp.getTime() > 15 * 60 * 1000) {
-           continue;
+        // Neptun can keep targets "active" (like translucent ghosts) even if they haven't moved in a while.
+        // We shouldn't ignore them here, otherwise they get deleted from our map while Neptun still shows them.
+        if (Date.now() - timestamp.getTime() > 24 * 60 * 60 * 1000) {
+           continue; // Only ignore completely dead targets (>24 hours)
         }
 
         // First, try to find the exact threat by externalId
@@ -163,7 +164,7 @@ export async function startNeptunWorker(io: Server) {
 
       // STRICT SYNC: Archive any active targets in our DB that are NO LONGER active in Neptun
       const activeNeptunIds = objects
-         .filter((o: any) => o.status === 'active' && (Date.now() - new Date(o.updatedAt).getTime() <= 15 * 60 * 1000))
+         .filter((o: any) => o.status === 'active')
          .map((o: any) => String(o.id));
 
       const staleThreats = await prisma.threatObject.findMany({

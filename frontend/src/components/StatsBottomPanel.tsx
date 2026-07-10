@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { Settings, Map as MapIcon, Layers, Flame, Box } from 'lucide-react';
+import Logo from './Logo';
 
 export default function StatsBottomPanel() {
   const { threats, alerts, mapMode, is3D, showHeatmap, setMapMode, setIs3D, setShowHeatmap } = useStore();
@@ -11,9 +12,10 @@ export default function StatsBottomPanel() {
   // Count active regions from siren.pp.ua
   const alertsCount = Object.values(alerts).filter(a => a?.alertnow === true).length;
   
-  const dronesCount = activeThreats.filter(t => t.type === 'DRONE' || t.type === 'FPV').length;
-  const missilesCount = activeThreats.filter(t => ['CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'MISSILE', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR'].includes(t.type)).length;
-  const aircraftCount = activeThreats.filter(t => t.type === 'AIRCRAFT').length;
+  const totalCount = activeThreats.reduce((acc, t) => acc + (t.quantity || 1), 0);
+  const dronesCount = activeThreats.filter(t => t.type === 'DRONE' || t.type === 'FPV').reduce((acc, t) => acc + (t.quantity || 1), 0);
+  const missilesCount = activeThreats.filter(t => ['CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'MISSILE', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR'].includes(t.type)).reduce((acc, t) => acc + (t.quantity || 1), 0);
+  const aircraftCount = activeThreats.filter(t => t.type === 'AIRCRAFT').reduce((acc, t) => acc + (t.quantity || 1), 0);
 
   return (
     <div className="hidden md:flex absolute bottom-6 left-1/2 -translate-x-1/2 flex-col items-center gap-3 z-30 pointer-events-none">
@@ -42,7 +44,7 @@ export default function StatsBottomPanel() {
           )}
 
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" className="w-5 h-5 object-contain" />
+            <Logo className="w-5 h-5" />
             <span className="text-white text-xs font-black tracking-widest drop-shadow-[0_0_8px_rgba(239,68,68,0.3)]">ALIVEMAP</span>
           </div>
         </div>
@@ -52,11 +54,10 @@ export default function StatsBottomPanel() {
           <span className="text-white font-black text-base drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">{alertsCount}</span>
         </div>
         
-        <div className="hidden md:block h-5 w-px bg-gray-700/50"></div>
+        <div className="hidden md:block h-5 w-px border-r border-gray-700/50"></div>
         
         <div className="flex gap-2 items-center">
-          <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Цілі:</span>
-          <span className="text-white font-black text-base drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">{activeThreats.length}</span>
+          <span className="text-white text-sm font-bold tracking-widest uppercase">Цілі: <span className="text-white/90 ml-1">{totalCount}</span></span>
         </div>
 
         <div className="hidden md:block h-5 w-px bg-gray-700/50"></div>
