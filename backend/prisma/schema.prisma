@@ -154,6 +154,7 @@ model MonitoringMessage {
   tags        String[]
   lat         Float?
   lng         Float?
+  threatId    String?
   createdAt   DateTime @default(now())
 }
 

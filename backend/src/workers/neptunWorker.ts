@@ -2,6 +2,8 @@ import axios from 'axios';
 import { Server } from 'socket.io';
 import prisma from '../db';
 import { ReportType, ReportStatus, SourceType } from '@prisma/client';
+import { extractWithAI } from '../services/aiParser';
+import { geocodeLocation } from '../services/geocoder';
 
 const NEPTUN_API_URL = 'https://neptun.in.ua/api/v1/threats';
 
@@ -210,12 +212,76 @@ export async function startNeptunWorker(io: Server) {
            else if (t.includes('злет') || t.includes('авіація') || t.includes('міг-') || t.includes('борти') || t.includes('авіа')) type = 'AIRCRAFT';
            else if (t.includes('ppo') || t.includes('ппо') || t.includes('вибух')) type = 'PPO';
            
+           let linkedThreatId: string | null = null;
+           let linkedLat: number | null = null;
+           let linkedLng: number | null = null;
+
+           if (['DRONE', 'KAB', 'MISSILE', 'AIRCRAFT', 'BALLISTIC_MISSILE', 'CRUISE_MISSILE'].includes(type)) {
+               try {
+                   const aiData = await extractWithAI(msg.text);
+                   if (aiData) {
+                       let geoLat: number | null = aiData.targetLat;
+                       let geoLng: number | null = aiData.targetLng;
+
+                       if (geoLat == null && aiData.locationNames && aiData.locationNames.length > 0) {
+                           const coords = await geocodeLocation(aiData.locationNames[0], false, msg.channel);
+                           if (coords) {
+                               geoLat = coords.lat;
+                               geoLng = coords.lng;
+                           }
+                       }
+
+                       if (geoLat != null && geoLng != null) {
+                           const activeThreats = await prisma.threatObject.findMany({
+                               where: { status: 'ACTIVE', type: type as ReportType },
+                               include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
+                           });
+
+                           let minDistance = Infinity;
+                           let bestMatch = null;
+                           for (const t of activeThreats) {
+                               if (t.locations.length > 0) {
+                                   const loc = t.locations[0];
+                                   const dist = getDistanceFromLatLonInKm(geoLat, geoLng, loc.lat, loc.lng);
+                                   if (dist < 150 && dist < minDistance) {
+                                       minDistance = dist;
+                                       bestMatch = t;
+                                   }
+                               } else if (t.targetLat != null && t.targetLng != null) {
+                                   const dist = getDistanceFromLatLonInKm(geoLat, geoLng, t.targetLat, t.targetLng);
+                                   if (dist < 150 && dist < minDistance) {
+                                       minDistance = dist;
+                                       bestMatch = t;
+                                   }
+                               }
+                           }
+
+                           if (bestMatch) {
+                               linkedThreatId = bestMatch.id;
+                               if (bestMatch.locations.length > 0) {
+                                   linkedLat = bestMatch.locations[0].lat;
+                                   linkedLng = bestMatch.locations[0].lng;
+                               } else {
+                                   linkedLat = bestMatch.targetLat;
+                                   linkedLng = bestMatch.targetLng;
+                               }
+                           }
+                       }
+                   }
+               } catch (e) {
+                   console.error("AI linking error:", e);
+               }
+           }
+
            const savedMsg = await prisma.monitoringMessage.create({
               data: {
                   text: msg.text,
                   channelName: msg.channel.replace('@', ''),
                   timestamp: msgTime,
-                  tags: [type]
+                  tags: [type],
+                  threatId: linkedThreatId,
+                  lat: linkedLat,
+                  lng: linkedLng
               }
            });
            newMessages.push(savedMsg);

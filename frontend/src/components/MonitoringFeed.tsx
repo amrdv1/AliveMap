@@ -48,6 +48,15 @@ export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ delay: index < 20 ? index * 0.03 : 0, duration: 0.3 }}
               onClick={() => {
+                if (msg.threatId) {
+                   useStore.getState().setSelectedThreatId(msg.threatId);
+                   useStore.getState().setActiveTab('MAP');
+                   if (msg.lat && msg.lng) {
+                       useStore.getState().setFlyToLocation({ lat: msg.lat, lng: msg.lng });
+                   }
+                   return;
+                }
+                
                 if (msg.lat && msg.lng) {
                    useStore.getState().setFlyToLocation({ lat: msg.lat, lng: msg.lng });
                    useStore.getState().setActiveTab('MAP');

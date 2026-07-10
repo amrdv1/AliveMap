@@ -313,7 +313,7 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
 };
 
 export default function UkraineMap() {
-  const { alerts, threats, explosions, filters, mapMode, is3D, showHeatmap, setIs3D, flyToLocation, setFlyToLocation, selectedThreat, setSelectedThreat } = useStore();
+  const { alerts, threats, explosions, filters, mapMode, is3D, showHeatmap, setIs3D, flyToLocation, setFlyToLocation, selectedThreat, setSelectedThreat, selectedThreatId, setSelectedThreatId } = useStore();
   const [geoData, setGeoData] = useState<any>(null); // Districts
   const [geoDataStates, setGeoDataStates] = useState<any>(null); // States
   const mapRef = React.useRef<any>(null);
@@ -344,6 +344,24 @@ export default function UkraineMap() {
       return () => clearTimeout(timer);
     }
   }, [flyToLocation, setFlyToLocation]);
+
+  useEffect(() => {
+    if (selectedThreatId) {
+      const threat = threats.find(t => t.id === selectedThreatId);
+      if (threat) {
+        setSelectedThreat(threat);
+        setIs3D(true);
+        const loc = threat.locations.length > 0 ? threat.locations[0] : { lat: threat.targetLat!, lng: threat.targetLng! };
+        mapRef.current?.flyTo({
+          center: [loc.lng, loc.lat],
+          zoom: 8,
+          pitch: 45,
+          essential: true
+        });
+      }
+      setSelectedThreatId(null);
+    }
+  }, [selectedThreatId, threats, setSelectedThreat, setIs3D, setSelectedThreatId]);
 
   // Compute active alert region names
   const activeAlertRegionNames = useMemo(() => {
@@ -421,13 +439,16 @@ export default function UkraineMap() {
        if (t.targetLat && t.targetLng) {
            bearing = turf.bearing(turf.point([loc.lng, loc.lat]), turf.point([t.targetLng, t.targetLat]));
            if (bearing < 0) bearing += 360;
-       } else if (bearing == null || bearing === undefined) {
-           bearing = 0; // default north
        }
        
-       // Draw a trajectory line for 1 hour of flight
+       if (bearing == null || bearing === undefined) {
+           return; // Do not draw line if we don't know the course
+       }
+       
+       // Draw a trajectory line for 15 minutes of flight (speedKmh * 0.25)
+       const distance = Math.max(10, speedKmh * 0.25); 
        const startPt = turf.point([loc.lng, loc.lat]);
-       const dest = turf.destination(startPt, speedKmh, bearing, { units: 'kilometers' });
+       const dest = turf.destination(startPt, distance, bearing, { units: 'kilometers' });
        
        features.push(turf.lineString([
          [loc.lng, loc.lat],

@@ -42,6 +42,7 @@ export interface MonitoringMessage {
   tags: string[];
   lat?: number | null;
   lng?: number | null;
+  threatId?: string | null;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -82,6 +83,8 @@ export interface AppState {
   setFlyToLocation: (loc: { lat: number, lng: number } | null) => void;
   selectedThreat: ThreatObject | null;
   setSelectedThreat: (threat: ThreatObject | null) => void;
+  selectedThreatId: string | null;
+  setSelectedThreatId: (id: string | null) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -96,7 +99,9 @@ export const useStore = create<AppState>((set) => ({
   showHeatmap: false,
   flyToLocation: null,
   selectedThreat: null,
+  selectedThreatId: null,
   setSelectedThreat: (threat) => set({ selectedThreat: threat }),
+  setSelectedThreatId: (id) => set({ selectedThreatId: id }),
   filters: {
     types: ['DRONE', 'MISSILE', 'CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'KAB', 'AIRCRAFT', 'ALERT', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR', 'PPO', 'RECON', 'FPV', 'UNKNOWN', 'MOLNIYA', 'DECOY'],
     showArchived: false,
