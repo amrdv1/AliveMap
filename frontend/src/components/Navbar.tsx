@@ -32,12 +32,12 @@ export default function Navbar() {
   return (
     <div className="absolute top-0 left-0 right-0 h-[72px] bg-[#050505]/95 backdrop-blur-2xl flex items-center justify-between px-6 z-30 border-b border-white/10 shadow-lg">
       {/* Logo */}
-      <div className="flex items-center gap-3 bg-white/5 pr-6 pl-2 py-2 rounded-2xl border border-white/5 shadow-inner">
-        <div className="relative flex items-center justify-center w-10 h-10 bg-red-500/10 rounded-xl border border-red-500/20">
-          <Logo className="relative z-10 w-7 h-7" />
+      <div className="flex items-center gap-3 pl-2">
+        <div className="relative w-12 h-12 flex items-center justify-center">
+          <Logo className="w-10 h-10 drop-shadow-[0_0_12px_rgba(239,68,68,0.5)] rounded-xl object-contain" />
         </div>
-        <h1 className="text-lg font-bold tracking-widest text-white/90 flex items-center gap-1 uppercase">
-          Alive<span className="text-red-500">Map</span>
+        <h1 className="text-xl font-black tracking-widest text-white uppercase">
+          ALIVE<span className="text-red-600">MAP</span>
         </h1>
       </div>
 

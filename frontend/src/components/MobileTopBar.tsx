@@ -43,7 +43,7 @@ export default function MobileTopBar() {
           {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="relative w-8 h-8 flex items-center justify-center">
-              <Logo className="w-6 h-6 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+              <Logo className="w-6 h-6 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)] object-contain" />
             </div>
             <h1 className="text-[15px] font-black tracking-widest text-white uppercase">
               ALIVE<span className="text-red-600">MAP</span>
