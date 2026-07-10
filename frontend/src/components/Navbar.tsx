@@ -42,7 +42,8 @@ export default function Navbar() {
       </div>
 
       {/* Tabs */}
-      <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/5">
+      <div className="hidden md:flex flex-1 justify-center px-2 min-w-0">
+        <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/5 overflow-x-auto no-scrollbar max-w-full">
         <button 
           onClick={() => setActiveTab('MAP')}
           className={`px-5 py-2 rounded-xl text-sm font-semibold tracking-widest uppercase transition-all duration-300 ${
@@ -72,16 +73,16 @@ export default function Navbar() {
       </div>
 
       {/* Search & Time & Live Indicator */}
-      <div className="flex items-center justify-end gap-4 w-auto">
-        <div className="hidden lg:block w-48 lg:w-64">
+      <div className="flex items-center justify-end gap-2 lg:gap-4 shrink-0">
+        <div className="w-32 lg:w-56 shrink-0">
           <CitySearch />
         </div>
-        <div className="text-gray-300 font-mono text-lg font-medium drop-shadow-md">
+        <div className="text-gray-300 font-mono text-sm lg:text-lg font-medium drop-shadow-md shrink-0">
           {mounted ? time.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
         </div>
-        <div className="flex items-center gap-2 bg-red-500/10 px-3 py-1.5 rounded-full border border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]">
-          <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,1)]"></div>
-          <span className="text-red-500 text-xs font-black tracking-widest uppercase">НАЖИВО</span>
+        <div className="hidden sm:flex items-center gap-2 bg-red-500/10 px-2 lg:px-3 py-1.5 rounded-full border border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)] shrink-0">
+          <div className="w-2 h-2 lg:w-2.5 lg:h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,1)]"></div>
+          <span className="text-red-500 text-[10px] lg:text-xs font-black tracking-widest uppercase">НАЖИВО</span>
         </div>
       </div>
       
