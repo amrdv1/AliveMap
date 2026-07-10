@@ -32,7 +32,7 @@ export default function SummaryView({ isMobile }: { isMobile?: boolean }) {
   return (
     <div 
       className={isMobile ? "absolute inset-0 z-20 bg-[#050505]/95 backdrop-blur-2xl px-3 pb-20 overflow-y-auto custom-scrollbar flex flex-col" : "absolute inset-0 z-20 bg-black/40 backdrop-blur-md pt-24 px-4 pb-24 overflow-y-auto custom-scrollbar flex justify-center"}
-      style={isMobile ? { paddingTop: 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 70px)' } : undefined}
+      style={isMobile ? { paddingTop: 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 130px)' } : undefined}
     >
       <div className={isMobile ? "w-full max-w-5xl flex flex-col gap-4 mx-auto pb-10" : "w-full max-w-4xl flex flex-col gap-6"}>
         

@@ -207,7 +207,7 @@ export default function Home() {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 26, stiffness: 260, mass: 0.8 }}
               className="fixed inset-0 pb-4 z-40 bg-black/95 backdrop-blur-3xl overflow-hidden"
-              style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 70px)' }}
+              style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + var(--tg-safe-area-inset-top, 0px) + 130px)' }}
             >
               <MonitoringFeed isMobile />
             </motion.div>
