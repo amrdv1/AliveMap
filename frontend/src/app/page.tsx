@@ -15,6 +15,7 @@ import MonitoringFeed from '@/components/MonitoringFeed';
 import StatsBottomPanel from '@/components/StatsBottomPanel';
 import ThreatFilters from '@/components/ThreatFilters';
 import SummaryView from '@/components/SummaryView';
+import Logo from '@/components/Logo';
 import { socket } from '@/lib/socket';
 
 const Map = dynamic(() => import('@/components/Map'), { 
@@ -239,7 +240,7 @@ export default function Home() {
             
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 flex items-center justify-center">
-                <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain opacity-90" />
+                <Logo className="w-8 h-8 opacity-90" />
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white tracking-wide">ALIVEMAP</h2>

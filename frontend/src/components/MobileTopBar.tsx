@@ -3,6 +3,7 @@ import { useStore } from '../store/useStore';
 import { Wifi, WifiOff, Map as MapIcon, List, Activity, Info, Search, X } from 'lucide-react';
 import CitySearch from './CitySearch';
 import { motion, AnimatePresence } from 'framer-motion';
+import Logo from './Logo';
 
 export default function MobileTopBar() {
   const { threats, alerts, activeTab, setActiveTab, setAboutOpen } = useStore();
@@ -42,7 +43,7 @@ export default function MobileTopBar() {
           {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="relative w-8 h-8 flex items-center justify-center">
-              <img src="/logo.png" alt="AliveMap" className="w-6 h-6 object-contain drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+              <Logo className="w-6 h-6 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
             </div>
             <h1 className="text-[15px] font-black tracking-widest text-white uppercase">
               ALIVE<span className="text-red-600">MAP</span>
