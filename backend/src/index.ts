@@ -129,8 +129,8 @@ server.listen(PORT, async () => {
         const hasNeptunData = !!t.externalId;
         const isMissile = t.type.includes('MISSILE') || t.type === 'KINZHAL' || t.type === 'ZIRCON' || t.type === 'ISKANDER' || t.type === 'KALIBR';
 
-        if (hasNeptunData && ageInMs > 15 * 60 * 1000) {
-            idsToArchive.push(t.id); // NEPTUN ghosts fade out after 15 mins
+        if (hasNeptunData && ageInMs > 24 * 60 * 60 * 1000) {
+            idsToArchive.push(t.id); // NEPTUN ghosts stay active for up to 24 hours to match the API
         } else if (!hasNeptunData && isMissile && ageInMs > 15 * 60 * 1000) {
             idsToArchive.push(t.id);
         } else if (!hasNeptunData && !isMissile && ageInMs > 45 * 60 * 1000) {
