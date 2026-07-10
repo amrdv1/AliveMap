@@ -9,7 +9,7 @@ export default function MonitoringFeed({ isMobile }: { isMobile?: boolean }) {
   return (
     <div className={`flex flex-col font-sans overflow-hidden ${
       isMobile 
-        ? 'w-full h-full bg-black/95' 
+        ? 'flex-1 w-full bg-black/95' 
         : 'w-full h-full bg-gradient-to-b from-black/40 to-black/10 backdrop-blur-xl border border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.3)]'
     }`}>
       {/* Header */}
