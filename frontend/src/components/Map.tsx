@@ -405,6 +405,39 @@ export default function UkraineMap() {
     return threats.filter(t => filters.types.includes(t.type));
   }, [threats, filters.types]);
 
+  const courseLinesData = useMemo(() => {
+    const features: any[] = [];
+    
+    filteredThreats.forEach(t => {
+       const loc = t.locations[0];
+       if (!loc) return;
+       
+       let speedKmh = t.speed;
+       if (!speedKmh) {
+           speedKmh = ['DRONE', 'RECON', 'MOLNIYA', 'DECOY', 'FPV'].includes(t.type) ? 150 : 800;
+       }
+       
+       let bearing = t.course;
+       if (t.targetLat && t.targetLng) {
+           bearing = turf.bearing(turf.point([loc.lng, loc.lat]), turf.point([t.targetLng, t.targetLat]));
+           if (bearing < 0) bearing += 360;
+       } else if (bearing == null || bearing === undefined) {
+           bearing = 0; // default north
+       }
+       
+       // Draw a trajectory line for 1 hour of flight
+       const startPt = turf.point([loc.lng, loc.lat]);
+       const dest = turf.destination(startPt, speedKmh, bearing, { units: 'kilometers' });
+       
+       features.push(turf.lineString([
+         [loc.lng, loc.lat],
+         dest.geometry.coordinates
+       ], { type: t.type, id: t.id }));
+    });
+    
+    return turf.featureCollection(features);
+  }, [filteredThreats]);
+
   const handleThreatClick = (t: ThreatObject) => {
     setSelectedThreat(t);
     setIs3D(true);
@@ -623,6 +656,29 @@ export default function UkraineMap() {
               <Layer {...heatmapLayer} />
             </Source>
           )}
+
+          {/* Trajectory Lines */}
+          <Source id="threats-course" type="geojson" data={courseLinesData as any}>
+              <Layer 
+                 id="threats-course-line"
+                 type="line"
+                 paint={{
+                   'line-color': [
+                       'match', ['get', 'type'], 
+                       'DRONE', '#ef4444', 
+                       'CRUISE_MISSILE', '#dc2626',
+                       'BALLISTIC_MISSILE', '#b91c1c',
+                       'KAB', '#ca8a04',
+                       'AIRCRAFT', '#2563eb',
+                       'UNKNOWN', '#6b7280',
+                       '#ffffff'
+                   ],
+                   'line-width': 1.5,
+                   'line-dasharray': [4, 4],
+                   'line-opacity': 0.6
+                 }}
+              />
+          </Source>
 
           {/* Threats */}
           {filteredThreats.map(t => (
