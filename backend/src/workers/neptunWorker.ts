@@ -124,6 +124,11 @@ export async function startNeptunWorker(io: Server) {
               
               io.emit('threat:update', updatedThreat);
           }
+          
+          if (speed && course && matchedThreat) {
+              const { sendSmartThreatNotification } = require('./botWorker');
+              sendSmartThreatNotification(matchedThreat.id, threatType, lat, lon, speed, course);
+          }
         } else {
            // We create new threats from NEPTUN directly to match external maps
            const newThreat = await prisma.threatObject.create({
@@ -148,6 +153,11 @@ export async function startNeptunWorker(io: Server) {
            });
            
            io.emit('threat:new', newThreat);
+           
+           if (speed && course) {
+               const { sendSmartThreatNotification } = require('./botWorker');
+               sendSmartThreatNotification(newThreat.id, threatType, lat, lon, speed, course);
+           }
         }
        }
 
