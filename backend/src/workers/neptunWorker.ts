@@ -155,6 +155,57 @@ export async function startNeptunWorker(io: Server) {
 
   fetchNeptunData();
   setInterval(fetchNeptunData, 20000); // Poll every 20 seconds
+
+  const fetchNeptunMessages = async () => {
+    try {
+      const { data } = await axios.get('https://neptun.in.ua/api/v1/messages', { timeout: 10000 });
+      if (!data || !data.messages) return;
+
+      const newMessages = [];
+      // reverse so older ones are processed first
+      for (const msg of data.messages.reverse()) {
+        const msgTime = new Date(msg.date);
+        
+        // Skip messages older than 30 minutes
+        if (Date.now() - msgTime.getTime() > 30 * 60 * 1000) continue;
+
+        const existing = await prisma.monitoringMessage.findFirst({
+           where: { text: msg.text, timestamp: msgTime }
+        });
+
+        if (!existing) {
+           let type = 'INFO';
+           const t = msg.text.toLowerCase();
+           if (t.includes('шахед') || t.includes('бпла') || t.includes('дрон') || t.includes('мопед') || t.includes('реактивн')) type = 'DRONE';
+           else if (t.includes('каб') || t.includes('авіабомб') || t.includes('фаб')) type = 'KAB';
+           else if (t.includes('ракет') || t.includes('балістик') || t.includes('кинджал') || t.includes('іскандер')) type = 'MISSILE';
+           else if (t.includes('злет') || t.includes('авіація') || t.includes('міг-') || t.includes('борти') || t.includes('авіа')) type = 'AIRCRAFT';
+           else if (t.includes('ppo') || t.includes('ппо') || t.includes('вибух')) type = 'PPO';
+           
+           const savedMsg = await prisma.monitoringMessage.create({
+              data: {
+                  text: msg.text,
+                  channelName: msg.channel.replace('@', ''),
+                  timestamp: msgTime,
+                  tags: [type]
+              }
+           });
+           newMessages.push(savedMsg);
+        }
+      }
+
+      if (newMessages.length > 0) {
+        for (const msg of newMessages) {
+            io.emit('monitoring:new_message', msg);
+        }
+      }
+    } catch (error: any) {
+      console.error("Error fetching Neptun messages API:", error.message);
+    }
+  };
+
+  fetchNeptunMessages();
+  setInterval(fetchNeptunMessages, 30000); // Poll every 30 seconds
 }
 
 function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
