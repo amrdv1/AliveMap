@@ -45,6 +45,7 @@ export async function startNeptunWorker(io: Server) {
 
         const speed = obj.velocity?.speedKmh || null;
         const course = heading || null;
+        const quantity = obj.count || 1;
 
         // Skip "ghosts" or translucent targets (older than 15 minutes)
         if (Date.now() - timestamp.getTime() > 15 * 60 * 1000) {
@@ -67,6 +68,8 @@ export async function startNeptunWorker(io: Server) {
            let minDistance = Infinity;
            
            for (const t of recentThreats) {
+             if (t.externalId) continue; // DO NOT steal a threat that is already linked to Neptun!
+
              let dist = Infinity;
              if (t.locations.length > 0) {
                const loc = t.locations[0];
@@ -82,7 +85,7 @@ export async function startNeptunWorker(io: Server) {
 
            // If no location match, but there's a threat of the SAME TYPE with NO locations, link it
            if (!matchedThreat) {
-              const locationlessThreat = recentThreats.find((t: any) => t.locations.length === 0);
+              const locationlessThreat = recentThreats.find((t: any) => t.locations.length === 0 && !t.externalId);
               if (locationlessThreat) {
                   matchedThreat = locationlessThreat;
               }
@@ -103,6 +106,7 @@ export async function startNeptunWorker(io: Server) {
                   externalId: String(obj.id),
                   speed: speed ?? matchedThreat.speed,
                   course: course ?? matchedThreat.course,
+                  quantity: quantity,
                   confidence: 1.0, // MAPA is high confidence
                   locations: {
                     create: {
@@ -127,6 +131,7 @@ export async function startNeptunWorker(io: Server) {
                externalId: String(obj.id),
                speed: speed,
                course: course,
+               quantity: quantity,
                confidence: 1.0,
                locations: {
                  create: {
