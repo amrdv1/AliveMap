@@ -71,6 +71,7 @@ export default function Navbar() {
           Інфо
         </button>
       </div>
+      </div>
 
       {/* Search & Time & Live Indicator */}
       <div className="flex items-center justify-end gap-2 lg:gap-4 shrink-0">
