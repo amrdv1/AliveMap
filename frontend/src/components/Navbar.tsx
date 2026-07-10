@@ -32,7 +32,7 @@ export default function Navbar() {
   return (
     <div className="absolute top-4 left-4 right-4 h-[64px] bg-[#0a0a0a]/85 backdrop-blur-3xl flex items-center justify-between px-6 z-30 border border-white/[0.05] shadow-[0_8px_32px_rgba(0,0,0,0.5)] rounded-full">
       {/* Logo */}
-      <div className="flex items-center gap-3 pl-2">
+      <div className="flex flex-1 items-center gap-3 pl-2 min-w-0">
         <div className="relative w-12 h-12 flex items-center justify-center">
           <Logo className="w-10 h-10 drop-shadow-[0_0_12px_rgba(239,68,68,0.5)] rounded-xl object-contain" />
         </div>
@@ -42,7 +42,7 @@ export default function Navbar() {
       </div>
 
       {/* Tabs */}
-      <div className="hidden md:flex flex-1 justify-center px-2 min-w-0">
+      <div className="hidden md:flex shrink-0 justify-center px-2">
         <div className="flex items-center gap-1 bg-black/40 p-1 rounded-2xl border border-white/5 overflow-x-auto no-scrollbar max-w-full">
         <button 
           onClick={() => setActiveTab('MAP')}
@@ -74,7 +74,7 @@ export default function Navbar() {
       </div>
 
       {/* Search & Time & Live Indicator */}
-      <div className="flex items-center justify-end gap-2 lg:gap-4 shrink-0">
+      <div className="flex flex-1 items-center justify-end gap-2 lg:gap-4 min-w-0 shrink-0">
         <div className="w-32 lg:w-56 shrink-0">
           <CitySearch />
         </div>
