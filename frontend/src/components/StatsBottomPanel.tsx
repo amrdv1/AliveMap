@@ -12,10 +12,10 @@ export default function StatsBottomPanel() {
   // Count active regions from siren.pp.ua
   const alertsCount = Object.values(alerts).filter(a => a?.alertnow === true).length;
   
-  const totalCount = activeThreats.reduce((acc, t) => acc + (t.quantity || 1), 0);
-  const dronesCount = activeThreats.filter(t => t.type === 'DRONE' || t.type === 'FPV').reduce((acc, t) => acc + (t.quantity || 1), 0);
-  const missilesCount = activeThreats.filter(t => ['CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'MISSILE', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR'].includes(t.type)).reduce((acc, t) => acc + (t.quantity || 1), 0);
-  const aircraftCount = activeThreats.filter(t => t.type === 'AIRCRAFT').reduce((acc, t) => acc + (t.quantity || 1), 0);
+  const totalCount = activeThreats.length;
+  const dronesCount = activeThreats.filter(t => t.type === 'DRONE' || t.type === 'FPV').length;
+  const missilesCount = activeThreats.filter(t => ['CRUISE_MISSILE', 'BALLISTIC_MISSILE', 'MISSILE', 'ZIRCON', 'KH101', 'ISKANDER', 'KINZHAL', 'KALIBR'].includes(t.type)).length;
+  const aircraftCount = activeThreats.filter(t => t.type === 'AIRCRAFT').length;
 
   return (
     <div className="hidden md:flex absolute bottom-6 left-1/2 -translate-x-1/2 flex-col items-center gap-3 z-30 pointer-events-none">

@@ -9,25 +9,25 @@ export default function SummaryView({ isMobile }: { isMobile?: boolean }) {
   const activeThreats = threats.filter(t => t.status === 'ACTIVE');
   const alertRegions = Object.entries(alerts).filter(([_, data]) => data.alertnow).map(([region]) => region);
 
-  const sumQuantity = (type: string) => activeThreats.filter(t => t.type === type).reduce((acc, t) => acc + (t.quantity || 1), 0);
+  const countType = (type: string) => activeThreats.filter(t => t.type === type).length;
 
-  const drones = sumQuantity('DRONE');
-  const fpvs = sumQuantity('FPV');
-  const molniya = sumQuantity('MOLNIYA');
-  const missiles = sumQuantity('MISSILE');
-  const cruise = sumQuantity('CRUISE_MISSILE');
-  const ballistic = sumQuantity('BALLISTIC_MISSILE');
-  const zircon = sumQuantity('ZIRCON');
-  const kh101 = sumQuantity('KH101');
-  const iskander = sumQuantity('ISKANDER');
-  const kinzhal = sumQuantity('KINZHAL');
-  const kalibr = sumQuantity('KALIBR');
-  const aircraft = sumQuantity('AIRCRAFT');
-  const kabs = sumQuantity('KAB');
-  const recons = sumQuantity('RECON');
-  const unknowns = sumQuantity('UNKNOWN');
+  const drones = countType('DRONE');
+  const fpvs = countType('FPV');
+  const molniya = countType('MOLNIYA');
+  const missiles = countType('MISSILE');
+  const cruise = countType('CRUISE_MISSILE');
+  const ballistic = countType('BALLISTIC_MISSILE');
+  const zircon = countType('ZIRCON');
+  const kh101 = countType('KH101');
+  const iskander = countType('ISKANDER');
+  const kinzhal = countType('KINZHAL');
+  const kalibr = countType('KALIBR');
+  const aircraft = countType('AIRCRAFT');
+  const kabs = countType('KAB');
+  const recons = countType('RECON');
+  const unknowns = countType('UNKNOWN');
   
-  const totalActiveQuantity = activeThreats.reduce((acc, t) => acc + (t.quantity || 1), 0);
+  const totalActiveQuantity = activeThreats.length;
 
   return (
     <div 

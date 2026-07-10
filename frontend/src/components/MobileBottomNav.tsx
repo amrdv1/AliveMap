@@ -4,7 +4,7 @@ import { useStore } from '../store/useStore';
 
 export default function MobileBottomNav() {
   const { activeTab, setActiveTab, setAboutOpen, threats } = useStore();
-  const activeCount = threats.filter(t => t.status === 'ACTIVE').reduce((acc, t) => acc + (t.quantity || 1), 0);
+  const activeCount = threats.filter(t => t.status === 'ACTIVE').length;
 
   const tabs = [
     { id: 'MAP' as const, icon: Map, label: 'МАПА' },
