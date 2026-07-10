@@ -25,27 +25,78 @@ export async function startBotWorker() {
 
   console.log("Personal Telegram Notification Bot started...");
 
-  const getKeyboard = async (chatId: string) => {
+  const getRegionsKeyboard = async (chatId: string) => {
     const subs = await prisma.telegramSubscriber.findMany({ where: { chatId } });
     const subscribedRegions = new Set(subs.map(s => s.region));
+    const { DISTRICTS } = require('./districts');
     
     const keyboard = [];
     for (let i = 0; i < REGIONS.length; i += 2) {
       const row = [];
       const r1 = REGIONS[i];
-      row.push({ text: `${subscribedRegions.has(r1) ? '✅ ' : ''}${r1}`, callback_data: `region:${r1}` });
+      const r1Districts = DISTRICTS[r1] || [];
+      const isR1Subbed = subscribedRegions.has(r1) || r1Districts.some((d: string) => subscribedRegions.has(d));
+      
+      row.push({ text: `${isR1Subbed ? '✅ ' : ''}${r1}`, callback_data: `o_${i}` });
       if (i + 1 < REGIONS.length) {
         const r2 = REGIONS[i + 1];
-        row.push({ text: `${subscribedRegions.has(r2) ? '✅ ' : ''}${r2}`, callback_data: `region:${r2}` });
+        const r2Districts = DISTRICTS[r2] || [];
+        const isR2Subbed = subscribedRegions.has(r2) || r2Districts.some((d: string) => subscribedRegions.has(d));
+        row.push({ text: `${isR2Subbed ? '✅ ' : ''}${r2}`, callback_data: `o_${i + 1}` });
       }
       keyboard.push(row);
     }
     return keyboard;
   };
 
+  const getRegionSubMenu = async (chatId: string, regionIndex: number) => {
+    const regionName = REGIONS[regionIndex];
+    const { DISTRICTS } = require('./districts');
+    const districts = DISTRICTS[regionName] || [];
+    
+    const subs = await prisma.telegramSubscriber.findMany({ where: { chatId } });
+    const subscribedRegions = new Set(subs.map(s => s.region));
+    
+    const keyboard = [];
+    
+    // Toggle whole region
+    keyboard.push([{ text: `${subscribedRegions.has(regionName) ? '✅ ' : ''}Вся область`, callback_data: `tr_${regionIndex}` }]);
+    
+    // Toggle districts
+    for (let i = 0; i < districts.length; i += 2) {
+      const row = [];
+      const d1 = districts[i];
+      row.push({ text: `${subscribedRegions.has(d1) ? '✅ ' : ''}${d1}`, callback_data: `td_${regionIndex}_${i}` });
+      
+      if (i + 1 < districts.length) {
+         const d2 = districts[i + 1];
+         row.push({ text: `${subscribedRegions.has(d2) ? '✅ ' : ''}${d2}`, callback_data: `td_${regionIndex}_${i + 1}` });
+      }
+      keyboard.push(row);
+    }
+    
+    // Back button
+    keyboard.push([{ text: "🔙 Назад до списку областей", callback_data: `b_` }]);
+    
+    return keyboard;
+  };
+
+  async function toggleSubscription(chatId: string, region: string) {
+    const existing = await prisma.telegramSubscriber.findUnique({
+      where: { chatId_region: { chatId, region } }
+    });
+    if (existing) {
+      await prisma.telegramSubscriber.delete({ where: { id: existing.id } });
+      return false;
+    } else {
+      await prisma.telegramSubscriber.create({ data: { chatId, region } });
+      return true;
+    }
+  }
+
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id.toString();
-    const keyboard = await getKeyboard(chatId);
+    const keyboard = await getRegionsKeyboard(chatId);
 
     bot!.sendMessage(chatId, "👋 **Привіт! Я — твій персональний радар-помічник.**\n\nОбери регіони нижче для отримання сповіщень про повітряні тривоги.\n\n📍 **Розумні сповіщення:**\nНадішли мені свою геолокацію (скріпка 📎 -> Розташування), і я попереджатиму тебе **ТІЛЬКИ ТОДІ**, коли ракета чи шахед летить у твоєму напрямку (радіус до 20 км)!", {
       parse_mode: 'Markdown',
@@ -79,47 +130,55 @@ export async function startBotWorker() {
     if (!query.message) return;
     const chatId = query.message.chat.id.toString();
     const data = query.data;
+    if (!data) return;
 
-    if (data && data.startsWith('region:')) {
-      const region = data.split(':')[1];
-
-      try {
-        const existing = await prisma.telegramSubscriber.findUnique({
-          where: {
-            chatId_region: {
-              chatId,
-              region
-            }
-          }
-        });
-
-        if (existing) {
-          await prisma.telegramSubscriber.delete({
-            where: { id: existing.id }
-          });
-          bot!.answerCallbackQuery(query.id, { text: `❌ Відписано від: ${region}` });
-        } else {
-          await prisma.telegramSubscriber.create({
-            data: {
-              chatId,
-              region
-            }
-          });
-          bot!.answerCallbackQuery(query.id, { text: `✅ Підписано на: ${region}` });
+    try {
+        if (data === 'b_') {
+            const newKeyboard = await getRegionsKeyboard(chatId);
+            bot!.editMessageReplyMarkup({ inline_keyboard: newKeyboard }, {
+                chat_id: chatId,
+                message_id: query.message.message_id
+            }).catch(()=>{});
+        } else if (data.startsWith('o_')) {
+            const rIndex = parseInt(data.split('_')[1]);
+            const subMenu = await getRegionSubMenu(chatId, rIndex);
+            bot!.editMessageReplyMarkup({ inline_keyboard: subMenu }, {
+                chat_id: chatId,
+                message_id: query.message.message_id
+            }).catch(()=>{});
+        } else if (data.startsWith('tr_')) {
+            const rIndex = parseInt(data.split('_')[1]);
+            const region = REGIONS[rIndex];
+            const isSubbed = await toggleSubscription(chatId, region);
+            bot!.answerCallbackQuery(query.id, { text: isSubbed ? `✅ Підписано на: ${region}` : `❌ Відписано від: ${region}` });
+            const subMenu = await getRegionSubMenu(chatId, rIndex);
+            bot!.editMessageReplyMarkup({ inline_keyboard: subMenu }, {
+                chat_id: chatId,
+                message_id: query.message.message_id
+            }).catch(()=>{});
+        } else if (data.startsWith('td_')) {
+            const parts = data.split('_');
+            const rIndex = parseInt(parts[1]);
+            const dIndex = parseInt(parts[2]);
+            const regionName = REGIONS[rIndex];
+            const { DISTRICTS } = require('./districts');
+            const district = DISTRICTS[regionName][dIndex];
+            
+            const isSubbed = await toggleSubscription(chatId, district);
+            bot!.answerCallbackQuery(query.id, { text: isSubbed ? `✅ Підписано на: ${district}` : `❌ Відписано від: ${district}` });
+            const subMenu = await getRegionSubMenu(chatId, rIndex);
+            bot!.editMessageReplyMarkup({ inline_keyboard: subMenu }, {
+                chat_id: chatId,
+                message_id: query.message.message_id
+            }).catch(()=>{});
+        } else if (data.startsWith('region:')) {
+            const region = data.split(':')[1];
+            const isSubbed = await toggleSubscription(chatId, region);
+            bot!.answerCallbackQuery(query.id, { text: isSubbed ? `✅ Підписано на: ${region}` : `❌ Відписано від: ${region}` });
         }
-
-        const newKeyboard = await getKeyboard(chatId);
-        
-        bot!.editMessageReplyMarkup({ inline_keyboard: newKeyboard }, {
-          chat_id: chatId,
-          message_id: query.message.message_id
-        }).catch(err => {
-            // Ignore message is not modified errors
-        });
-      } catch (e) {
-        console.error("Failed to toggle subscription", e);
+    } catch (e) {
+        console.error("Callback error", e);
         bot!.answerCallbackQuery(query.id, { text: "Помилка." });
-      }
     }
   });
 }

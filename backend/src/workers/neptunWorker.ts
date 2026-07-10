@@ -50,71 +50,111 @@ export async function startNeptunWorker(io: Server) {
         const quantity = obj.count || 1;
 
         // Neptun can keep targets "active" (like translucent ghosts) even if they haven't moved in a while.
-        // We shouldn't ignore them here, otherwise they get deleted from our map while Neptun still shows them.
         if (Date.now() - timestamp.getTime() > 24 * 60 * 60 * 1000) {
-           continue; // Only ignore completely dead targets (>24 hours)
+           continue; 
         }
 
-        // First, try to find the exact threat by externalId
-        let matchedThreat: any = await prisma.threatObject.findUnique({
-           where: { externalId: String(obj.id) },
-           include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
-        });
+        for (let i = 0; i < quantity; i++) {
+           const extId = quantity === 1 ? String(obj.id) : `${obj.id}_${i}`;
+           
+           // Apply a tiny offset so they don't sit exactly on top of each other
+           let offsetLat = lat;
+           let offsetLng = lon;
+           if (i > 0) {
+             const distance = 0.05 + Math.floor((i - 1) / 2) * 0.05; 
+             const angleOffset = i % 2 === 0 ? 120 : -120;
+             const angleRad = (((course || 0) + angleOffset) * Math.PI) / 180;
+             offsetLat = lat + (distance / 111.32) * Math.cos(angleRad);
+             offsetLng = lon + (distance / (111.32 * Math.cos(lat * Math.PI / 180))) * Math.sin(angleRad);
+           }
 
-        // If not found by externalId, search for ACTIVE threats of the same type
-        if (!matchedThreat) {
-           const recentThreats = await prisma.threatObject.findMany({
-             where: { status: ReportStatus.ACTIVE, type: threatType },
-             include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
+           // First, try to find the exact threat by externalId
+           let matchedThreat: any = await prisma.threatObject.findUnique({
+              where: { externalId: extId },
+              include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
            });
 
-           let minDistance = Infinity;
-           
-           for (const t of recentThreats) {
-             if (t.externalId) continue; // DO NOT steal a threat that is already linked to Neptun!
-
-             let dist = Infinity;
-             if (t.locations.length > 0) {
-               const loc = t.locations[0];
-               dist = getDistanceFromLatLonInKm(lat, lon, loc.lat, loc.lng);
-             }
-
-             // Increased radius to 150km because Telegram geocoding can be off by region centers
-             if (dist < 150 && dist < minDistance) { 
-               matchedThreat = t;
-               minDistance = dist;
-             }
-           }
-
-           // If no location match, but there's a threat of the SAME TYPE with NO locations, link it
+           // If not found by externalId, search for ACTIVE threats of the same type
            if (!matchedThreat) {
-              const locationlessThreat = recentThreats.find((t: any) => t.locations.length === 0 && !t.externalId);
-              if (locationlessThreat) {
-                  matchedThreat = locationlessThreat;
+              const recentThreats = await prisma.threatObject.findMany({
+                where: { status: ReportStatus.ACTIVE, type: threatType },
+                include: { locations: { orderBy: { time: 'desc' }, take: 1 } }
+              });
+
+              let minDistance = Infinity;
+              
+              for (const t of recentThreats) {
+                if (t.externalId) continue; // DO NOT steal a threat that is already linked to Neptun!
+
+                let dist = Infinity;
+                if (t.locations.length > 0) {
+                  const loc = t.locations[0];
+                  dist = getDistanceFromLatLonInKm(offsetLat, offsetLng, loc.lat, loc.lng);
+                }
+
+                if (dist < 150 && dist < minDistance) { 
+                  matchedThreat = t;
+                  minDistance = dist;
+                }
+              }
+
+              if (!matchedThreat) {
+                 const locationlessThreat = recentThreats.find((t: any) => t.locations.length === 0 && !t.externalId);
+                 if (locationlessThreat) {
+                     matchedThreat = locationlessThreat;
+                 }
               }
            }
-        }
 
-        if (matchedThreat) {
-          // Check if we already have this exact timestamp from NEPTUN to avoid spamming
-          const lastNeptunLoc = await prisma.threatLocation.findFirst({
-            where: { threatObjectId: matchedThreat.id, sourceId: source!.id },
-            orderBy: { time: 'desc' }
-          });
+           if (matchedThreat) {
+             const lastNeptunLoc = await prisma.threatLocation.findFirst({
+               where: { threatObjectId: matchedThreat.id, sourceId: source!.id },
+               orderBy: { time: 'desc' }
+             });
 
-          if (!lastNeptunLoc || lastNeptunLoc.time.getTime() < timestamp.getTime()) {
-             const updatedThreat = await prisma.threatObject.update({
-                where: { id: matchedThreat.id },
+             if (!lastNeptunLoc || lastNeptunLoc.time.getTime() < timestamp.getTime()) {
+                const updatedThreat = await prisma.threatObject.update({
+                   where: { id: matchedThreat.id },
+                   data: {
+                     externalId: extId,
+                     speed: speed ?? matchedThreat.speed,
+                     course: course ?? matchedThreat.course,
+                     quantity: 1, // Reset to 1 since we are expanding them
+                     confidence: 1.0, 
+                     locations: {
+                       create: {
+                         lat: offsetLat,
+                         lng: offsetLng,
+                         time: timestamp,
+                         sourceId: source!.id
+                       }
+                     }
+                   },
+                   include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
+                 });
+                 
+                 io.emit('threat:update', updatedThreat);
+             }
+             
+             if (speed && course && matchedThreat) {
+                 const { sendSmartThreatNotification } = require('./botWorker');
+                 sendSmartThreatNotification(matchedThreat.id, threatType, offsetLat, offsetLng, speed, course);
+             }
+           } else {
+              // We create new threats from NEPTUN directly to match external maps
+              const newThreat = await prisma.threatObject.create({
                 data: {
-                  externalId: String(obj.id),
-                  speed: speed ?? matchedThreat.speed,
-                  course: course ?? matchedThreat.course,
-                  quantity: quantity,
-                  confidence: 1.0, // MAPA is high confidence
+                  type: threatType,
+                  status: ReportStatus.ACTIVE,
+                  externalId: extId,
+                  speed: speed,
+                  course: course,
+                  quantity: 1,
+                  confidence: 1.0,
                   locations: {
                     create: {
-                      lat,
-                      lng: lon,
+                      lat: offsetLat,
+                      lng: offsetLng,
                       time: timestamp,
                       sourceId: source!.id
                     }
@@ -123,54 +163,31 @@ export async function startNeptunWorker(io: Server) {
                 include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
               });
               
-              io.emit('threat:update', updatedThreat);
-          }
-          
-          if (speed && course && matchedThreat) {
-              const { sendSmartThreatNotification } = require('./botWorker');
-              sendSmartThreatNotification(matchedThreat.id, threatType, lat, lon, speed, course);
-          }
-        } else {
-           // We create new threats from NEPTUN directly to match external maps
-           const newThreat = await prisma.threatObject.create({
-             data: {
-               type: threatType,
-               status: ReportStatus.ACTIVE,
-               externalId: String(obj.id),
-               speed: speed,
-               course: course,
-               quantity: quantity,
-               confidence: 1.0,
-               locations: {
-                 create: {
-                   lat,
-                   lng: lon,
-                   time: timestamp,
-                   sourceId: source!.id
-                 }
-               }
-             },
-             include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
-           });
-           
-           io.emit('threat:new', newThreat);
-           
-           if (speed && course) {
-               const { sendSmartThreatNotification } = require('./botWorker');
-               sendSmartThreatNotification(newThreat.id, threatType, lat, lon, speed, course);
+              io.emit('threat:new', newThreat);
+              
+              if (speed && course) {
+                  const { sendSmartThreatNotification } = require('./botWorker');
+                  sendSmartThreatNotification(newThreat.id, threatType, offsetLat, offsetLng, speed, course);
+              }
            }
         }
        }
 
       // STRICT SYNC: Archive any active targets in our DB that are NO LONGER active in Neptun
-      const activeNeptunIds = objects
-         .filter((o: any) => o.status === 'active')
-         .map((o: any) => String(o.id));
+      const activeNeptunIds = new Set<string>();
+      objects.forEach((o: any) => {
+        if (o.status === 'active') {
+          const qty = o.count || 1;
+          for (let i = 0; i < qty; i++) {
+            activeNeptunIds.add(qty === 1 ? String(o.id) : `${o.id}_${i}`);
+          }
+        }
+      });
 
       const staleThreats = await prisma.threatObject.findMany({
           where: {
               status: 'ACTIVE',
-              externalId: { not: null, notIn: activeNeptunIds }
+              externalId: { not: null, notIn: Array.from(activeNeptunIds) }
           }
       });
 
