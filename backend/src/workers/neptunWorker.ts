@@ -4,6 +4,7 @@ import prisma from '../db';
 import { ReportType, ReportStatus, SourceType } from '@prisma/client';
 import { extractWithAI } from '../services/aiParser';
 import { geocodeLocation } from '../services/geocoder';
+import * as turf from '@turf/turf';
 
 const NEPTUN_API_URL = 'https://neptun.in.ua/api/v1/threats';
 
@@ -41,14 +42,36 @@ export async function startNeptunWorker(io: Server) {
 
         const threatType = KIND_MAPPING[obj.type] || KIND_MAPPING['default'];
         
-        const lon = obj.lon;
-        const lat = obj.lat;
+        let lon = obj.lon;
+        let lat = obj.lat;
         const timestamp = new Date(obj.updatedAt);
         const heading = obj.heading;
 
         const speed = obj.velocity?.speedKmh || null;
-        const course = heading || null;
+        let course = heading || null;
         const quantity = obj.count || 1;
+
+        let targetLat: number | null = null;
+        let targetLng: number | null = null;
+
+        if (obj.destination) {
+           // The API returns the destination in lat/lon, and the azimuth FROM the destination TO the threat in 'heading'.
+           // We must project backwards to find the current location of the threat.
+           const distanceBack = obj.uncertaintyKm || 30; // default 30km back
+           
+           if (heading !== undefined && heading !== null) {
+               targetLat = lat;
+               targetLng = lon;
+               const destPt = turf.point([lon, lat]);
+               const currentPos = turf.destination(destPt, distanceBack, heading, { units: 'kilometers' });
+               
+               lon = currentPos.geometry.coordinates[0];
+               lat = currentPos.geometry.coordinates[1];
+               
+               // The threat is flying TOWARDS the destination, so its course is opposite the azimuth
+               course = (heading + 180) % 360;
+           }
+        }
 
         // Neptun can keep targets "active" (like translucent ghosts) even if they haven't moved in a while.
         if (Date.now() - timestamp.getTime() > 24 * 60 * 60 * 1000) {
@@ -122,6 +145,8 @@ export async function startNeptunWorker(io: Server) {
                      type: threatType,
                      speed: speed ?? matchedThreat.speed,
                      course: course ?? matchedThreat.course,
+                     targetLat: targetLat ?? matchedThreat.targetLat,
+                     targetLng: targetLng ?? matchedThreat.targetLng,
                      quantity: 1, // Reset to 1 since we are expanding them
                      confidence: 1.0, 
                      locations: {
@@ -152,6 +177,8 @@ export async function startNeptunWorker(io: Server) {
                   externalId: extId,
                   speed: speed,
                   course: course,
+                  targetLat: targetLat,
+                  targetLng: targetLng,
                   quantity: 1,
                   confidence: 1.0,
                   locations: {
