@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   description: "Моніторинг повітряного простору України у реальному часі. Відстеження шахедів, ракет, балістики, авіації та повітряних тривог.",
   keywords: ["AliveMap", "карта тривог", "повітряна тривога", "Україна", "шахеди", "ракети", "моніторинг"],
   icons: {
-    icon: '/favicon.ico?v=3',
-    apple: '/favicon.ico?v=3',
+    icon: '/icon.ico',
+    apple: '/icon.ico',
   },
   viewport: {
     width: 'device-width',
