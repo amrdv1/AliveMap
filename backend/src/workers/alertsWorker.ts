@@ -69,21 +69,24 @@ export async function startAlertsWorker(io: Server) {
                     const wasActive = previousStates[region];
                     const isNowActive = currentActiveRegions[region];
 
-                    if (!wasActive && isNowActive) {
-                      // Alert Started — send to Telegram bot only
-                      await sendAlertNotification(region, true);
+                    try {
+                      if (!wasActive && isNowActive) {
+                        // Alert Started — send to Telegram bot only
+                        await sendAlertNotification(region, true);
 
-                    } else if (wasActive && !isNowActive) {
-                      // Alert Cleared — send to Telegram bot
-                      await sendAlertNotification(region, false);
-                      
-                      // Also archive threats in this region
-                      const regionCoords = getRegionCenter(region);
-                      if (regionCoords) {
-                         // Import archiveThreatsNear dynamically or at the top
-                         const { archiveThreatsNear } = require('./aggregatorService');
-                         await archiveThreatsNear(regionCoords.lat, regionCoords.lng, 150, io);
+                      } else if (wasActive && !isNowActive) {
+                        // Alert Cleared — send to Telegram bot
+                        await sendAlertNotification(region, false);
+                        
+                        // Also archive threats in this region
+                        const regionCoords = getRegionCenter(region);
+                        if (regionCoords) {
+                           const { archiveThreatsNear } = require('../services/aggregatorService');
+                           await archiveThreatsNear(regionCoords.lat, regionCoords.lng, 150, io);
+                        }
                       }
+                    } catch (err) {
+                      console.error(`Error processing alert change for region ${region}:`, err);
                     }
                   }
                 }
