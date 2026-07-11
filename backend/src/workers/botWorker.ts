@@ -1,6 +1,7 @@
 import TelegramBot from 'node-telegram-bot-api';
 import prisma from '../db';
 import { projectTrajectory, willIntersectLocation, TrajectoryProjection } from '../services/trajectoryEngine';
+import { isRegionActive } from './alertsWorker';
 
 let bot: TelegramBot | null = null;
 
@@ -150,7 +151,15 @@ export async function startBotWorker() {
             const rIndex = parseInt(data.split('_')[1]);
             const region = REGIONS[rIndex];
             const isSubbed = await toggleSubscription(chatId, region);
-            bot!.answerCallbackQuery(query.id, { text: isSubbed ? `✅ Підписано на: ${region}` : `❌ Відписано від: ${region}` });
+            
+            let text = isSubbed ? `✅ Підписано на: ${region}` : `❌ Відписано від: ${region}`;
+            if (isSubbed) {
+                text += isRegionActive(region) 
+                  ? `\n\n⚠️ Увага! У цьому регіоні/районі зараз оголошено повітряну тривогу!` 
+                  : `\n\n🟢 Наразі в цьому регіоні/районі спокійно.`;
+            }
+            bot!.answerCallbackQuery(query.id, { text, show_alert: true });
+            
             const subMenu = await getRegionSubMenu(chatId, rIndex);
             bot!.editMessageReplyMarkup({ inline_keyboard: subMenu }, {
                 chat_id: chatId,
@@ -165,7 +174,14 @@ export async function startBotWorker() {
             const district = DISTRICTS[regionName][dIndex];
             
             const isSubbed = await toggleSubscription(chatId, district);
-            bot!.answerCallbackQuery(query.id, { text: isSubbed ? `✅ Підписано на: ${district}` : `❌ Відписано від: ${district}` });
+            let text = isSubbed ? `✅ Підписано на: ${district}` : `❌ Відписано від: ${district}`;
+            if (isSubbed) {
+                text += isRegionActive(district) 
+                  ? `\n\n⚠️ Увага! У цьому регіоні/районі зараз оголошено повітряну тривогу!` 
+                  : `\n\n🟢 Наразі в цьому регіоні/районі спокійно.`;
+            }
+            bot!.answerCallbackQuery(query.id, { text, show_alert: true });
+            
             const subMenu = await getRegionSubMenu(chatId, rIndex);
             bot!.editMessageReplyMarkup({ inline_keyboard: subMenu }, {
                 chat_id: chatId,
@@ -174,7 +190,13 @@ export async function startBotWorker() {
         } else if (data.startsWith('region:')) {
             const region = data.split(':')[1];
             const isSubbed = await toggleSubscription(chatId, region);
-            bot!.answerCallbackQuery(query.id, { text: isSubbed ? `✅ Підписано на: ${region}` : `❌ Відписано від: ${region}` });
+            let text = isSubbed ? `✅ Підписано на: ${region}` : `❌ Відписано від: ${region}`;
+            if (isSubbed) {
+                text += isRegionActive(region) 
+                  ? `\n\n⚠️ Увага! У цьому регіоні/районі зараз оголошено повітряну тривогу!` 
+                  : `\n\n🟢 Наразі в цьому регіоні/районі спокійно.`;
+            }
+            bot!.answerCallbackQuery(query.id, { text, show_alert: true });
         }
     } catch (e) {
         console.error("Callback error", e);

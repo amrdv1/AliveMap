@@ -34,6 +34,10 @@ export async function startAlertsWorker(io: Server) {
             const currentActiveRegions: Record<string, boolean> = {};
 
             if (Array.isArray(data)) {
+                const { DISTRICTS } = require('./districts');
+
+                // First pass: populate raw data
+                const rawActiveRegions: Set<string> = new Set();
                 data.forEach((region: any) => {
                     const airAlert = region.activeAlerts?.find((a: any) => a.type === 'AIR');
                     if (airAlert) {
@@ -42,24 +46,32 @@ export async function startAlertsWorker(io: Server) {
                             regionType: region.regionType,
                             lastUpdate: airAlert.lastUpdate || region.lastUpdate
                         };
-                        currentActiveRegions[region.regionName] = true;
+                        rawActiveRegions.add(region.regionName);
                     }
                 });
                 
                 // Inject permanent alerts based on official data
-                formattedStates['Автономна Республіка Крим'] = {
-                    alertnow: true,
-                    regionType: 'State',
-                    lastUpdate: '2022-12-11T00:22:00.000Z'
-                };
-                currentActiveRegions['Автономна Республіка Крим'] = true;
+                rawActiveRegions.add('Автономна Республіка Крим');
+                rawActiveRegions.add('Луганська область');
 
-                formattedStates['Луганська область'] = {
-                    alertnow: true,
-                    regionType: 'State',
-                    lastUpdate: '2022-04-04T19:45:00.000Z'
-                };
-                currentActiveRegions['Луганська область'] = true;
+                // Second pass: expand regions (Oblast <-> Districts)
+                for (const region of rawActiveRegions) {
+                    currentActiveRegions[region] = true;
+
+                    // If it's a district, mark the parent oblast as active
+                    for (const [oblast, districts] of Object.entries(DISTRICTS)) {
+                        if ((districts as string[]).includes(region)) {
+                            currentActiveRegions[oblast] = true;
+                        }
+                    }
+
+                    // If it's an oblast, mark all its districts as active
+                    if (DISTRICTS[region]) {
+                        (DISTRICTS[region] as string[]).forEach((d: string) => {
+                            currentActiveRegions[d] = true;
+                        });
+                    }
+                }
                 
                 // Compare with previous states
                 if (!isFirstRun) {
@@ -92,6 +104,7 @@ export async function startAlertsWorker(io: Server) {
                 }
 
                 previousStates = currentActiveRegions;
+                lastKnownActiveRegions = currentActiveRegions;
                 isFirstRun = false;
 
                 io.emit('alerts:sync', formattedStates);
@@ -144,5 +157,11 @@ function getRegionCenter(region: string): {lat: number, lng: number} | null {
     if (lower.includes(k)) return v;
   }
   return null;
+}
+
+let lastKnownActiveRegions: Record<string, boolean> = {};
+
+export function isRegionActive(region: string): boolean {
+    return !!lastKnownActiveRegions[region];
 }
 
