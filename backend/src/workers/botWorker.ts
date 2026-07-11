@@ -153,12 +153,14 @@ export async function startBotWorker() {
             const isSubbed = await toggleSubscription(chatId, region);
             
             let text = isSubbed ? `✅ Підписано на: ${region}` : `❌ Відписано від: ${region}`;
+            bot!.answerCallbackQuery(query.id, { text: `✅ Статус змінено` });
+
             if (isSubbed) {
                 text += isRegionActive(region) 
                   ? `\n\n⚠️ Увага! У цьому регіоні/районі зараз оголошено повітряну тривогу!` 
                   : `\n\n🟢 Наразі в цьому регіоні/районі спокійно.`;
+                bot!.sendMessage(chatId, text);
             }
-            bot!.answerCallbackQuery(query.id, { text, show_alert: true });
             
             const subMenu = await getRegionSubMenu(chatId, rIndex);
             bot!.editMessageReplyMarkup({ inline_keyboard: subMenu }, {
@@ -175,12 +177,14 @@ export async function startBotWorker() {
             
             const isSubbed = await toggleSubscription(chatId, district);
             let text = isSubbed ? `✅ Підписано на: ${district}` : `❌ Відписано від: ${district}`;
+            bot!.answerCallbackQuery(query.id, { text: `✅ Статус змінено` });
+
             if (isSubbed) {
                 text += isRegionActive(district) 
                   ? `\n\n⚠️ Увага! У цьому регіоні/районі зараз оголошено повітряну тривогу!` 
                   : `\n\n🟢 Наразі в цьому регіоні/районі спокійно.`;
+                bot!.sendMessage(chatId, text);
             }
-            bot!.answerCallbackQuery(query.id, { text, show_alert: true });
             
             const subMenu = await getRegionSubMenu(chatId, rIndex);
             bot!.editMessageReplyMarkup({ inline_keyboard: subMenu }, {
@@ -191,12 +195,14 @@ export async function startBotWorker() {
             const region = data.split(':')[1];
             const isSubbed = await toggleSubscription(chatId, region);
             let text = isSubbed ? `✅ Підписано на: ${region}` : `❌ Відписано від: ${region}`;
+            bot!.answerCallbackQuery(query.id, { text: `✅ Статус змінено` });
+
             if (isSubbed) {
                 text += isRegionActive(region) 
                   ? `\n\n⚠️ Увага! У цьому регіоні/районі зараз оголошено повітряну тривогу!` 
                   : `\n\n🟢 Наразі в цьому регіоні/районі спокійно.`;
+                bot!.sendMessage(chatId, text);
             }
-            bot!.answerCallbackQuery(query.id, { text, show_alert: true });
         }
     } catch (e) {
         console.error("Callback error", e);
