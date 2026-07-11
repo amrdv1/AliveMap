@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "AliveMap",
+    "slug": "alivemap",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.alivemap.app"
+    },
+    "android": {
+      "package": "com.alivemap.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#000000",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
+    },
+    "plugins": [
+      "expo-status-bar"
+    ]
+  }
+}
