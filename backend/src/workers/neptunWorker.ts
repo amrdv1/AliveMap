@@ -15,6 +15,7 @@ const KIND_MAPPING: Record<string, ReportType> = {
   'kab': ReportType.KAB,
   'mig31k': ReportType.AIRCRAFT,
   'unknown': ReportType.UNKNOWN,
+  'fpv': ReportType.FPV,
   'default': ReportType.DRONE
 };
 
@@ -118,6 +119,7 @@ export async function startNeptunWorker(io: Server) {
                    data: {
                      externalId: extId,
                      status: 'ACTIVE',
+                     type: threatType,
                      speed: speed ?? matchedThreat.speed,
                      course: course ?? matchedThreat.course,
                      quantity: 1, // Reset to 1 since we are expanding them
