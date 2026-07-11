@@ -117,6 +117,7 @@ export async function startNeptunWorker(io: Server) {
                    where: { id: matchedThreat.id },
                    data: {
                      externalId: extId,
+                     status: 'ACTIVE',
                      speed: speed ?? matchedThreat.speed,
                      course: course ?? matchedThreat.course,
                      quantity: 1, // Reset to 1 since we are expanding them
