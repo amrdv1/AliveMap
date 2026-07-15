@@ -396,7 +396,7 @@ export async function broadcastThreatToChannel(threatType: string, targetName: s
     targetText = `в повітряному просторі!`;
   }
 
-  const message = `${typePrefix} ${targetText}${courseText}\n\n[карта цілей](https://t.me/alivemap_bot) | [підписатися](https://t.me/alivemap_channel)`;
+  const message = `${typePrefix} ${targetText}${courseText}\n\n[карта цілей](https://t.me/alivemapbot) | [підписатися](https://t.me/alivemapinfo)`;
 
   try {
     await bot.sendMessage(channelId, message, { parse_mode: 'Markdown' } as any);
