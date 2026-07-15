@@ -54,8 +54,10 @@ router.post('/telegram', verifyWebhook, async (req, res) => {
         parsedThreat.confidence / 100 // Prisma expects 0-1.0
       );
 
-      // WebSockets emit is handled by aggregator/services or you can emit here if needed
-      io.emit('threat:update', savedThreat);
+      // processExternalThreat returns an array of created/updated threats
+      for (const t of savedThreat) {
+        io.emit('threat:update', t);
+      }
     }
 
     res.status(200).json({ success: true });
