@@ -86,6 +86,7 @@ model ThreatObject {
   speed     Float?
   course    Float?
   quantity  Int          @default(1)
+  locationName String?
   targetName String?
   targetLat  Float?
   targetLng  Float?

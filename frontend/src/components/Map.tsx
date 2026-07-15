@@ -313,11 +313,8 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
                          return dict[threat.type] || 'Повітряна ціль';
                  })()} 
                  {(() => {
-                     const clat = currentLoc?.lat || loc.lat;
-                     const clng = currentLoc?.lng || loc.lng;
-                     const isOver = threat.targetLat && threat.targetLng && (Math.sqrt(Math.pow(clat - threat.targetLat, 2) + Math.pow(clng - threat.targetLng, 2)) < 0.05);
-                     if (threat.targetName) return isOver ? ` (в районі: ${threat.targetName})` : ` (напрямок: ${threat.targetName})`;
-                     return threat.course != null ? `, курс ${getCourseText(threat.course).toLowerCase()}` : '';
+                     const dest = (threat as any).targetName ? `курсом на ${(threat as any).targetName}` : (threat.course != null ? `курсом ${getCourseText(threat.course).toLowerCase()}` : '');
+                     return dest ? `, ${dest}` : '';
                  })()}.
                  <br/>
                  Підтверджень: {Math.max(1, Math.round(threat.confidence * 5) - 1)}.

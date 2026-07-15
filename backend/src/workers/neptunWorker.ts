@@ -92,6 +92,14 @@ export async function startNeptunWorker(io: Server) {
              offsetLng = lon + (distance / (111.32 * Math.cos(lat * Math.PI / 180))) * Math.sin(angleRad);
            }
 
+           const { getNearestCity } = require('../services/geocoder');
+           const locationName = getNearestCity(offsetLat, offsetLng);
+           let targetName = null;
+           if (course != null) {
+               const dest = turf.destination(turf.point([offsetLng, offsetLat]), 40, course, {units: 'kilometers'} as any);
+               targetName = getNearestCity(dest.geometry.coordinates[1], dest.geometry.coordinates[0]);
+           }
+
            // First, try to find the exact threat by externalId
            let matchedThreat: any = await prisma.threatObject.findUnique({
               where: { externalId: extId },
@@ -147,6 +155,8 @@ export async function startNeptunWorker(io: Server) {
                      course: course ?? matchedThreat.course,
                      targetLat: targetLat ?? matchedThreat.targetLat,
                      targetLng: targetLng ?? matchedThreat.targetLng,
+                     locationName: locationName ?? matchedThreat.locationName,
+                     targetName: targetName ?? matchedThreat.targetName,
                      quantity: 1, // Reset to 1 since we are expanding them
                      confidence: 1.0, 
                      locations: {
@@ -179,6 +189,8 @@ export async function startNeptunWorker(io: Server) {
                   course: course,
                   targetLat: targetLat,
                   targetLng: targetLng,
+                  locationName: locationName,
+                  targetName: targetName,
                   quantity: 1,
                   confidence: 1.0,
                   locations: {
