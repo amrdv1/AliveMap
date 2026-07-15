@@ -1,6 +1,7 @@
 import prisma from '../db';
 import { ReportType, ReportStatus, ThreatObject } from '@prisma/client';
 import { Server } from 'socket.io';
+import { broadcastThreatToChannel } from '../workers/botWorker';
 
 export async function processExternalThreat(
   externalId: string | null,
@@ -178,6 +179,11 @@ export async function processExternalThreat(
       },
       include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
     });
+    
+    // Only broadcast the first instance to avoid spamming multiple split threats
+    if (i === 0) {
+      broadcastThreatToChannel(threatType, targetName);
+    }
     
     createdThreats.push(newThreat);
   }

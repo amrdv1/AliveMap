@@ -249,12 +249,53 @@ export async function sendAlertNotification(region: string, isAlert: boolean) {
         if (err.response && err.response.statusCode === 403) {
           await prisma.telegramSubscriber.delete({
             where: { id: sub.id }
-          }).catch(() => {});
+          });
         }
       }
     }
-  } catch (error) {
-    console.error("Error in sendAlertNotification:", error);
+  } catch (e) {
+    console.error("Failed to send alert notifications", e);
+  }
+}
+
+/**
+ * Broadcasts a new threat to a public Telegram channel.
+ */
+export async function broadcastThreatToChannel(threatType: string, targetName: string | null) {
+  if (!bot) return;
+  const channelId = process.env.TELEGRAM_CHANNEL_ID;
+  if (!channelId) return;
+
+  const typeMap: Record<string, string> = {
+    'DRONE': '🛸 Шахед',
+    'MISSILE': '🚀 Ракета',
+    'CRUISE_MISSILE': '🚀 Крилата ракета',
+    'BALLISTIC_MISSILE': '🚀 Балістика',
+    'AIRCRAFT': '✈️ Авіація',
+    'KAB': '💣 КАБ',
+    'RECON': '👁️ Розвідник',
+    'KH101': '🚀 Х-101',
+    'KALIBR': '🚀 Калібр',
+    'ISKANDER': '🚀 Іскандер',
+    'KINZHAL': '🚀 Кинджал',
+    'ZIRCON': '🚀 Циркон',
+  };
+
+  const readableType = typeMap[threatType] || '⚠️ Невідома ціль';
+  
+  let targetText = "";
+  if (targetName) {
+     targetText = `на ${targetName}!`;
+  } else {
+     targetText = `в повітряному просторі!`;
+  }
+
+  const message = `${readableType} ${targetText}\n\n[карта шахедів](https://t.me/alivemap_bot) | [канал AliveMap](https://t.me/alivemap_channel)`;
+
+  try {
+    await bot.sendMessage(channelId, message, { parse_mode: 'Markdown' } as any);
+  } catch (err: any) {
+    console.error(`Failed to broadcast to channel ${channelId}:`, err.message);
   }
 }
 
