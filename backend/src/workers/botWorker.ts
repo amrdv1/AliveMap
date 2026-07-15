@@ -320,6 +320,12 @@ export async function broadcastThreatToChannel(threatType: string, targetName: s
   const channelId = process.env.TELEGRAM_CHANNEL_ID;
   if (!channelId) return;
 
+  // Filter out single drones/recons from public broadcast to avoid spam
+  const isDrone = threatType === 'DRONE' || threatType === 'FPV' || threatType === 'RECON';
+  if (isDrone && quantity === 1) {
+      return; 
+  }
+
   const typeMap: Record<string, string> = {
     'DRONE': '🛸 Шахед',
     'MISSILE': '🚀 Ракета',
