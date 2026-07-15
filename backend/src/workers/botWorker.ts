@@ -399,7 +399,10 @@ export async function broadcastThreatToChannel(threatType: string, targetName: s
   const message = `${typePrefix} ${targetText}${courseText}\n\n[карта цілей](https://t.me/alivemapbot) | [підписатися](https://t.me/alivemapinfo)`;
 
   try {
-    await bot.sendMessage(channelId, message, { parse_mode: 'Markdown' } as any);
+    await bot.sendMessage(channelId, message, { 
+      parse_mode: 'Markdown',
+      disable_web_page_preview: true 
+    } as any);
   } catch (err: any) {
     console.error(`Failed to broadcast to channel ${channelId}:`, err.message);
   }
