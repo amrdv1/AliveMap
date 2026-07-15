@@ -262,7 +262,7 @@ export async function sendAlertNotification(region: string, isAlert: boolean) {
  * Finds the nearest region for a given lat/lng
  */
 function getRegionByCoords(lat: number, lng: number): string {
-  const REGION_CENTERS: Record<string, {lat: number, lng: number, name: string}> = {
+  const REGION_CENTERS: Record<string, { lat: number, lng: number, name: string }> = {
     'Київська область': { lat: 50.45, lng: 30.52, name: 'Київщині' },
     'Чернігівська область': { lat: 51.49, lng: 31.28, name: 'Чернігівщині' },
     'Сумська область': { lat: 50.90, lng: 34.79, name: 'Сумщині' },
@@ -290,19 +290,19 @@ function getRegionByCoords(lat: number, lng: number): string {
   let closestRegion = 'в повітряному просторі';
   let minDist = Infinity;
 
-  const deg2rad = (deg: number) => deg * (Math.PI/180);
+  const deg2rad = (deg: number) => deg * (Math.PI / 180);
 
   for (const [key, center] of Object.entries(REGION_CENTERS)) {
-    const R = 6371; 
+    const R = 6371;
     const dLat = deg2rad(center.lat - lat);
-    const dLon = deg2rad(center.lng - lng); 
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(deg2rad(lat)) * Math.cos(deg2rad(center.lat)) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2); 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    const dLon = deg2rad(center.lng - lng);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat)) * Math.cos(deg2rad(center.lat)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const dist = R * c;
-    
+
     if (dist < minDist && dist < 150) { // Max 150km radius
       minDist = dist;
       closestRegion = `на ${center.name}`;
@@ -351,13 +351,13 @@ export async function broadcastThreatToChannel(threatType: string, targetName: s
 
   let typePrefix = readableType;
   if (quantity > 1) {
-     if (threatType === 'DRONE' || threatType === 'FPV') {
-         typePrefix = `🛸 Рій шахедів/БПЛА (${quantity} шт)`;
-     } else if (threatType === 'MISSILE' || threatType === 'CRUISE_MISSILE') {
-         typePrefix = `🚀 Група ракет (${quantity} шт)`;
-     } else {
-         typePrefix = `${readableType} (${quantity} шт)`;
-     }
+    if (threatType === 'DRONE' || threatType === 'FPV') {
+      typePrefix = `🛸 Рій шахедів/БПЛА (${quantity} шт)`;
+    } else if (threatType === 'MISSILE' || threatType === 'CRUISE_MISSILE') {
+      typePrefix = `🚀 Група ракет (${quantity} шт)`;
+    } else {
+      typePrefix = `${readableType} (${quantity} шт)`;
+    }
   }
 
   let targetText = "";
@@ -367,28 +367,28 @@ export async function broadcastThreatToChannel(threatType: string, targetName: s
     const { getNearestCity } = require('../services/geocoder');
     const nearestCity = getNearestCity(lat, lng);
     const regionLocation = getRegionByCoords(lat, lng);
-    
+
     if (nearestCity) {
-        const cleanRegion = regionLocation.replace('на ', '').replace('в ', '');
-        if (cleanRegion.includes('повітряному просторі')) {
-            targetText = `фіксується біля н.п. ${nearestCity}!`;
-        } else {
-            targetText = `фіксується біля н.п. ${nearestCity} (${cleanRegion})!`;
-        }
+      const cleanRegion = regionLocation.replace('на ', '').replace('в ', '');
+      if (cleanRegion.includes('повітряному просторі')) {
+        targetText = `фіксується біля н.п. ${nearestCity}!`;
+      } else {
+        targetText = `фіксується біля н.п. ${nearestCity} (${cleanRegion})!`;
+      }
     } else {
-        targetText = `фіксується ${regionLocation}!`;
+      targetText = `фіксується ${regionLocation}!`;
     }
 
     if (course != null) {
-        const turf = require('@turf/turf');
-        const dest = turf.destination(turf.point([lng, lat]), 40, course, {units: 'kilometers'} as any);
-        const destCity = getNearestCity(dest.geometry.coordinates[1], dest.geometry.coordinates[0]);
-        
-        if (destCity && destCity !== nearestCity) {
-            courseText = `\n🧭 Вектор руху: на н.п. ${destCity}`;
-        } else {
-            courseText = `\n🧭 Курс: ${getCourseDirection(course)}`;
-        }
+      const turf = require('@turf/turf');
+      const dest = turf.destination(turf.point([lng, lat]), 40, course, { units: 'kilometers' } as any);
+      const destCity = getNearestCity(dest.geometry.coordinates[1], dest.geometry.coordinates[0]);
+
+      if (destCity && destCity !== nearestCity) {
+        courseText = `\nВектор руху: на н.п. ${destCity}`;
+      } else {
+        courseText = `\nКурс: ${getCourseDirection(course)}`;
+      }
     }
   } else if (targetName) {
     targetText = `вектор руху: на ${targetName}!`;

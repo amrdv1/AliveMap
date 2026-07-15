@@ -54,8 +54,9 @@ router.post('/telegram', verifyWebhook, async (req, res) => {
         parsedThreat.confidence / 100 // Prisma expects 0-1.0
       );
 
-      // processExternalThreat returns an array of created/updated threats
-      for (const t of savedThreat) {
+      // processExternalThreat returns either an array of created threats or a single updated threat
+      const threatsToEmit = Array.isArray(savedThreat) ? savedThreat : [savedThreat];
+      for (const t of threatsToEmit) {
         io.emit('threat:update', t);
       }
     }
