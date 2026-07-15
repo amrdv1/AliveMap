@@ -182,7 +182,7 @@ export async function processExternalThreat(
     
     // Only broadcast the first instance to avoid spamming multiple split threats
     if (i === 0) {
-      broadcastThreatToChannel(threatType, targetName);
+      broadcastThreatToChannel(threatType, targetName, actualQuantity, lat, lng);
     }
     
     if (defaultSpeed && finalCourse != null) {
