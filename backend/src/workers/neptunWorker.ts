@@ -197,7 +197,7 @@ export async function startNeptunWorker(io: Server) {
               
               if (i === 0) {
                  const { broadcastThreatToChannel } = require('./botWorker');
-                 broadcastThreatToChannel(threatType, null, quantity, lat, lon);
+                 broadcastThreatToChannel(threatType, null, quantity, lat, lon, course);
               }
               
               if (speed && course) {

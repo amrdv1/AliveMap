@@ -313,9 +313,21 @@ function getRegionByCoords(lat: number, lng: number): string {
 }
 
 /**
+ * Converts a degree course to a human-readable direction
+ */
+function getCourseDirection(course: number): string {
+  const directions = [
+    'Північний', 'Північно-Східний', 'Східний', 'Південно-Східний',
+    'Південний', 'Південно-Західний', 'Західний', 'Північно-Західний'
+  ];
+  const index = Math.round(((course %= 360) < 0 ? course + 360 : course) / 45) % 8;
+  return directions[index];
+}
+
+/**
  * Broadcasts a new threat to a public Telegram channel.
  */
-export async function broadcastThreatToChannel(threatType: string, targetName: string | null, quantity: number = 1, lat?: number, lng?: number) {
+export async function broadcastThreatToChannel(threatType: string, targetName: string | null, quantity: number = 1, lat?: number, lng?: number, course?: number | null) {
   if (!bot) return;
   const channelId = process.env.TELEGRAM_CHANNEL_ID;
   if (!channelId) return;
@@ -358,7 +370,12 @@ export async function broadcastThreatToChannel(threatType: string, targetName: s
     targetText = `в повітряному просторі!`;
   }
 
-  const message = `${typePrefix} ${targetText}\n\n[карта цілей](https://t.me/alivemap_bot) | [підписатися](https://t.me/alivemap_channel)`;
+  let courseText = "";
+  if (course != null) {
+      courseText = `\n🧭 Курс: ${getCourseDirection(course)}`;
+  }
+
+  const message = `${typePrefix} ${targetText}${courseText}\n\n[карта цілей](https://t.me/alivemap_bot) | [підписатися](https://t.me/alivemap_channel)`;
 
   try {
     await bot.sendMessage(channelId, message, { parse_mode: 'Markdown' } as any);
