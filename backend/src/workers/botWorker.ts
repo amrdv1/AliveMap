@@ -370,7 +370,11 @@ export async function broadcastThreatToChannel(threatType: string, targetName: s
     
     if (nearestCity) {
         const cleanRegion = regionLocation.replace('на ', '').replace('в ', '');
-        targetText = `фіксується біля н.п. ${nearestCity} (${cleanRegion})!`;
+        if (cleanRegion.includes('повітряному просторі')) {
+            targetText = `фіксується біля н.п. ${nearestCity}!`;
+        } else {
+            targetText = `фіксується біля н.п. ${nearestCity} (${cleanRegion})!`;
+        }
     } else {
         targetText = `фіксується ${regionLocation}!`;
     }

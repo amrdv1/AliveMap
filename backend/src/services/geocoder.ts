@@ -254,5 +254,17 @@ export function getNearestCity(lat: number, lng: number): string | null {
     }
   }
 
+  if (nearest) {
+      // Keep track if original had hyphen
+      const hasHyphen = nearest.includes('-');
+      nearest = nearest.split(/[\s-]/).map((word: string) => {
+          return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      }).join(' ');
+      
+      if (hasHyphen) {
+           nearest = nearest.replace(' ', '-');
+      }
+  }
+
   return nearest;
 }
