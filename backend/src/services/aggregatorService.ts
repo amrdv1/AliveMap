@@ -1,7 +1,7 @@
 import prisma from '../db';
 import { ReportType, ReportStatus, ThreatObject } from '@prisma/client';
 import { Server } from 'socket.io';
-import { broadcastThreatToChannel } from '../workers/botWorker';
+import { broadcastThreatToChannel, sendSmartThreatNotification } from '../workers/botWorker';
 
 export async function processExternalThreat(
   externalId: string | null,
@@ -185,6 +185,10 @@ export async function processExternalThreat(
       broadcastThreatToChannel(threatType, targetName);
     }
     
+    if (defaultSpeed && finalCourse != null) {
+      sendSmartThreatNotification(newThreat.id, threatType, offsetLat, offsetLng, defaultSpeed, finalCourse);
+    }
+
     createdThreats.push(newThreat);
   }
 
@@ -246,7 +250,7 @@ async function updateThreat(
   // Preserve highest confidence
   const finalConfidence = Math.max(existingThreat.confidence || 0, dynamicConfidence, newConfidence);
 
-  return await prisma.threatObject.update({
+  const updatedThreat = await prisma.threatObject.update({
     where: { id: existingThreat.id },
     data: {
       speed: speed ?? existingThreat.speed,
@@ -261,6 +265,12 @@ async function updateThreat(
     },
     include: { locations: { orderBy: { time: 'desc' }, include: { source: true } } }
   });
+
+  if (updatedThreat.speed && updatedThreat.course != null) {
+    sendSmartThreatNotification(updatedThreat.id, existingThreat.type, lat, lng, updatedThreat.speed, updatedThreat.course);
+  }
+
+  return updatedThreat;
 }
 
 function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
