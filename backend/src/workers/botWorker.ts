@@ -361,18 +361,35 @@ export async function broadcastThreatToChannel(threatType: string, targetName: s
   }
 
   let targetText = "";
-  if (targetName) {
-    targetText = `вектор руху: на ${targetName}!`;
-  } else if (lat && lng) {
+  let courseText = "";
+
+  if (lat && lng) {
+    const { getNearestCity } = require('../services/geocoder');
+    const nearestCity = getNearestCity(lat, lng);
     const regionLocation = getRegionByCoords(lat, lng);
-    targetText = `фіксується ${regionLocation}!`;
+    
+    if (nearestCity) {
+        const cleanRegion = regionLocation.replace('на ', '').replace('в ', '');
+        targetText = `фіксується біля н.п. ${nearestCity} (${cleanRegion})!`;
+    } else {
+        targetText = `фіксується ${regionLocation}!`;
+    }
+
+    if (course != null) {
+        const turf = require('@turf/turf');
+        const dest = turf.destination(turf.point([lng, lat]), 40, course, {units: 'kilometers'} as any);
+        const destCity = getNearestCity(dest.geometry.coordinates[1], dest.geometry.coordinates[0]);
+        
+        if (destCity && destCity !== nearestCity) {
+            courseText = `\n🧭 Вектор руху: на н.п. ${destCity}`;
+        } else {
+            courseText = `\n🧭 Курс: ${getCourseDirection(course)}`;
+        }
+    }
+  } else if (targetName) {
+    targetText = `вектор руху: на ${targetName}!`;
   } else {
     targetText = `в повітряному просторі!`;
-  }
-
-  let courseText = "";
-  if (course != null) {
-      courseText = `\n🧭 Курс: ${getCourseDirection(course)}`;
   }
 
   const message = `${typePrefix} ${targetText}${courseText}\n\n[карта цілей](https://t.me/alivemap_bot) | [підписатися](https://t.me/alivemap_channel)`;

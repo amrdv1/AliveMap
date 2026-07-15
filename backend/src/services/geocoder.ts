@@ -227,3 +227,32 @@ export async function searchCities(query: string, limit: number = 10) {
     pop: c.pop
   }));
 }
+
+export function getNearestCity(lat: number, lng: number): string | null {
+  if (citiesCache.length === 0) return null;
+
+  let nearest = null;
+  let minDist = Infinity;
+
+  const deg2rad = (deg: number) => deg * (Math.PI/180);
+  const R = 6371;
+
+  for (const c of citiesCache) {
+    if (c.pop < 1000) continue; // Only pick towns/cities, ignore tiny villages
+    
+    const dLat = deg2rad(c.lat - lat);
+    const dLon = deg2rad(c.lng - lng);
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(deg2rad(lat)) * Math.cos(deg2rad(c.lat)) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const dist = R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+
+    if (dist < minDist) {
+      minDist = dist;
+      nearest = c.names[0];
+    }
+  }
+
+  return nearest;
+}
