@@ -85,7 +85,7 @@ export async function startNeptunWorker(io: Server) {
            let offsetLat = lat;
            let offsetLng = lon;
            if (i > 0) {
-             const distance = 0.05 + Math.floor((i - 1) / 2) * 0.05; 
+             const distance = 3.0 + Math.floor((i - 1) / 2) * 1.5; 
              const angleOffset = i % 2 === 0 ? 120 : -120;
              const angleRad = (((course || 0) + angleOffset) * Math.PI) / 180;
              offsetLat = lat + (distance / 111.32) * Math.cos(angleRad);
@@ -194,6 +194,11 @@ export async function startNeptunWorker(io: Server) {
               });
               
               io.emit('threat:new', newThreat);
+              
+              if (i === 0) {
+                 const { broadcastThreatToChannel } = require('./botWorker');
+                 broadcastThreatToChannel(threatType, null);
+              }
               
               if (speed && course) {
                   const { sendSmartThreatNotification } = require('./botWorker');
