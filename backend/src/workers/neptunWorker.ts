@@ -63,7 +63,7 @@ export async function startNeptunWorker(io: Server) {
                targetLat = lat;
                targetLng = lon;
                const destPt = turf.point([lon, lat]);
-               const currentPos = turf.destination(destPt, distanceBack, heading, { units: 'kilometers' });
+               const currentPos = turf.destination(destPt, distanceBack, heading, { units: 'kilometers' as const });
                
                lon = currentPos.geometry.coordinates[0];
                lat = currentPos.geometry.coordinates[1];
