@@ -121,6 +121,15 @@ function getStaggeredOffset(index: number, course: number, lat: number) {
 const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: ThreatObject, onClick: (t: ThreatObject) => void, isSelected: boolean, onClosePopup: () => void }) => {
   const [currentLoc, setCurrentLoc] = useState<{lng: number, lat: number} | null>(null);
 
+  const locRaw = threat.locations[0];
+  let calculatedBearing = threat.course;
+  if (locRaw && threat.targetLat && threat.targetLng) {
+      calculatedBearing = turf.bearing(turf.point([locRaw.lng, locRaw.lat]), turf.point([threat.targetLng, threat.targetLat]));
+      if (calculatedBearing < 0) calculatedBearing += 360;
+  } else if (calculatedBearing == null || calculatedBearing === undefined) {
+      calculatedBearing = 0; // default north
+  }
+
   useEffect(() => {
     const loc = threat.locations[0];
     if (!loc) {
@@ -133,18 +142,8 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
     }
 
     let speedKmh = threat.speed;
-    let bearing = threat.course;
-
     if (!speedKmh) {
         speedKmh = ['DRONE', 'RECON', 'MOLNIYA', 'DECOY', 'FPV'].includes(threat.type) ? 150 : 800;
-    }
-
-    // Always prioritize bearing towards the target if we have one
-    if (threat.targetLat && threat.targetLng) {
-        bearing = turf.bearing(turf.point([loc.lng, loc.lat]), turf.point([threat.targetLng, threat.targetLat]));
-        if (bearing < 0) bearing += 360;
-    } else if (bearing == null || bearing === undefined) {
-        bearing = 0; // default north
     }
 
     const startPt = turf.point([loc.lng, loc.lat]);
@@ -161,7 +160,7 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
        }
 
        const distance = speedKmh * Math.max(0, elapsedHours);
-       const dest = turf.destination(startPt, distance, bearing, { units: 'kilometers' });
+       const dest = turf.destination(startPt, distance, calculatedBearing, { units: 'kilometers' });
        const newLng = dest.geometry.coordinates[0];
        const newLat = dest.geometry.coordinates[1];
 
@@ -186,13 +185,13 @@ const ThreatMarker = ({ threat, onClick, isSelected, onClosePopup }: { threat: T
     const interval = setInterval(updatePosition, 1000); // update every 1 second
 
     return () => clearInterval(interval);
-  }, [threat]);
+  }, [threat, calculatedBearing]);
 
   if (!currentLoc) return null;
   const loc = currentLoc;
 
   const isThreat = Object.keys(THREAT_SVGS).includes(threat.type);
-  const rot = threat.course || 0;
+  const rot = calculatedBearing;
   
   let svgIcon = THREAT_SVGS[threat.type as keyof typeof THREAT_SVGS] || THREAT_SVGS['DRONE'];
   let ringColor = THREAT_COLORS[threat.type as keyof typeof THREAT_COLORS] || '#ffffff';
@@ -477,10 +476,13 @@ export default function UkraineMap() {
        const startPt = turf.point([loc.lng, loc.lat]);
        const dest = turf.destination(startPt, distance, bearing, { units: 'kilometers' });
        
-       features.push(turf.lineString([
-         [loc.lng, loc.lat],
-         dest.geometry.coordinates
-       ], { type: t.type, id: t.id }));
+       // Combine historical points and projected future
+       const coords = t.locations.slice().reverse().map(l => [l.lng, l.lat]);
+       coords.push(dest.geometry.coordinates as [number, number]);
+       
+       if (coords.length > 1) {
+         features.push(turf.lineString(coords, { type: t.type, id: t.id }));
+       }
     });
     
     return turf.featureCollection(features);
